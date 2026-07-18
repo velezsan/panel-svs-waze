@@ -70,6 +70,228 @@ ROAD_TYPE_NAMES = {
 
 BBOX_PRUEBA = [-103.38, 20.655, -103.33, 20.695]  # Guadalajara centro
 
+# ------------------------------------------------------------- INEGI (GAIA)
+# Réplica de la consulta del script "WME INEGI GAIA": WMS GetFeatureInfo
+# sobre la capa de vialidades c112, en hasta 5 puntos del segmento.
+INEGI_WMS = "https://gaia.inegi.org.mx/NLB/tunnel/wms/wms61"
+INEGI_LAYER = "c112"
+INEGI_DELTA = 0.00004
+
+BLACKLIST_INEGI = {
+    "calle", "calles", "avenida", "av", "privada", "priv", "cda", "cerrada",
+    "retorno", "andador", "vialidad", "vialidades", "no", "si", "null", "s/n",
+    "sin nombre", "callejón", "bulevar", "boulevard", "blvd", "camino",
+    "carretera", "autopista", "periférico", "circuito", "viaducto", "calzada",
+    "prolongación", "diagonal", "paseo", "0", "1",
+    "mapserver", "inegi", "nombre", "nomvial", "tipovial", "texto",
+    "objectid", "shape", "length", "cvegeo", "shape_length",
+    "the_geom", "cve_mun", "cve_loc", "cve_ent", "ambito",
+}
+
+RE_TH_TD = re.compile(r"<th[^>]*>([\s\S]*?)</th>\s*<td[^>]*>([\s\S]*?)</td>", re.I)
+RE_TD = re.compile(r"<td[^>]*>([\s\S]*?)</td>", re.I)
+RE_TAGS = re.compile(r"<[^>]+>")
+
+_MINUSCULAS = {"de", "del", "la", "las", "los", "el", "en", "y", "a", "e", "o", "u"}
+
+
+def _title_case(texto):
+    """Réplica de toTitleCase de GAIA (minúsculas conectoras, romanos en alta)."""
+    palabras = texto.lower().split()
+    out = []
+    for i, w in enumerate(palabras):
+        if i > 0 and w in _MINUSCULAS:
+            out.append(w)
+        elif re.fullmatch(r"[ivxlcdm]{2,7}", w):
+            out.append(w.upper())
+        else:
+            out.append(w[:1].upper() + w[1:])
+    return " ".join(out)
+
+
+def _normalizar_nombre(nombre):
+    """Réplica de normalizeStreetName de GAIA ("31"→"Calle 31", Avenida→Av., etc.)."""
+    if not nombre:
+        return nombre
+    t = nombre.strip()
+    t = re.sub(r"^C\.?\s+", "", t, flags=re.I)
+    t = re.sub(r"^Avenida\b", "Av.", t, flags=re.I)
+    t = re.sub(r"^Boulevard\b", "Blvd.", t, flags=re.I)
+    t = re.sub(r"\bGeneral\b", "Gral.", t, flags=re.I)
+    t = re.sub(r"\bPriv\.?\b", "Privada", t, flags=re.I)
+    t = re.sub(r"^(\d+)(?:ta|da|ra|va|na|ma)\.?\b", r"\1a.", t, flags=re.I)
+    t = re.sub(r"^(\d+)(?:to|do|ro|vo|no|mo|er)\.?\b", r"\1o.", t, flags=re.I)
+    if not re.match(r"^\d", t):
+        return t
+    if re.match(r"^\d+[ao]\.\s", t) or re.fullmatch(r"\d+[ao]\.", t):
+        return t
+    m = re.match(r"^(\d+-[A-Za-z0-9]*)\s*(.*)$", t) or re.match(r"^(\d+)\s*(.*)$", t)
+    if not m:
+        return t
+    num, resto = m.group(1), (m.group(2) or "").strip()
+    if re.match(r"^de\b", resto, flags=re.I):
+        return t
+    if not resto:
+        return "Calle " + num
+    return "Calle " + num + " " + resto
+
+
+def _limpiar_valor(val, nombres, vistos):
+    """Réplica de addClean de GAIA: filtra IDs, coordenadas y palabras basura."""
+    if not val or len(val) > 100:
+        return
+    v = val.strip()
+    if re.match(r"^\d+\.\d{4,}", v):
+        return  # coordenadas
+    if re.fullmatch(r"\d{4,}", v):
+        return  # IDs numéricos largos
+    if re.fullmatch(r"\d+\s+[A-Za-z]", v) and int(re.match(r"^\d+", v).group()) > 999:
+        return
+    if v.lower() in BLACKLIST_INEGI:
+        return
+    if re.search(r"mapserver|inegi|objectid|shape_len|cvegeo", v, flags=re.I):
+        return
+    limpio = _normalizar_nombre(_title_case(v))
+    if not limpio or len(limpio) < 2:
+        return
+    if re.fullmatch(r"[A-Za-z]{1,3}\d+", limpio):
+        return  # códigos tipo "A1"
+    m = re.match(r"^Calle (\d+)", limpio)
+    if m and int(m.group(1)) > 999:
+        return
+    if limpio.lower() not in vistos:
+        vistos.add(limpio.lower())
+        nombres.append(limpio)
+
+
+def parse_wms(html):
+    """Réplica de parseWMS de GAIA: extrae nombres de vialidad del HTML."""
+    if not html or len(html) < 30:
+        return []
+    nombres, vistos = [], set()
+    for m in RE_TH_TD.finditer(html):
+        header = RE_TAGS.sub("", m.group(1)).strip().lower()
+        val = RE_TAGS.sub("", m.group(2)).strip()
+        if (header in ("nomvial", "nombre", "nom_calle", "nombre_vialidad", "nom_vial")
+                or re.search(r"vial", header, flags=re.I)
+                or re.match(r"^nom_?v", header, flags=re.I)
+                or re.match(r"^nombre", header, flags=re.I)):
+            _limpiar_valor(val, nombres, vistos)
+    if not nombres:
+        for m in RE_TD.finditer(html):
+            _limpiar_valor(RE_TAGS.sub("", m.group(1)).strip(), nombres, vistos)
+    # si un nombre es prefijo de otro más largo, gana el más específico
+    filtrados = []
+    for f, nf in enumerate(nombres):
+        es_prefijo = any(
+            g != f and ng.lower().startswith(nf.lower()) and len(ng) > len(nf)
+            for g, ng in enumerate(nombres)
+        )
+        if not es_prefijo:
+            filtrados.append(nf)
+    return filtrados
+
+
+def _nombre_invalido(n):
+    return bool(re.fullmatch(r"ninguno|sin nombre|n/a|s/n", n, flags=re.I))
+
+
+def puntos_consulta(coords):
+    """Réplica de getQueryPoints: inicio, ¼, mitad, ¾ y fin de la geometría."""
+    n = len(coords)
+    if n == 0:
+        return []
+    if n == 1:
+        return [coords[0]]
+    indices = [0]
+    if n > 2:
+        indices.append(int(n * 0.25))
+    indices.append(int(n * 0.5))
+    if n > 2:
+        indices.append(int(n * 0.75))
+    indices.append(n - 1)
+    unicos, vistos = [], set()
+    for i in indices:
+        i = min(i, n - 1)
+        if i not in vistos:
+            vistos.add(i)
+            unicos.append(coords[i])
+    return unicos
+
+
+class ConsultorINEGI:
+    """Consulta el WMS del INEGI con caché por coordenada y pausa entre llamadas."""
+
+    def __init__(self, pausa=0.15):
+        self.sesion = requests.Session()
+        self.sesion.headers.update({"User-Agent": HEADERS["User-Agent"]})
+        self.cache = {}
+        self.pausa = pausa
+        self.peticiones = 0
+        self.errores = 0
+
+    def nombres_en(self, lon, lat):
+        key = (round(lon, 6), round(lat, 6))
+        if key in self.cache:
+            return self.cache[key]
+        bbox = (f"{lon - INEGI_DELTA:.6f},{lat - INEGI_DELTA:.6f},"
+                f"{lon + INEGI_DELTA:.6f},{lat + INEGI_DELTA:.6f}")
+        params = {
+            "SERVICE": "WMS", "VERSION": "1.1.1", "REQUEST": "GetFeatureInfo",
+            "LAYERS": INEGI_LAYER, "QUERY_LAYERS": INEGI_LAYER,
+            "SRS": "EPSG:4326", "BBOX": bbox,
+            "WIDTH": "5", "HEIGHT": "5", "X": "2", "Y": "2",
+            "INFO_FORMAT": "text/html", "FEATURE_COUNT": "5",
+        }
+        time.sleep(self.pausa)
+        self.peticiones += 1
+        try:
+            r = self.sesion.get(INEGI_WMS, params=params, timeout=10)
+            nombres = parse_wms(r.text) if r.status_code == 200 else []
+            if r.status_code == 200:
+                self.cache[key] = nombres
+            else:
+                self.errores += 1
+            return nombres
+        except requests.RequestException:
+            self.errores += 1
+            return []
+
+    def sugerir(self, coords):
+        """Réplica del flujo por etapas de GAIA con aborto temprano.
+
+        Devuelve (nombre, confianza 0-100, empatado). La confianza es el % de
+        puntos del segmento donde el INEGI regresó ese mismo nombre.
+        """
+        pts = puntos_consulta(coords)
+        if not pts:
+            return "", 0, False
+        total = len(pts)
+        conteo = {}
+        candidatos = None
+        respondidos = 0
+        for p in pts:
+            nombres = self.nombres_en(p[0], p[1])
+            respondidos += 1
+            for n in nombres:
+                conteo[n] = conteo.get(n, 0) + 1
+            validos = [n for n in nombres if not _nombre_invalido(n)]
+            if candidatos is None:
+                candidatos = validos
+            else:
+                lset = {n.lower() for n in validos}
+                candidatos = [n for n in candidatos if n.lower() in lset]
+            if not candidatos:
+                break  # el 100% ya es imposible (o zona sin cobertura): abortar
+        mejor, mejor_n = None, 0
+        for n, c in conteo.items():
+            if not _nombre_invalido(n) and c > mejor_n:
+                mejor, mejor_n = n, c
+        conf = round(100.0 * mejor_n / total) if mejor else 0
+        perfectos = sum(1 for n, c in conteo.items()
+                        if not _nombre_invalido(n) and round(100.0 * c / total) >= 100)
+        return (mejor or "", conf, perfectos > 1)
+
 
 # ---------------------------------------------------------------- utilidades
 def log(msg):
@@ -342,15 +564,33 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             if not c.get("isEmpty"):
                 ciudad = (c.get("name") or "").strip()
 
+        geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
         hallazgos.append({
             "id": sid,
             "lat": round(lat, 6),
             "lon": round(lon, 6),
             "rt": rt,
             "ciudad": ciudad,
-            "sug": sugerido,
+            "sug": "",          # nombre según INEGI (se llena después)
+            "conf": 0,           # % de confianza INEGI
+            "vec": sugerido,     # respaldo: nombre de la vialidad vecina
+            "_coords": geom.get("coordinates") or [],
         })
     return hallazgos, len(segs)
+
+
+def enriquecer_con_inegi(hallazgos, inegi, limite):
+    """Consulta el INEGI (como GAIA) para cada segmento sin nombre encontrado."""
+    for h in hallazgos:
+        coords = h.pop("_coords", [])
+        if inegi is None or time.time() >= limite:
+            continue
+        nombre, conf, empatado = inegi.sugerir(coords)
+        h["sug"] = nombre
+        h["conf"] = conf
+        if empatado:
+            h["conf"] = min(h["conf"], 99)  # empate: GAIA no lo auto-aplica
+    return hallazgos
 
 
 def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_metros=0):
@@ -455,9 +695,11 @@ def main():
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
     celda = cfg.get("celda_grados", 0.2)
     pausa = cfg.get("pausa_segundos", 0.25)
-    tipos = set(cfg.get("tipos_con_nombre", [1, 2]))
-    min_metros = cfg.get("longitud_minima_metros", 0)
+    tipos = set(cfg.get("tipos_con_nombre", [1]))
+    min_metros = cfg.get("longitud_minima_metros", 30)
     ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
+    usar_inegi = cfg.get("sugerencias_inegi", True)
+    inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
 
     inicio = time.time()
     limite = inicio + args.minutos * 60
@@ -519,6 +761,7 @@ def main():
             for nombre, bb in celdas_a_escanear:
                 h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
                                   min_metros=min_metros)
+                enriquecer_con_inegi(h, inegi, limite)
                 escaneadas.append(("test", bb, h))
                 hallados_run += len(h)
         else:
@@ -550,6 +793,7 @@ def main():
                     cursor = max(cursor, idx + 1)
                     time.sleep(3)
                     continue
+                enriquecer_con_inegi(h, inegi, limite)
                 segs_en_celda = contador["segs"] - segs_antes
                 celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
                 escaneadas.append((str(idx), bb, h))
@@ -598,6 +842,8 @@ def main():
         "modo": args.modo, "celdas": len(escaneadas),
         "peticiones": contador["req"], "segmentos_vistos": contador["segs"],
         "sin_nombre_en_corrida": hallados_run, "total_acumulado": resumen["total"],
+        "peticiones_inegi": inegi.peticiones if inegi else 0,
+        "errores_inegi": inegi.errores if inegi else 0,
         "minutos": round((time.time() - inicio) / 60, 1),
     })
     log(f"Listo: {len(escaneadas)} celdas, {contador['req']} peticiones, "
