@@ -1,21 +1,21 @@
 {
- "actualizado": "2026-07-18T17:27:45+00:00",
+ "actualizado": "2026-07-18T21:44:53+00:00",
  "env": "row",
- "total": 82,
+ "total": 2649,
  "estados": [
   {
-   "estado": "Jalisco",
-   "slug": "jalisco",
-   "total": 82,
-   "ciudades": 3
+   "estado": "Sonora",
+   "slug": "sonora",
+   "total": 2649,
+   "ciudades": 57
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 0,
-  "celdas_total": 161650,
-  "porcentaje": 0.0,
-  "modo": "test"
+  "celdas_escaneadas": 4966,
+  "celdas_total": 12084,
+  "porcentaje": 41.1,
+  "modo": "completo"
  },
  "aviso": "",
  "tipos": {
