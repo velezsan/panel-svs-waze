@@ -178,7 +178,7 @@
       const ciudad=r.ciudad||'(sin ciudad)';
       if(c&&ciudad!==c)return false;
       if(t&&String(r.rt)!==t)return false;
-      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)))return false;
+      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)))return false;
       return true;
     });
     lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
@@ -194,7 +194,14 @@
       html+='<tr><td colspan="4" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
     lista.slice(ini,fin).forEach(r=>{
-      const sug=r.sug?`<span class="sug">${r.sug}</span>`:'<span class="sug na">sin pista</span>';
+      let sug;
+      if(r.sug){
+        sug=`<span class="sug">${r.sug}</span> <span class="chip" title="Coincidencia del INEGI en los puntos del segmento">INEGI ${r.conf!=null?r.conf+'%':''}</span>`;
+      }else if(r.vec){
+        sug=`<span class="sug na" title="El INEGI no tiene nombre aquí; esta es la vialidad vecina que continúa">vecina: ${r.vec}</span>`;
+      }else{
+        sug='<span class="sug na">sin pista</span>';
+      }
       html+=`<tr><td><span class="chip">${tipoNombre(r.rt)}</span></td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td>${sug}</td>
