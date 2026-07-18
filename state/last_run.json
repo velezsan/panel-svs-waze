@@ -1,0 +1,5 @@
+{
+ "ok": false,
+ "error": "AuthError('Ningún servidor respondió con datos. Detalle: {\\'usa\\': \\'AuthError(\\\\\\'HTTP 403: {\"errorLevel\":\"ERROR\",\"errorList\":[{\"code\":100,\"details\":\"user is not logged in.\"}]}\\\\\\')\\', \\'row\\': \\'AuthError(\\\\\\'HTTP 403: {\"errorLevel\":\"ERROR\",\"errorList\":[{\"code\":100,\"details\":\"user is not logged in.\"}]}\\\\\\')\\'}')",
+ "fecha": "2026-07-18T13:31:09.532916+00:00"
+}

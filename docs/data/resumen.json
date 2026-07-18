@@ -1,0 +1,26 @@
+{
+ "actualizado": "2026-07-18T13:31:09+00:00",
+ "env": "usa",
+ "total": 0,
+ "estados": [],
+ "progreso": {},
+ "aviso": "No se pudo acceder a los datos de Waze en la última corrida. Revisa state/debug_ultimo_error.txt",
+ "tipos": {
+  "1": "Calle",
+  "2": "Avenida principal",
+  "3": "Autopista",
+  "4": "Rampa",
+  "5": "Sendero peatonal",
+  "6": "Carretera mayor",
+  "7": "Carretera menor",
+  "8": "Terracería",
+  "10": "Andador",
+  "15": "Ferry",
+  "16": "Escaleras",
+  "17": "Camino privado",
+  "18": "Vía de tren",
+  "19": "Pista de aterrizaje",
+  "20": "Camino de estacionamiento",
+  "22": "Callejón"
+ }
+}
