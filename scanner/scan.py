@@ -722,6 +722,8 @@ def main():
     tipos = set(cfg.get("tipos_con_nombre", [1]))
     min_metros = cfg.get("longitud_minima_metros", 30)
     ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
+    solo_estados = set(cfg.get("solo_estados") or [])
+    franja_lat = cfg.get("revisar_franja_na_desde_lat", 31.0)
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
 
@@ -769,8 +771,9 @@ def main():
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
-    if estado.get("celda_grados") not in (None, celda):
-        log("Cambió el tamaño de celda: reiniciando el recorrido del país")
+    if (estado.get("celda_grados") not in (None, celda)
+            or estado.get("bbox_escaneo") not in (None, bbox_mx)):
+        log("Cambió la zona o el tamaño de celda: reiniciando el recorrido")
         celdas_info, cursor, ciclo = {}, 0, 1
 
     if args.modo == "test":
@@ -796,6 +799,8 @@ def main():
     escaneadas = []
     hallados_run = 0
     fallos_seguidos = 0
+    sesion_usa = None
+    celdas_run = set()
     try:
         if args.modo == "test":
             for nombre, bb in celdas_a_escanear:
@@ -812,11 +817,36 @@ def main():
                     log(f"Vuelta completa al país. Iniciando ciclo {ciclo}")
                 idx = cursor
                 cursor += 1
+                if str(idx) in celdas_run:
+                    log("Toda la zona quedó cubierta en esta corrida; terminando")
+                    break
+                celdas_run.add(str(idx))
                 info = celdas_info.get(str(idx))
                 # celdas que salieron vacías se revisan solo de vez en cuando
                 if info and info.get("n", 0) == 0 and ciclo - info.get("c", 0) < ciclos_vacia:
                     continue
                 bb = bbox_de(idx)
+                # si se limita a ciertos estados, saltar celdas fuera de ellos
+                if solo_estados:
+                    x1c, y1c, x2c, y2c = bb
+                    puntos_chk = [((x1c + x2c) / 2, (y1c + y2c) / 2),
+                                  (x1c, y1c), (x2c, y1c), (x1c, y2c), (x2c, y2c)]
+                    if not any(estados_mx.estado_de(px, py) in solo_estados
+                               for px, py in puntos_chk):
+                        celdas_info[str(idx)] = {"n": 0, "c": ciclo}
+                        continue
+                # franja fronteriza: si el servidor NA tiene más datos ahí,
+                # esa zona vive en el otro servidor y no se debe reportar
+                usa_n = None
+                if bb[3] > franja_lat:
+                    try:
+                        if sesion_usa is None:
+                            sesion_usa = nueva_sesion("usa")
+                        d_usa = pedir_celda(sesion_usa, "usa", bb, pausa, tipos)
+                        contador["req"] += 1
+                        usa_n = len(_objetos(d_usa, "segments"))
+                    except Exception:
+                        usa_n = None
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -833,8 +863,14 @@ def main():
                     cursor = max(cursor, idx + 1)
                     time.sleep(3)
                     continue
-                h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 segs_en_celda = contador["segs"] - segs_antes
+                if usa_n is not None and usa_n > segs_en_celda:
+                    log(f"Celda {idx}: franja del servidor NA "
+                        f"({usa_n} segs en NA vs {segs_en_celda} en ROW); se omite")
+                    h = []
+                    segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
+                else:
+                    h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -864,6 +900,8 @@ def main():
     for celda_id, _bb, hallazgos in escaneadas:
         for h in hallazgos:
             est = estados_mx.estado_de(h["lon"], h["lat"])
+            if solo_estados and est not in solo_estados:
+                continue
             reg = dict(h)
             reg["celda"] = celda_id
             almacen.setdefault(est, {})[str(h["id"])] = reg
@@ -879,7 +917,7 @@ def main():
     resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
 
     estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
-                   "env": env, "celda_grados": celda})
+                   "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
     save_json(STATE_PATH, estado, compact=True)
     save_json(LASTRUN_PATH, {
         "ok": True, "fecha": datetime.now(timezone.utc).isoformat(),
