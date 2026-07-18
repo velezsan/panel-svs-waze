@@ -271,8 +271,14 @@ class ConsultorINEGI:
         conteo = {}
         candidatos = None
         respondidos = 0
-        for p in pts:
+        for i, p in enumerate(pts):
             nombres = self.nombres_en(p[0], p[1])
+            if i == 0 and not nombres:
+                # la sonda regresó vacío: puede ser zona sin cobertura o un
+                # rechazo silencioso del INEGI; reintentamos una vez
+                self.cache.pop((round(p[0], 6), round(p[1], 6)), None)
+                time.sleep(max(self.pausa, 0.4))
+                nombres = self.nombres_en(p[0], p[1])
             respondidos += 1
             for n in nombres:
                 conteo[n] = conteo.get(n, 0) + 1
@@ -580,11 +586,13 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     return hallazgos, len(segs)
 
 
-def enriquecer_con_inegi(hallazgos, inegi, limite):
+def enriquecer_con_inegi(hallazgos, inegi, limite, previas=None):
     """Consulta el INEGI (como GAIA) para cada segmento sin nombre encontrado.
 
     Solo se conservan los segmentos con nombre del INEGI al 100% y sin
-    empate (los mismos que GAIA marca como aplicables).
+    empate (los mismos que GAIA marca como aplicables). Si el INEGI no
+    responde hoy pero el segmento ya tenía nombre al 100% en una corrida
+    anterior, se conserva ese nombre (el INEGI a veces contesta vacío).
     """
     for h in hallazgos:
         coords = h.pop("_coords", [])
@@ -594,6 +602,9 @@ def enriquecer_con_inegi(hallazgos, inegi, limite):
         # como GAIA: solo valen los resultados al 100% y sin empate
         if nombre and conf >= 100 and not empatado:
             h["sug"] = nombre
+            h["conf"] = 100
+        elif previas and str(h["id"]) in previas:
+            h["sug"] = previas[str(h["id"])]
             h["conf"] = 100
     if inegi is None:
         return hallazgos
@@ -737,6 +748,12 @@ def main():
         sys.exit(0)
 
     almacen = cargar_almacen()
+    # nombres INEGI al 100% de corridas anteriores (memoria anti-fallas)
+    sugs_previas = {}
+    for _est, _m in almacen.items():
+        for _k, _v in _m.items():
+            if _v.get("sug"):
+                sugs_previas[_k] = _v["sug"]
 
     # --- malla
     lon1, lat1, lon2, lat2 = bbox_mx
@@ -768,7 +785,7 @@ def main():
             for nombre, bb in celdas_a_escanear:
                 h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
                                   min_metros=min_metros)
-                h = enriquecer_con_inegi(h, inegi, limite)
+                h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 escaneadas.append(("test", bb, h))
                 hallados_run += len(h)
         else:
@@ -800,7 +817,7 @@ def main():
                     cursor = max(cursor, idx + 1)
                     time.sleep(3)
                     continue
-                h = enriquecer_con_inegi(h, inegi, limite)
+                h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 segs_en_celda = contador["segs"] - segs_antes
                 celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
                 escaneadas.append((str(idx), bb, h))
