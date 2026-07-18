@@ -59,7 +59,7 @@ HEADERS = {
 }
 
 # Tipos de vía que DEBEN tener nombre (los demás pueden ir sin nombre):
-# 1 Calle, 2 Avenida principal, 3 Autopista, 6 Carretera mayor, 7 Carretera menor
+# 1 Calle (ST), 2 Avenida principal (PS)
 ROAD_TYPE_NAMES = {
     1: "Calle", 2: "Avenida principal", 3: "Autopista", 4: "Rampa",
     5: "Sendero peatonal", 6: "Carretera mayor", 7: "Carretera menor",
@@ -205,7 +205,9 @@ def _objetos(data, clave):
 
 def pedir_celda(sesion, env, bbox, pausa, tipos=None):
     """Pide los features de un bbox. Devuelve dict con segments/streets/cities."""
-    solicitados = sorted(set(tipos or [1, 2, 3, 6, 7]) | {4})
+    # pedimos también los tipos vecinos (avenidas, carreteras, rampas) para
+    # que las sugerencias de nombre tengan contexto, aunque no se reporten
+    solicitados = sorted(set(tipos or [1, 2]) | {1, 2, 3, 4, 6, 7})
     params = {
         "bbox": f"{bbox[0]:.6f},{bbox[1]:.6f},{bbox[2]:.6f},{bbox[3]:.6f}",
         "language": "es",
@@ -256,7 +258,26 @@ def punto_medio(seg):
         return None, None
 
 
-def analizar_respuesta(data, tipos_con_nombre):
+def largo_metros(seg):
+    """Longitud del segmento en metros (usa el dato del servidor o la geometría)."""
+    largo = seg.get("length")
+    if isinstance(largo, (int, float)) and largo > 0:
+        return float(largo)
+    geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
+    coords = geom.get("coordinates") or []
+    total = 0.0
+    for a, b in zip(coords, coords[1:]):
+        try:
+            lon1, lat1, lon2, lat2 = map(math.radians, (a[0], a[1], b[0], b[1]))
+        except (TypeError, ValueError, IndexError):
+            return None
+        h = (math.sin((lat2 - lat1) / 2) ** 2
+             + math.cos(lat1) * math.cos(lat2) * math.sin((lon2 - lon1) / 2) ** 2)
+        total += 2 * 6371000 * math.asin(math.sqrt(h))
+    return total if total > 0 else None
+
+
+def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
     streets = {s.get("id"): s for s in _objetos(data, "streets")}
@@ -290,6 +311,10 @@ def analizar_respuesta(data, tipos_con_nombre):
             continue
         if nombre_seg.get(sid):
             continue  # sí tiene nombre
+        if min_metros:
+            largo = largo_metros(seg)
+            if largo is not None and largo < min_metros:
+                continue  # segmento muy corto: no se reporta
         lon, lat = punto_medio(seg)
         if lon is None:
             continue
@@ -328,12 +353,12 @@ def analizar_respuesta(data, tipos_con_nombre):
     return hallazgos, len(segs)
 
 
-def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
+def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_metros=0):
     """Escanea un bbox; si el servidor dice que es muy grande, lo parte en 4."""
     try:
         data = pedir_celda(sesion, env, bbox, pausa, tipos)
         contador["req"] += 1
-        h, n = analizar_respuesta(data, tipos)
+        h, n = analizar_respuesta(data, tipos, min_metros)
         contador["segs"] += n
         return h
     except AreaError:
@@ -346,7 +371,7 @@ def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
         for sub in ([x1, y1, mx, my], [mx, y1, x2, my],
                     [x1, my, mx, y2], [mx, my, x2, y2]):
             out.extend(escanear_bbox(sesion, env, sub, tipos, pausa,
-                                     contador, profundidad + 1))
+                                     contador, profundidad + 1, min_metros))
         return out
 
 
@@ -430,7 +455,8 @@ def main():
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
     celda = cfg.get("celda_grados", 0.2)
     pausa = cfg.get("pausa_segundos", 0.25)
-    tipos = set(cfg.get("tipos_con_nombre", [1, 2, 3, 6, 7]))
+    tipos = set(cfg.get("tipos_con_nombre", [1, 2]))
+    min_metros = cfg.get("longitud_minima_metros", 0)
     ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
 
     inicio = time.time()
@@ -491,7 +517,8 @@ def main():
     try:
         if args.modo == "test":
             for nombre, bb in celdas_a_escanear:
-                h = escanear_bbox(sesion, env, bb, tipos, pausa, contador)
+                h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                  min_metros=min_metros)
                 escaneadas.append(("test", bb, h))
                 hallados_run += len(h)
         else:
@@ -509,7 +536,8 @@ def main():
                 bb = bbox_de(idx)
                 segs_antes = contador["segs"]
                 try:
-                    h = escanear_bbox(sesion, env, bb, tipos, pausa, contador)
+                    h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                      min_metros=min_metros)
                     fallos_seguidos = 0
                 except AuthError:
                     raise
