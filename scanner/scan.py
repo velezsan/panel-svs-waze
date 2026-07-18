@@ -247,6 +247,7 @@ class ConsultorINEGI:
         self.peticiones += 1
         try:
             r = self.sesion.get(INEGI_WMS, params=params, timeout=10)
+            r.encoding = "utf-8"  # el INEGI responde UTF-8 sin declararlo
             nombres = parse_wms(r.text) if r.status_code == 200 else []
             if r.status_code == 200:
                 self.cache[key] = nombres
