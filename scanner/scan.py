@@ -581,7 +581,11 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
 
 
 def enriquecer_con_inegi(hallazgos, inegi, limite):
-    """Consulta el INEGI (como GAIA) para cada segmento sin nombre encontrado."""
+    """Consulta el INEGI (como GAIA) para cada segmento sin nombre encontrado.
+
+    Solo se conservan los segmentos con nombre del INEGI al 100% y sin
+    empate (los mismos que GAIA marca como aplicables).
+    """
     for h in hallazgos:
         coords = h.pop("_coords", [])
         if inegi is None or time.time() >= limite:
@@ -591,7 +595,9 @@ def enriquecer_con_inegi(hallazgos, inegi, limite):
         if nombre and conf >= 100 and not empatado:
             h["sug"] = nombre
             h["conf"] = 100
-    return hallazgos
+    if inegi is None:
+        return hallazgos
+    return [h for h in hallazgos if h.get("sug")]
 
 
 def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_metros=0):
@@ -762,7 +768,7 @@ def main():
             for nombre, bb in celdas_a_escanear:
                 h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
                                   min_metros=min_metros)
-                enriquecer_con_inegi(h, inegi, limite)
+                h = enriquecer_con_inegi(h, inegi, limite)
                 escaneadas.append(("test", bb, h))
                 hallados_run += len(h)
         else:
@@ -794,7 +800,7 @@ def main():
                     cursor = max(cursor, idx + 1)
                     time.sleep(3)
                     continue
-                enriquecer_con_inegi(h, inegi, limite)
+                h = enriquecer_con_inegi(h, inegi, limite)
                 segs_en_celda = contador["segs"] - segs_antes
                 celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
                 escaneadas.append((str(idx), bb, h))
