@@ -100,7 +100,7 @@
 
   function permalink(r){
     const env=(resumen&&resumen.env)||'usa';
-    return `https://www.waze.com/es-419/editor?env=${env}&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+    return `https://www.waze.com/es-419/editor?env=${env}&lat=${r.lat}&lon=${r.lon}&zoomLevel=18&segments=${r.id}`;
   }
   function tipoNombre(rt){
     return (resumen&&resumen.tipos&&resumen.tipos[String(rt)])||('Tipo '+rt);
