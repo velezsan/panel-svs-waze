@@ -3,7 +3,9 @@
   "bbox": [-118.45, 14.5, -86.65, 32.75],
   "celda_grados": 0.2,
   "pausa_segundos": 0.25,
-  "tipos_con_nombre": [1, 2],
+  "tipos_con_nombre": [1],
   "longitud_minima_metros": 30,
+  "sugerencias_inegi": true,
+  "pausa_inegi_segundos": 0.15,
   "reescanear_vacias_cada": 5
 }
