@@ -1,10 +1,23 @@
 {
- "actualizado": "2026-07-18T13:31:09+00:00",
- "env": "usa",
- "total": 0,
- "estados": [],
- "progreso": {},
- "aviso": "No se pudo acceder a los datos de Waze en la última corrida. Revisa state/debug_ultimo_error.txt",
+ "actualizado": "2026-07-18T13:45:18+00:00",
+ "env": "row",
+ "total": 124,
+ "estados": [
+  {
+   "estado": "Jalisco",
+   "slug": "jalisco",
+   "total": 124,
+   "ciudades": 2
+  }
+ ],
+ "progreso": {
+  "ciclo": 1,
+  "celdas_escaneadas": 0,
+  "celdas_total": 14628,
+  "porcentaje": 0.0,
+  "modo": "test"
+ },
+ "aviso": "",
  "tipos": {
   "1": "Calle",
   "2": "Avenida principal",
