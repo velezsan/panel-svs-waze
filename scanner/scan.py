@@ -68,7 +68,7 @@ ROAD_TYPE_NAMES = {
     20: "Camino de estacionamiento", 22: "Callejón",
 }
 
-BBOX_PRUEBA = [-103.405, 20.655, -103.305, 20.695]  # Guadalajara centro (ampliada)
+BBOX_PRUEBA = [-103.43, 20.655, -103.28, 20.695]  # Guadalajara centro (triple)
 
 # ------------------------------------------------------------- INEGI (GAIA)
 # Réplica de la consulta del script "WME INEGI GAIA": WMS GetFeatureInfo
