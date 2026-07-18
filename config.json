@@ -1,0 +1,8 @@
+{
+  "_comentario": "Configuración del escáner. bbox = [lon oeste, lat sur, lon este, lat norte]",
+  "bbox": [-118.45, 14.5, -86.65, 32.75],
+  "celda_grados": 0.2,
+  "pausa_segundos": 0.25,
+  "tipos_con_nombre": [1, 2, 3, 6, 7],
+  "reescanear_vacias_cada": 5
+}
