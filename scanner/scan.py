@@ -36,12 +36,14 @@ DEBUG_PATH = os.path.join(BASE, "state", "debug_ultimo_error.txt")
 DATA_DIR = os.path.join(BASE, "docs", "data")
 ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
 
-# Servidores del WME. México vive en el entorno "usa" (Norteamérica),
-# pero probamos ambos por si acaso.
+# Servidores del WME. México vive en el entorno "row" (Rest of World).
+# El parámetro sandbox=true es el que usa el modo práctica: permite leer
+# los datos del mapa sin iniciar sesión.
 ENDPOINTS = {
-    "usa": "https://www.waze.com/Descartes/app/Features",
     "row": "https://www.waze.com/row-Descartes/app/Features",
+    "usa": "https://www.waze.com/Descartes/app/Features",
 }
+ORDEN_ENTORNOS = ("row", "usa")
 EDITOR_PAGES = {
     "usa": "https://www.waze.com/editor?env=usa",
     "row": "https://www.waze.com/editor?env=row",
@@ -201,11 +203,17 @@ def _objetos(data, clave):
     return out
 
 
-def pedir_celda(sesion, env, bbox, pausa):
+def pedir_celda(sesion, env, bbox, pausa, tipos=None):
     """Pide los features de un bbox. Devuelve dict con segments/streets/cities."""
+    solicitados = sorted(set(tipos or [1, 2, 3, 6, 7]) | {4})
     params = {
         "bbox": f"{bbox[0]:.6f},{bbox[1]:.6f},{bbox[2]:.6f},{bbox[3]:.6f}",
         "language": "es",
+        "v": "2",
+        "apiV2": "true",
+        "roadTypes": ",".join(str(t) for t in solicitados),
+        "zoomLevel": "17",
+        "sandbox": "true",  # el truco del modo práctica: lectura sin login
     }
     time.sleep(pausa)
     r = sesion.get(ENDPOINTS[env], params=params, timeout=60)
@@ -323,7 +331,7 @@ def analizar_respuesta(data, tipos_con_nombre):
 def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
     """Escanea un bbox; si el servidor dice que es muy grande, lo parte en 4."""
     try:
-        data = pedir_celda(sesion, env, bbox, pausa)
+        data = pedir_celda(sesion, env, bbox, pausa, tipos)
         contador["req"] += 1
         h, n = analizar_respuesta(data, tipos)
         contador["segs"] += n
@@ -345,7 +353,7 @@ def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
 def detectar_entorno(cfg, pausa):
     """Averigua en qué servidor (usa/row) vive México y si hay acceso sin login."""
     errores = {}
-    for env in ("usa", "row"):
+    for env in ORDEN_ENTORNOS:
         try:
             s = nueva_sesion(env)
             data = pedir_celda(s, env, BBOX_PRUEBA, pausa)
