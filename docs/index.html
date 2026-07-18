@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Panel SVS Waze · Segmentos sin nombre — México</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c;
+    --warn:#ffb454; --chip:#243049;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:28px 20px 10px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.45rem;font-weight:700}
+  h1 .wz{color:var(--accent)}
+  .sub{color:var(--muted);font-size:.95rem;margin:0}
+  main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}
+  .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+  .tile .v{font-size:1.55rem;font-weight:700;margin:2px 0}
+  .tile .l{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
+  .tile .d{color:var(--muted);font-size:.78rem}
+  .aviso{display:none;background:#3a2c14;border:1px solid var(--warn);color:#ffd9a0;
+         border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.9rem}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select,input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  input[type=search]{flex:1;min-width:200px}
+  .hint{color:var(--muted);font-size:.85rem;margin:6px 0 14px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  tr.clickable{cursor:pointer}
+  tr.clickable:hover td{background:var(--panel2)}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  .chip{display:inline-block;background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .sug{color:var(--accent2)}
+  .sug.na{color:var(--muted);font-style:italic}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .volver{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.92rem;padding:0;margin-right:6px}
+  footer{max-width:1100px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:.82rem}
+  .cargando{color:var(--muted);padding:30px;text-align:center}
+  @media (max-width:640px){ th:nth-child(2),td:nth-child(2){display:none} }
+</style>
+</head>
+<body>
+<header>
+  <h1>Panel SVS <span class="wz">Waze</span> · Segmentos sin nombre</h1>
+  <p class="sub">México · Revisión automática diaria del mapa (datos del editor, modo práctica)</p>
+</header>
+<main>
+  <div class="aviso" id="aviso"></div>
+
+  <div class="tiles">
+    <div class="tile"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en todo el país</div></div>
+    <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 32</div></div>
+    <div class="tile"><div class="l">Cobertura del escaneo</div><div class="v" id="t-prog">—</div><div class="d" id="t-ciclo"></div></div>
+    <div class="tile"><div class="l">Última actualización</div><div class="v" id="t-fecha" style="font-size:1.05rem">—</div><div class="d" id="t-hora"></div></div>
+  </div>
+
+  <div class="controls" id="controles" style="display:none">
+    <button class="volver" id="btn-volver" style="display:none">← Todos los estados</button>
+    <select id="sel-estado"><option value="">Elige un estado…</option></select>
+    <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
+    <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
+    <input type="search" id="buscar" placeholder="Buscar por ciudad o nombre sugerido…" style="display:none">
+  </div>
+  <p class="hint" id="pista">Elige un estado en la lista (o en la tabla) para ver sus segmentos sin nombre y abrirlos directo en el editor.</p>
+
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <button id="pg-next">Siguiente →</button>
+  </div>
+</main>
+<footer>
+  Los datos provienen de la API pública del Waze Map Editor (la misma que usa el modo práctica, sin iniciar sesión).
+  El escaneo corre en automático con GitHub Actions y recorre el país por partes; la cobertura crece con cada corrida.
+  Hecho por la comunidad, para la comunidad. 🚗
+</footer>
+
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  let resumen=null, datosEstado=null, lista=[], pagina=0, porPagina=100;
+
+  const fmt=n=>n.toLocaleString('es-MX');
+
+  function permalink(r){
+    const env=(resumen&&resumen.env)||'usa';
+    return `https://www.waze.com/es-419/editor?env=${env}&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  }
+  function tipoNombre(rt){
+    return (resumen&&resumen.tipos&&resumen.tipos[String(rt)])||('Tipo '+rt);
+  }
+
+  function pintarResumen(){
+    $('t-total').textContent=fmt(resumen.total);
+    $('t-estados').textContent=resumen.estados.length;
+    const p=resumen.progreso||{};
+    $('t-prog').textContent=(p.porcentaje!=null?p.porcentaje+'%':'—');
+    $('t-ciclo').textContent=p.ciclo?('vuelta '+p.ciclo+' al país'):'';
+    if(resumen.actualizado){
+      const d=new Date(resumen.actualizado);
+      $('t-fecha').textContent=d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
+      $('t-hora').textContent=d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})+' (tu hora)';
+    }
+    if(resumen.aviso){ const a=$('aviso'); a.style.display='block'; a.textContent='⚠️ '+resumen.aviso; }
+    const sel=$('sel-estado');
+    resumen.estados.forEach(e=>{
+      const o=document.createElement('option');
+      o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
+      sel.appendChild(o);
+    });
+    $('controles').style.display='flex';
+  }
+
+  function tablaEstados(){
+    $('btn-volver').style.display='none';
+    ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='none');
+    $('sel-estado').value='';
+    $('pager').style.display='none';
+    $('pista').style.display='block';
+    if(!resumen.estados.length){
+      $('contenido').innerHTML='<div class="cargando">Aún no hay datos. En cuanto corra el primer escaneo aparecerán aquí.</div>';
+      return;
+    }
+    let html='<table><thead><tr><th>Estado</th><th class="num">Ciudades</th><th class="num">Segmentos sin nombre</th></tr></thead><tbody>';
+    resumen.estados.slice().sort((a,b)=>b.total-a.total).forEach(e=>{
+      html+=`<tr class="clickable" data-slug="${e.slug}"><td>${e.estado}</td><td class="num">${fmt(e.ciudades)}</td><td class="num">${fmt(e.total)}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    document.querySelectorAll('tr.clickable').forEach(tr=>{
+      tr.addEventListener('click',()=>{ $('sel-estado').value=tr.dataset.slug; cargarEstado(tr.dataset.slug); });
+    });
+  }
+
+  async function cargarEstado(slug){
+    if(!slug){ tablaEstados(); return; }
+    $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
+    try{
+      const r=await fetch('data/estados/'+slug+'.json',{cache:'no-store'});
+      datosEstado=await r.json();
+    }catch(e){
+      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
+      return;
+    }
+    $('btn-volver').style.display='inline';
+    $('pista').style.display='none';
+    const regs=Object.values(datosEstado.segmentos||{});
+    const ciudades=[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
+    const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
+    const sc=$('sel-ciudad'), st=$('sel-tipo');
+    sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
+    st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
+    ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='inline-block');
+    $('buscar').value='';
+    filtrar();
+  }
+
+  function filtrar(){
+    if(!datosEstado)return;
+    const c=$('sel-ciudad').value, t=$('sel-tipo').value, q=$('buscar').value.trim().toLowerCase();
+    lista=Object.values(datosEstado.segmentos||{}).filter(r=>{
+      const ciudad=r.ciudad||'(sin ciudad)';
+      if(c&&ciudad!==c)return false;
+      if(t&&String(r.rt)!==t)return false;
+      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)))return false;
+      return true;
+    });
+    lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    pagina=0;
+    pintarTabla();
+  }
+
+  function pintarTabla(){
+    const total=lista.length;
+    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th></th></tr></thead><tbody>`;
+    if(!total){
+      html+='<tr><td colspan="4" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+    }
+    lista.slice(ini,fin).forEach(r=>{
+      const sug=r.sug?`<span class="sug">${r.sug}</span>`:'<span class="sug na">sin pista</span>';
+      html+=`<tr><td><span class="chip">${tipoNombre(r.rt)}</span></td>
+        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
+        <td>${sug}</td>
+        <td><a class="wme" target="_blank" rel="noopener" href="${permalink(r)}">Abrir en WME</a></td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    $('pager').style.display=total>porPagina?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág. ${pagina+1}/${pgs}`;
+    $('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=pgs-1;
+  }
+
+  $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
+  $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
+  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
+  $('btn-volver').addEventListener('click',()=>tablaEstados());
+  ['sel-ciudad','sel-tipo'].forEach(i=>$(i).addEventListener('change',filtrar));
+  $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
+
+  fetch('data/resumen.json',{cache:'no-store'})
+    .then(r=>r.json())
+    .then(d=>{resumen=d;pintarResumen();tablaEstados();})
+    .catch(()=>{ $('contenido').innerHTML='<div class="cargando">Aún no hay datos. Corre el primer escaneo en la pestaña Actions de GitHub y recarga esta página.</div>'; });
+})();
+</script>
+</body>
+</html>
