@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-07-18T16:40:33+00:00",
+ "actualizado": "2026-07-18T16:59:33+00:00",
  "env": "row",
- "total": 62,
+ "total": 1,
  "estados": [
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 62,
-   "ciudades": 3
+   "total": 1,
+   "ciudades": 1
   }
  ],
  "progreso": {
