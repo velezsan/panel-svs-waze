@@ -68,7 +68,7 @@ ROAD_TYPE_NAMES = {
     20: "Camino de estacionamiento", 22: "Callejón",
 }
 
-BBOX_PRUEBA = [-103.38, 20.655, -103.33, 20.695]  # Guadalajara centro
+BBOX_PRUEBA = [-103.405, 20.655, -103.305, 20.695]  # Guadalajara centro (ampliada)
 
 # ------------------------------------------------------------- INEGI (GAIA)
 # Réplica de la consulta del script "WME INEGI GAIA": WMS GetFeatureInfo
@@ -587,10 +587,10 @@ def enriquecer_con_inegi(hallazgos, inegi, limite):
         if inegi is None or time.time() >= limite:
             continue
         nombre, conf, empatado = inegi.sugerir(coords)
-        h["sug"] = nombre
-        h["conf"] = conf
-        if empatado:
-            h["conf"] = min(h["conf"], 99)  # empate: GAIA no lo auto-aplica
+        # como GAIA: solo valen los resultados al 100% y sin empate
+        if nombre and conf >= 100 and not empatado:
+            h["sug"] = nombre
+            h["conf"] = 100
     return hallazgos
 
 
