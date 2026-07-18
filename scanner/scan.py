@@ -677,8 +677,10 @@ def cargar_almacen():
 def guardar_almacen(almacen, meta):
     os.makedirs(ESTADOS_DIR, exist_ok=True)
     resumen_estados = []
+    slugs_actuales = set()
     for estado, segmentos in sorted(almacen.items()):
         slug = slugify(estado)
+        slugs_actuales.add(slug)
         ciudades = {}
         for reg in segmentos.values():
             c = reg.get("ciudad") or "(sin ciudad)"
@@ -689,6 +691,10 @@ def guardar_almacen(almacen, meta):
             "estado": estado, "slug": slug, "total": len(segmentos),
             "ciudades": len(ciudades),
         })
+    # borrar archivos de estados que ya no tienen segmentos
+    for fn in os.listdir(ESTADOS_DIR):
+        if fn.endswith(".json") and fn[:-5] not in slugs_actuales:
+            os.remove(os.path.join(ESTADOS_DIR, fn))
     resumen = {
         "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "env": meta.get("env", "usa"),
@@ -763,10 +769,20 @@ def main():
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
+    if estado.get("celda_grados") not in (None, celda):
+        log("Cambió el tamaño de celda: reiniciando el recorrido del país")
+        celdas_info, cursor, ciclo = {}, 0, 1
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
-        celdas_a_escanear = [("test", BBOX_PRUEBA)]
+        # en rebanadas de 0.05° porque el servidor recorta las áreas grandes
+        celdas_a_escanear = []
+        _x1, _y1, _x2, _y2 = BBOX_PRUEBA
+        _x, _i = _x1, 0
+        while _x < _x2:
+            celdas_a_escanear.append((f"test{_i}", [_x, _y1, min(_x + 0.05, _x2), _y2]))
+            _x += 0.05
+            _i += 1
     else:
         celdas_a_escanear = None  # se generan sobre la marcha
 
@@ -786,7 +802,7 @@ def main():
                 h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
                                   min_metros=min_metros)
                 h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
-                escaneadas.append(("test", bb, h))
+                escaneadas.append((nombre, bb, h))
                 hallados_run += len(h)
         else:
             while time.time() < limite:
@@ -834,10 +850,13 @@ def main():
 
     # --- actualizar almacén: quitar lo viejo de las celdas re-escaneadas
     celdas_re = {c for c, _b, _h in escaneadas}
+    es_test = args.modo == "test"
     if celdas_re:
         for est in list(almacen.keys()):
             seg_map = almacen[est]
-            for k in [k for k, v in seg_map.items() if v.get("celda") in celdas_re]:
+            for k in [k for k, v in seg_map.items()
+                      if v.get("celda") in celdas_re
+                      or (es_test and str(v.get("celda", "")).startswith("test"))]:
                 del seg_map[k]
             if not seg_map:
                 del almacen[est]
@@ -859,7 +878,8 @@ def main():
     }
     resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
 
-    estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info, "env": env})
+    estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
+                   "env": env, "celda_grados": celda})
     save_json(STATE_PATH, estado, compact=True)
     save_json(LASTRUN_PATH, {
         "ok": True, "fecha": datetime.now(timezone.utc).isoformat(),
