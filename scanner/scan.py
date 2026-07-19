@@ -70,6 +70,29 @@ ROAD_TYPE_NAMES = {
 
 BBOX_PRUEBA = [-103.43, 20.655, -103.28, 20.695]  # Guadalajara centro (triple)
 
+# Línea fronteriza México-EUA (aprox). Cerca de ella hay una franja cuyos
+# datos viven en el servidor NA; esas celdas se verifican contra ambos.
+FRONTERA_USA = [
+    (-117.13, 32.54), (-114.72, 32.72), (-111.07, 31.33), (-108.21, 31.33),
+    (-108.21, 31.78), (-106.53, 31.79), (-104.92, 30.61), (-104.40, 29.57),
+    (-103.11, 29.03), (-102.40, 29.85), (-101.40, 29.77), (-100.96, 29.35),
+    (-99.51, 27.60), (-99.11, 26.42), (-98.20, 26.06), (-97.14, 25.87),
+]
+
+
+def distancia_a_frontera(lon, lat):
+    """Distancia aproximada (en grados) del punto a la frontera con EUA."""
+    best = 1e9
+    for (x1, y1), (x2, y2) in zip(FRONTERA_USA, FRONTERA_USA[1:]):
+        dx, dy = x2 - x1, y2 - y1
+        den = dx * dx + dy * dy
+        t = 0.0 if den == 0 else max(0.0, min(1.0, ((lon - x1) * dx + (lat - y1) * dy) / den))
+        px, py = x1 + t * dx, y1 + t * dy
+        d = ((lon - px) ** 2 + (lat - py) ** 2) ** 0.5
+        if d < best:
+            best = d
+    return best
+
 # ------------------------------------------------------------- INEGI (GAIA)
 # Réplica de la consulta del script "WME INEGI GAIA": WMS GetFeatureInfo
 # sobre la capa de vialidades c112, en hasta 5 puntos del segmento.
@@ -394,6 +417,22 @@ class EstadosMX:
             found = best or "Sin estado"
         self._cache[key] = found
         return found
+
+    def dentro_de_alguno(self, lon, lat):
+        """True solo si el punto cae DENTRO de algún estado (sin 'más cercano')."""
+        key = ("in", round(lon, 3), round(lat, 3))
+        if key in self._cache:
+            return self._cache[key]
+        res = False
+        for _name, rings in self.features:
+            for (minx, miny, maxx, maxy, ring) in rings:
+                if minx <= lon <= maxx and miny <= lat <= maxy and self._inside(lon, lat, ring):
+                    res = True
+                    break
+            if res:
+                break
+        self._cache[key] = res
+        return res
 
 
 # ------------------------------------------------------------------ API Waze
@@ -723,7 +762,7 @@ def main():
     min_metros = cfg.get("longitud_minima_metros", 30)
     ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
     solo_estados = set(cfg.get("solo_estados") or [])
-    franja_lat = cfg.get("revisar_franja_na_desde_lat", 31.0)
+    franja_umbral = cfg.get("franja_umbral_grados", 0.5)
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
 
@@ -768,6 +807,14 @@ def main():
     cols = max(1, math.ceil((lon2 - lon1) / celda))
     filas = max(1, math.ceil((lat2 - lat1) / celda))
     total_celdas = cols * filas
+    # normalizar los ids de celda del almacén al grid actual (por si cambió la malla,
+    # p. ej. al pasar de un estado al país completo, sin perder lo ya encontrado)
+    for _est, _m in almacen.items():
+        for _v in _m.values():
+            _c = int((_v["lon"] - lon1) // celda)
+            _f = int((_v["lat"] - lat1) // celda)
+            if 0 <= _c < cols and 0 <= _f < filas:
+                _v["celda"] = str(_f * cols + _c)
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
@@ -826,19 +873,24 @@ def main():
                 if info and info.get("n", 0) == 0 and ciclo - info.get("c", 0) < ciclos_vacia:
                     continue
                 bb = bbox_de(idx)
-                # si se limita a ciertos estados, saltar celdas fuera de ellos
+                # saltar celdas fuera de México (o fuera de los estados elegidos)
+                x1c, y1c, x2c, y2c = bb
+                mxc, myc = (x1c + x2c) / 2, (y1c + y2c) / 2
+                puntos_chk = [(mxc, myc), (x1c, y1c), (x2c, y1c), (x1c, y2c), (x2c, y2c),
+                              (mxc, y1c), (mxc, y2c), (x1c, myc), (x2c, myc)]
                 if solo_estados:
-                    x1c, y1c, x2c, y2c = bb
-                    puntos_chk = [((x1c + x2c) / 2, (y1c + y2c) / 2),
-                                  (x1c, y1c), (x2c, y1c), (x1c, y2c), (x2c, y2c)]
-                    if not any(estados_mx.estado_de(px, py) in solo_estados
-                               for px, py in puntos_chk):
-                        celdas_info[str(idx)] = {"n": 0, "c": ciclo}
-                        continue
+                    dentro = any(estados_mx.estado_de(px, py) in solo_estados
+                                 for px, py in puntos_chk)
+                else:
+                    dentro = any(estados_mx.dentro_de_alguno(px, py)
+                                 for px, py in puntos_chk)
+                if not dentro:
+                    celdas_info[str(idx)] = {"n": 0, "c": ciclo}
+                    continue
                 # franja fronteriza: si el servidor NA tiene más datos ahí,
                 # esa zona vive en el otro servidor y no se debe reportar
                 usa_n = None
-                if bb[3] > franja_lat:
+                if distancia_a_frontera(mxc, myc) < franja_umbral:
                     try:
                         if sesion_usa is None:
                             sesion_usa = nueva_sesion("usa")
