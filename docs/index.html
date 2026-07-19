@@ -41,6 +41,10 @@
   a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
         padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
   a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
   .chip{display:inline-block;background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .sug{color:var(--accent2)}
   .sug.na{color:var(--muted);font-style:italic}
@@ -95,6 +99,11 @@
 (function(){
   const $=id=>document.getElementById(id);
   let resumen=null, datosEstado=null, lista=[], pagina=0, porPagina=100;
+
+  // segmentos que ya abriste en el WME (se guarda en este navegador)
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados')||'[]'));}catch(e){}
+  function guardarVisitados(){try{localStorage.setItem('svs_visitados',JSON.stringify([...visitados]));}catch(e){}}
 
   const fmt=n=>n.toLocaleString('es-MX');
 
@@ -202,10 +211,11 @@
       }else{
         sug='<span class="sug na">sin pista</span>';
       }
-      html+=`<tr><td><span class="chip">${tipoNombre(r.rt)}</span></td>
+      const vis=visitados.has(String(r.id));
+      html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td>${sug}</td>
-        <td><a class="wme" target="_blank" rel="noopener" href="${permalink(r)}">Abrir en WME</a></td></tr>`;
+        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
     html+='</tbody></table>';
     $('contenido').innerHTML=html;
@@ -215,6 +225,13 @@
     $('pg-prev').disabled=pagina===0;
     $('pg-next').disabled=pagina>=pgs-1;
   }
+
+  $('contenido').addEventListener('click',e=>{
+    const q=e.target.closest('.quitar');
+    if(q){visitados.delete(String(q.dataset.quitar));guardarVisitados();pintarTabla();return;}
+    const a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardarVisitados();setTimeout(pintarTabla,150);}
+  });
 
   $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
   $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
