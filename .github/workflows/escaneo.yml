@@ -2,7 +2,7 @@ name: Escaneo de segmentos sin nombre
 
 on:
   schedule:
-    - cron: '17 9 * * *'   # todos los días a las 03:17 (hora de Ciudad de México)
+    - cron: '17 3,9,15,21 * * *'   # 4 veces al día: 3:17 y 9:17 am/pm (hora de CDMX)
   workflow_dispatch:
     inputs:
       modo:
@@ -53,4 +53,3 @@ jobs:
             git pull --rebase origin ${GITHUB_REF_NAME}
             git push
           fi
-
