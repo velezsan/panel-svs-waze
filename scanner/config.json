@@ -5,7 +5,7 @@
   "franja_umbral_grados": 0.5,
   "celda_grados": 0.06,
   "pausa_segundos": 0.25,
-  "tipos_con_nombre": [1],
+  "tipos_con_nombre": [1, 2],
   "longitud_minima_metros": 30,
   "sugerencias_inegi": true,
   "pausa_inegi_segundos": 0.25,
