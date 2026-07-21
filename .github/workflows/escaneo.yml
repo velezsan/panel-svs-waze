@@ -2,7 +2,7 @@ name: Escaneo de segmentos sin nombre
 
 on:
   schedule:
-    - cron: '17 3,9,15,21 * * *'   # 4 veces al día: 3:17 y 9:17 am/pm (hora de CDMX)
+    - cron: '17 */4 * * *'   # 6 veces al día, cada 4 horas (con 30 min de holgura entre corridas)
   workflow_dispatch:
     inputs:
       modo:
@@ -12,7 +12,7 @@ on:
         options: [test, completo]
       minutos:
         description: 'Duración máxima en minutos'
-        default: '240'
+        default: '210'
       zona:
         description: 'Re-escaneo prioritario: estado, "lat,lon" o bbox (vacío = barrido normal)'
         default: ''
@@ -42,7 +42,7 @@ jobs:
         run: |
           python scanner/scan.py \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
-            --minutos "${{ github.event.inputs.minutos || '240' }}" \
+            --minutos "${{ github.event.inputs.minutos || '210' }}" \
             --zona "${{ github.event.inputs.zona || '' }}"
 
       - name: Guardar resultados
