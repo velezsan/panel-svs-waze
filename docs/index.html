@@ -45,6 +45,10 @@
   a.wme.hecho{background:var(--accent2)}
   .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
   .quitar:hover{color:var(--text)}
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel2);
+         border:1px solid var(--accent);color:var(--text);padding:10px 16px;border-radius:10px;
+         font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9;max-width:90%}
+  #toast.ver{opacity:1}
   .chip{display:inline-block;background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .sug{color:var(--accent2)}
   .sug.na{color:var(--muted);font-style:italic}
@@ -75,6 +79,7 @@
 
   <div class="controls" id="controles" style="display:none">
     <button class="volver" id="btn-volver" style="display:none">← Todos los estados</button>
+    <button class="volver" id="btn-recrawl" style="display:none" title="Pide que el escáner le dé prioridad a este estado en la próxima corrida">🔄 Pedir re-escaneo</button>
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
     <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
@@ -138,6 +143,7 @@
 
   function tablaEstados(){
     $('btn-volver').style.display='none';
+    $('btn-recrawl').style.display='none';
     ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='none');
     $('sel-estado').value='';
     $('pager').style.display='none';
@@ -168,6 +174,7 @@
       return;
     }
     $('btn-volver').style.display='inline';
+    $('btn-recrawl').style.display='inline';
     $('pista').style.display='none';
     const regs=Object.values(datosEstado.segmentos||{});
     const ciudades=[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -235,6 +242,19 @@
 
   $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
   $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
+  function mostrarToast(msg){
+    let t=document.getElementById('toast');
+    if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
+    t.textContent=msg;t.className='ver';
+    clearTimeout(window._tt);window._tt=setTimeout(()=>{t.className='';},7000);
+  }
+  $('btn-recrawl').addEventListener('click',async()=>{
+    const est=datosEstado?datosEstado.estado:'';
+    if(!est)return;
+    try{await navigator.clipboard.writeText(est);}catch(e){}
+    mostrarToast(`"${est}" copiado ✓ — en GitHub: Run workflow → pégalo en el campo "zona" → Run`);
+    window.open('https://github.com/velezsan/panel-svs-waze/actions/workflows/escaneo.yml','_blank');
+  });
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('btn-volver').addEventListener('click',()=>tablaEstados());
   ['sel-ciudad','sel-tipo'].forEach(i=>$(i).addEventListener('change',filtrar));
