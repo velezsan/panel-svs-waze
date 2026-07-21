@@ -13,6 +13,9 @@ on:
       minutos:
         description: 'Duración máxima en minutos'
         default: '240'
+      zona:
+        description: 'Re-escaneo prioritario: estado, "lat,lon" o bbox (vacío = barrido normal)'
+        default: ''
 
 permissions:
   contents: write
@@ -39,7 +42,8 @@ jobs:
         run: |
           python scanner/scan.py \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
-            --minutos "${{ github.event.inputs.minutos || '240' }}"
+            --minutos "${{ github.event.inputs.minutos || '240' }}" \
+            --zona "${{ github.event.inputs.zona || '' }}"
 
       - name: Guardar resultados
         run: |
