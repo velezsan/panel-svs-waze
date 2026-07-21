@@ -16,6 +16,7 @@ import json
 import math
 import os
 import re
+import subprocess
 import sys
 import time
 import unicodedata
@@ -892,6 +893,67 @@ def main():
     fallos_seguidos = 0
     sesion_usa = None
     celdas_run = set()
+    pub_cada = cfg.get("publicar_cada_minutos", 40)
+    ultima_pub = inicio
+    celdas_aplicadas = 0
+
+    def aplicar_pendientes():
+        """Vuelca lo escaneado al almacén y guarda los archivos del panel."""
+        nonlocal escaneadas, celdas_aplicadas
+        celdas_aplicadas += len(escaneadas)
+        celdas_re = {c for c, _b, _h in escaneadas}
+        es_test = args.modo == "test"
+        if celdas_re:
+            for est in list(almacen.keys()):
+                seg_map = almacen[est]
+                for k in [k for k, v in seg_map.items()
+                          if v.get("celda") in celdas_re
+                          or (es_test and str(v.get("celda", "")).startswith("test"))]:
+                    del seg_map[k]
+                if not seg_map:
+                    del almacen[est]
+        for celda_id, _bb, hallazgos in escaneadas:
+            for h in hallazgos:
+                est = estados_mx.estado_de(h["lon"], h["lat"])
+                if solo_estados and est not in solo_estados:
+                    continue
+                reg = dict(h)
+                reg["celda"] = celda_id
+                almacen.setdefault(est, {})[str(h["id"])] = reg
+        escaneadas = []
+        celdas_hechas = len([1 for v in celdas_info.values()])
+        progreso = {
+            "ciclo": ciclo,
+            "celdas_escaneadas": celdas_hechas,
+            "celdas_total": total_celdas,
+            "porcentaje": round(100.0 * min(celdas_hechas, total_celdas) / total_celdas, 1),
+            "modo": args.modo,
+        }
+        resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
+        estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
+                       "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
+        save_json(STATE_PATH, estado, compact=True)
+        return resumen
+
+    def publicar_git(etiqueta):
+        """Commit y push intermedios (solo dentro de GitHub Actions)."""
+        if not os.environ.get("GITHUB_ACTIONS"):
+            return
+        try:
+            subprocess.run(["git", "config", "user.name", "escaner-bot"], cwd=BASE, check=False)
+            subprocess.run(["git", "config", "user.email",
+                            "actions@users.noreply.github.com"], cwd=BASE, check=False)
+            subprocess.run(["git", "add", "docs/data", "state"], cwd=BASE, check=False)
+            r = subprocess.run(["git", "commit", "-m", etiqueta], cwd=BASE,
+                               capture_output=True)
+            if r.returncode == 0:
+                subprocess.run(["git", "pull", "--rebase", "origin", "main"],
+                               cwd=BASE, check=False)
+                subprocess.run(["git", "push"], cwd=BASE, check=False)
+                log(f"Publicación parcial hecha: {etiqueta}")
+        except Exception as e:
+            log(f"No se pudo publicar parcial ({e}); se publicará al final")
+
     try:
         if args.modo == "test":
             for nombre, bb in celdas_a_escanear:
@@ -945,6 +1007,10 @@ def main():
                 if len(escaneadas) % 200 == 0:
                     log(f"zona: {len(escaneadas)}/{len(indices_zona)} celdas | "
                         f"{hallados_run} sin nombre")
+                if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
+                    aplicar_pendientes()
+                    publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
+                    ultima_pub = time.time()
         else:
             while time.time() < limite:
                 if cursor >= total_celdas:
@@ -1018,6 +1084,10 @@ def main():
                 if len(escaneadas) % 200 == 0:
                     log(f"{len(escaneadas)} celdas | {contador['req']} peticiones | "
                         f"{hallados_run} sin nombre | cursor {cursor}/{total_celdas}")
+                if pub_cada and time.time() - ultima_pub >= pub_cada * 60 and escaneadas:
+                    aplicar_pendientes()
+                    publicar_git(f"Publicación parcial {datetime.now(timezone.utc).strftime('%H:%M UTC')}")
+                    ultima_pub = time.time()
     except AuthError as e:
         log(f"El servidor dejó de aceptar peticiones: {e}")
     except KeyboardInterrupt:
@@ -1025,51 +1095,18 @@ def main():
     except Exception as e:
         log(f"Error inesperado (se guarda el avance): {e}")
 
-    # --- actualizar almacén: quitar lo viejo de las celdas re-escaneadas
-    celdas_re = {c for c, _b, _h in escaneadas}
-    es_test = args.modo == "test"
-    if celdas_re:
-        for est in list(almacen.keys()):
-            seg_map = almacen[est]
-            for k in [k for k, v in seg_map.items()
-                      if v.get("celda") in celdas_re
-                      or (es_test and str(v.get("celda", "")).startswith("test"))]:
-                del seg_map[k]
-            if not seg_map:
-                del almacen[est]
-
-    for celda_id, _bb, hallazgos in escaneadas:
-        for h in hallazgos:
-            est = estados_mx.estado_de(h["lon"], h["lat"])
-            if solo_estados and est not in solo_estados:
-                continue
-            reg = dict(h)
-            reg["celda"] = celda_id
-            almacen.setdefault(est, {})[str(h["id"])] = reg
-
-    celdas_hechas = len([1 for v in celdas_info.values()])
-    progreso = {
-        "ciclo": ciclo,
-        "celdas_escaneadas": celdas_hechas,
-        "celdas_total": total_celdas,
-        "porcentaje": round(100.0 * min(celdas_hechas, total_celdas) / total_celdas, 1),
-        "modo": args.modo,
-    }
-    resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
-
-    estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
-                   "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
-    save_json(STATE_PATH, estado, compact=True)
+    # --- volcado final al almacén y archivos del panel
+    resumen = aplicar_pendientes()
     save_json(LASTRUN_PATH, {
         "ok": True, "fecha": datetime.now(timezone.utc).isoformat(),
-        "modo": args.modo, "celdas": len(escaneadas),
+        "modo": args.modo, "celdas": celdas_aplicadas,
         "peticiones": contador["req"], "segmentos_vistos": contador["segs"],
         "sin_nombre_en_corrida": hallados_run, "total_acumulado": resumen["total"],
         "peticiones_inegi": inegi.peticiones if inegi else 0,
         "errores_inegi": inegi.errores if inegi else 0,
         "minutos": round((time.time() - inicio) / 60, 1),
     })
-    log(f"Listo: {len(escaneadas)} celdas, {contador['req']} peticiones, "
+    log(f"Listo: {celdas_aplicadas} celdas, {contador['req']} peticiones, "
         f"{hallados_run} segmentos sin nombre en esta corrida, "
         f"{resumen['total']} acumulados en total.")
 
