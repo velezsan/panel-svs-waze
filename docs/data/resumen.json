@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-21T14:59:38+00:00",
+ "actualizado": "2026-07-21T15:17:44+00:00",
  "env": "row",
- "total": 32804,
+ "total": 33107,
  "estados": [
   {
    "estado": "Chiapas",
@@ -12,8 +12,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 6700,
-   "ciudades": 162
+   "total": 7003,
+   "ciudades": 164
   },
   {
    "estado": "Oaxaca",
@@ -42,7 +42,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 27335,
+  "celdas_escaneadas": 27340,
   "celdas_total": 161650,
   "porcentaje": 16.9,
   "modo": "completo"
