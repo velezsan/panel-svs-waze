@@ -84,6 +84,7 @@
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
     <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
+    <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option><option value="7">Últimos 7 días</option><option value="sinfecha">Sin fecha</option></select>
     <input type="search" id="buscar" placeholder="Buscar por ciudad o nombre sugerido…" style="display:none">
   </div>
   <p class="hint" id="pista">Elige un estado en la lista (o en la tabla) para ver sus segmentos sin nombre y abrirlos directo en el editor.</p>
@@ -144,7 +145,7 @@
 
   function tablaEstados(){
     $('btn-volver').style.display='none';
-    ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='none');
+    ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='none');
     $('sel-estado').value='';
     $('pager').style.display='none';
     $('pista').style.display='block';
@@ -181,18 +182,26 @@
     const sc=$('sel-ciudad'), st=$('sel-tipo');
     sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
     st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
-    ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='inline-block');
+    ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='inline-block');
+    $('sel-fecha').value='';
     $('buscar').value='';
     filtrar();
   }
 
   function filtrar(){
     if(!datosEstado)return;
-    const c=$('sel-ciudad').value, t=$('sel-tipo').value, q=$('buscar').value.trim().toLowerCase();
+    const c=$('sel-ciudad').value, t=$('sel-tipo').value, f=$('sel-fecha').value, q=$('buscar').value.trim().toLowerCase();
     lista=Object.values(datosEstado.segmentos||{}).filter(r=>{
       const ciudad=r.ciudad||'(sin ciudad)';
       if(c&&ciudad!==c)return false;
       if(t&&String(r.rt)!==t)return false;
+      if(f){
+        const ms=r.visto?new Date(r.visto+'T12:00:00Z').getTime():null;
+        if(f==='sinfecha'){ if(ms)return false; }
+        else if(!ms)return false;
+        else if(f==='nuevos'&&Date.now()-ms>=48*3600*1000)return false;
+        else if(f==='7'&&Date.now()-ms>=7*24*3600*1000)return false;
+      }
       if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)))return false;
       return true;
     });
@@ -256,7 +265,7 @@
   }
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('btn-volver').addEventListener('click',()=>tablaEstados());
-  ['sel-ciudad','sel-tipo'].forEach(i=>$(i).addEventListener('change',filtrar));
+  ['sel-ciudad','sel-tipo','sel-fecha'].forEach(i=>$(i).addEventListener('change',filtrar));
   $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
 
   fetch('data/resumen.json',{cache:'no-store'})
