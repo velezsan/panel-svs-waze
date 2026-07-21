@@ -1,19 +1,19 @@
 {
- "actualizado": "2026-07-21T17:20:42+00:00",
+ "actualizado": "2026-07-21T18:00:52+00:00",
  "env": "row",
- "total": 33793,
+ "total": 34113,
  "estados": [
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 6089,
-   "ciudades": 279
+   "total": 6095,
+   "ciudades": 281
   },
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 7316,
-   "ciudades": 173
+   "total": 7580,
+   "ciudades": 177
   },
   {
    "estado": "Oaxaca",
@@ -30,8 +30,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 260,
-   "ciudades": 11
+   "total": 310,
+   "ciudades": 16
   },
   {
    "estado": "Veracruz",
@@ -42,9 +42,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 27439,
+  "celdas_escaneadas": 27865,
   "celdas_total": 161650,
-  "porcentaje": 17.0,
+  "porcentaje": 17.2,
   "modo": "completo"
  },
  "aviso": "",
