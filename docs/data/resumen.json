@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-21T13:32:11+00:00",
+ "actualizado": "2026-07-21T14:12:25+00:00",
  "env": "row",
- "total": 31572,
+ "total": 32452,
  "estados": [
   {
    "estado": "Chiapas",
@@ -12,14 +12,14 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 5980,
-   "ciudades": 151
+   "total": 6645,
+   "ciudades": 158
   },
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 16191,
-   "ciudades": 647
+   "total": 16406,
+   "ciudades": 657
   },
   {
    "estado": "Sonora",
@@ -42,7 +42,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 26809,
+  "celdas_escaneadas": 26840,
   "celdas_total": 161650,
   "porcentaje": 16.6,
   "modo": "completo"
