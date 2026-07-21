@@ -752,6 +752,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--modo", choices=["test", "completo"], default="completo")
     ap.add_argument("--minutos", type=float, default=240)
+    ap.add_argument("--zona", default="",
+                    help='Re-escaneo prioritario: nombre de estado, "lat,lon" o "lon1,lat1,lon2,lat2"')
     args = ap.parse_args()
 
     cfg = load_json(CONFIG_PATH, {})
@@ -843,6 +845,48 @@ def main():
         m = 0.002  # margen para que las sugerencias vean calles vecinas
         return [x1 - m, y1 - m, min(x1 + celda, lon2) + m, min(y1 + celda, lat2) + m]
 
+    # --- re-escaneo prioritario de una zona (estado, punto o bbox)
+    indices_zona = []
+    if args.zona.strip() and args.modo == "completo":
+        z = args.zona.strip()
+        estados_nombres = {n.lower(): n for n, _r in estados_mx.features}
+        zona_bbox = None
+        zona_estado = None
+        partes = [p.strip() for p in z.split(",")]
+        if z.lower() in estados_nombres:
+            zona_estado = estados_nombres[z.lower()]
+        elif len(partes) == 4:
+            try:
+                a, b, c, d = map(float, partes)
+                zona_bbox = [min(a, c), min(b, d), max(a, c), max(b, d)]
+            except ValueError:
+                pass
+        elif len(partes) == 2:
+            try:
+                la, lo = map(float, partes)  # formato lat,lon (como el WME)
+                zona_bbox = [lo - 0.15, la - 0.15, lo + 0.15, la + 0.15]
+            except ValueError:
+                pass
+        for idx in range(total_celdas):
+            f, c = divmod(idx, cols)
+            x1 = lon1 + c * celda
+            y1 = lat1 + f * celda
+            x2, y2 = min(x1 + celda, lon2), min(y1 + celda, lat2)
+            if zona_bbox is not None:
+                if x1 <= zona_bbox[2] and x2 >= zona_bbox[0] and y1 <= zona_bbox[3] and y2 >= zona_bbox[1]:
+                    indices_zona.append(idx)
+            elif zona_estado is not None:
+                mxp, myp = (x1 + x2) / 2, (y1 + y2) / 2
+                pts9 = [(mxp, myp), (x1, y1), (x2, y1), (x1, y2), (x2, y2),
+                        (mxp, y1), (mxp, y2), (x1, myp), (x2, myp)]
+                if any(estados_mx.estado_de(px, py) == zona_estado for px, py in pts9):
+                    indices_zona.append(idx)
+        if indices_zona:
+            log(f"RE-ESCANEO PRIORITARIO de '{z}': {len(indices_zona)} celdas en cola")
+        else:
+            log(f"Zona '{z}' no reconocida (usa nombre de estado, lat,lon o bbox); "
+                "se hará el barrido normal")
+
     escaneadas = []
     hallados_run = 0
     fallos_seguidos = 0
@@ -856,6 +900,51 @@ def main():
                 h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 escaneadas.append((nombre, bb, h))
                 hallados_run += len(h)
+        elif indices_zona:
+            for idx in indices_zona:
+                if time.time() >= limite:
+                    log("Se acabó el tiempo; el resto de la zona queda para otra corrida")
+                    break
+                bb = bbox_de(idx)
+                x1c, y1c, x2c, y2c = bb
+                mxc, myc = (x1c + x2c) / 2, (y1c + y2c) / 2
+                usa_n = None
+                if distancia_a_frontera(mxc, myc) < franja_umbral:
+                    try:
+                        if sesion_usa is None:
+                            sesion_usa = nueva_sesion("usa")
+                        d_usa = pedir_celda(sesion_usa, "usa", bb, pausa, tipos)
+                        contador["req"] += 1
+                        usa_n = len(_objetos(d_usa, "segments"))
+                    except Exception:
+                        usa_n = None
+                segs_antes = contador["segs"]
+                try:
+                    h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
+                                      min_metros=min_metros)
+                    fallos_seguidos = 0
+                except AuthError:
+                    raise
+                except Exception as e:
+                    fallos_seguidos += 1
+                    log(f"Celda {idx} falló ({e})")
+                    if fallos_seguidos >= 8:
+                        log("Demasiados fallos seguidos; se detiene y se guarda el avance")
+                        break
+                    time.sleep(3)
+                    continue
+                segs_en_celda = contador["segs"] - segs_antes
+                if usa_n is not None and usa_n > segs_en_celda:
+                    h = []
+                    segs_en_celda = 0
+                else:
+                    h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
+                escaneadas.append((str(idx), bb, h))
+                hallados_run += len(h)
+                if len(escaneadas) % 200 == 0:
+                    log(f"zona: {len(escaneadas)}/{len(indices_zona)} celdas | "
+                        f"{hallados_run} sin nombre")
         else:
             while time.time() < limite:
                 if cursor >= total_celdas:
