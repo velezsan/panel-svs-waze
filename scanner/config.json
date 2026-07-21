@@ -9,5 +9,6 @@
   "longitud_minima_metros": 30,
   "sugerencias_inegi": true,
   "pausa_inegi_segundos": 0.25,
+  "publicar_cada_minutos": 40,
   "reescanear_vacias_cada": 5
 }
