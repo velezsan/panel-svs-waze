@@ -52,6 +52,8 @@
   .chip{display:inline-block;background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .sug{color:var(--accent2)}
   .sug.na{color:var(--muted);font-style:italic}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  td.fecha{color:var(--muted);font-size:.85rem;white-space:nowrap}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
@@ -202,9 +204,9 @@
   function pintarTabla(){
     const total=lista.length;
     const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th></th></tr></thead><tbody>`;
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th>Detectado</th><th></th></tr></thead><tbody>`;
     if(!total){
-      html+='<tr><td colspan="4" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+      html+='<tr><td colspan="5" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
     lista.slice(ini,fin).forEach(r=>{
       let sug;
@@ -216,9 +218,16 @@
         sug='<span class="sug na">sin pista</span>';
       }
       const vis=visitados.has(String(r.id));
+      let det='—', esNuevo=false;
+      if(r.visto){
+        const d=new Date(r.visto+'T12:00:00Z');
+        det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        esNuevo=(Date.now()-d.getTime())<48*3600*1000;
+      }
       html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td>${sug}</td>
+        <td class="fecha">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
         <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
     html+='</tbody></table>';
