@@ -901,6 +901,12 @@ def main():
         """Vuelca lo escaneado al almacén y guarda los archivos del panel."""
         nonlocal escaneadas, celdas_aplicadas
         celdas_aplicadas += len(escaneadas)
+        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        # fecha en que se detectó cada segmento por primera vez (se conserva)
+        vistos_prev = {}
+        for _e, _m in almacen.items():
+            for _k, _v in _m.items():
+                vistos_prev[_k] = _v.get("visto", "")
         celdas_re = {c for c, _b, _h in escaneadas}
         es_test = args.modo == "test"
         if celdas_re:
@@ -919,7 +925,9 @@ def main():
                     continue
                 reg = dict(h)
                 reg["celda"] = celda_id
-                almacen.setdefault(est, {})[str(h["id"])] = reg
+                sid = str(h["id"])
+                reg["visto"] = vistos_prev[sid] if sid in vistos_prev else hoy
+                almacen.setdefault(est, {})[sid] = reg
         escaneadas = []
         celdas_hechas = len([1 for v in celdas_info.values()])
         progreso = {
