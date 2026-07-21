@@ -79,7 +79,6 @@
 
   <div class="controls" id="controles" style="display:none">
     <button class="volver" id="btn-volver" style="display:none">← Todos los estados</button>
-    <button class="volver" id="btn-recrawl" style="display:none" title="Pide que el escáner le dé prioridad a este estado en la próxima corrida">🔄 Pedir re-escaneo</button>
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
     <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
@@ -143,7 +142,6 @@
 
   function tablaEstados(){
     $('btn-volver').style.display='none';
-    $('btn-recrawl').style.display='none';
     ['sel-ciudad','sel-tipo','buscar'].forEach(i=>$(i).style.display='none');
     $('sel-estado').value='';
     $('pager').style.display='none';
@@ -174,7 +172,6 @@
       return;
     }
     $('btn-volver').style.display='inline';
-    $('btn-recrawl').style.display='inline';
     $('pista').style.display='none';
     const regs=Object.values(datosEstado.segmentos||{});
     const ciudades=[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
@@ -248,13 +245,6 @@
     t.textContent=msg;t.className='ver';
     clearTimeout(window._tt);window._tt=setTimeout(()=>{t.className='';},7000);
   }
-  $('btn-recrawl').addEventListener('click',async()=>{
-    const est=datosEstado?datosEstado.estado:'';
-    if(!est)return;
-    try{await navigator.clipboard.writeText(est);}catch(e){}
-    mostrarToast(`"${est}" copiado ✓ — en GitHub: Run workflow → pégalo en el campo "zona" → Run`);
-    window.open('https://github.com/velezsan/panel-svs-waze/actions/workflows/escaneo.yml','_blank');
-  });
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('btn-volver').addEventListener('click',()=>tablaEstados());
   ['sel-ciudad','sel-tipo'].forEach(i=>$(i).addEventListener('change',filtrar));
