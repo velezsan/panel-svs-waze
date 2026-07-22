@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-07-22T04:31:37+00:00",
+ "actualizado": "2026-07-22T05:11:53+00:00",
  "env": "row",
- "total": 42712,
+ "total": 43152,
  "estados": [
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 57,
-   "ciudades": 4
+   "total": 103,
+   "ciudades": 9
   },
   {
    "estado": "Chiapas",
@@ -54,8 +54,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 2148,
-   "ciudades": 55
+   "total": 2542,
+   "ciudades": 59
   },
   {
    "estado": "Veracruz",
@@ -66,9 +66,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 31138,
+  "celdas_escaneadas": 31542,
   "celdas_total": 161650,
-  "porcentaje": 19.3,
+  "porcentaje": 19.5,
   "modo": "completo"
  },
  "aviso": "",
