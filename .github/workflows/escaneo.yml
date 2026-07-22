@@ -30,6 +30,8 @@ jobs:
     timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historial completo: evita conflictos falsos al hacer rebase
 
       - uses: actions/setup-python@v5
         with:
@@ -49,11 +51,17 @@ jobs:
         run: |
           git config user.name "escaner-bot"
           git config user.email "actions@users.noreply.github.com"
+          git rebase --abort 2>/dev/null || true
           git add docs/data state
           if git diff --cached --quiet; then
             echo "Sin cambios que guardar"
           else
             git commit -m "Escaneo automático $(date -u +'%Y-%m-%d %H:%M UTC')"
-            git pull --rebase origin ${GITHUB_REF_NAME}
-            git push
+            ok=0
+            for i in 1 2 3; do
+              if git pull --rebase -X theirs origin ${GITHUB_REF_NAME} && git push; then ok=1; break; fi
+              git rebase --abort 2>/dev/null || true
+              sleep 10
+            done
+            [ "$ok" = "1" ]
           fi
