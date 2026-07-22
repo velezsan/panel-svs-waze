@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-22T17:58:23+00:00",
+ "actualizado": "2026-07-22T18:39:21+00:00",
  "env": "row",
- "total": 53371,
+ "total": 53346,
  "estados": [
   {
    "estado": "Campeche",
@@ -18,8 +18,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 14317,
-   "ciudades": 350
+   "total": 14294,
+   "ciudades": 348
   },
   {
    "estado": "Michoacán",
@@ -30,7 +30,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 5,
+   "total": 3,
    "ciudades": 2
   },
   {
@@ -72,7 +72,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 34748,
+  "celdas_escaneadas": 34742,
   "celdas_total": 161650,
   "porcentaje": 21.5,
   "modo": "completo"
