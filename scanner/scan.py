@@ -943,22 +943,31 @@ def main():
         save_json(STATE_PATH, estado, compact=True)
         return resumen
 
+    def _git(*args_git):
+        return subprocess.run(["git", *args_git], cwd=BASE, capture_output=True, text=True)
+
     def publicar_git(etiqueta):
         """Commit y push intermedios (solo dentro de GitHub Actions)."""
         if not os.environ.get("GITHUB_ACTIONS"):
             return
         try:
-            subprocess.run(["git", "config", "user.name", "escaner-bot"], cwd=BASE, check=False)
-            subprocess.run(["git", "config", "user.email",
-                            "actions@users.noreply.github.com"], cwd=BASE, check=False)
-            subprocess.run(["git", "add", "docs/data", "state"], cwd=BASE, check=False)
-            r = subprocess.run(["git", "commit", "-m", etiqueta], cwd=BASE,
-                               capture_output=True)
+            _git("rebase", "--abort")  # limpia cualquier rebase atorado de un intento previo
+            _git("config", "user.name", "escaner-bot")
+            _git("config", "user.email", "actions@users.noreply.github.com")
+            _git("add", "docs/data", "state")
+            r = _git("commit", "-m", etiqueta)
             if r.returncode == 0:
-                subprocess.run(["git", "pull", "--rebase", "origin", "main"],
-                               cwd=BASE, check=False)
-                subprocess.run(["git", "push"], cwd=BASE, check=False)
-                log(f"Publicación parcial hecha: {etiqueta}")
+                for _ in range(3):
+                    p = _git("pull", "--rebase", "-X", "theirs", "origin", "main")
+                    if p.returncode != 0:
+                        _git("rebase", "--abort")
+                        time.sleep(5)
+                        continue
+                    if _git("push", "origin", "main").returncode == 0:
+                        log(f"Publicación parcial hecha: {etiqueta}")
+                        return
+                    time.sleep(5)
+                log("No se pudo publicar parcial; se reintentará en la siguiente")
         except Exception as e:
             log(f"No se pudo publicar parcial ({e}); se publicará al final")
 
