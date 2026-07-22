@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-07-22T01:37:52+00:00",
+ "actualizado": "2026-07-22T02:11:15+00:00",
  "env": "row",
- "total": 41449,
+ "total": 41950,
  "estados": [
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 20,
-   "ciudades": 3
+   "total": 57,
+   "ciudades": 4
   },
   {
    "estado": "Chiapas",
@@ -18,13 +18,13 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 8850,
-   "ciudades": 222
+   "total": 8865,
+   "ciudades": 224
   },
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 88,
+   "total": 125,
    "ciudades": 3
   },
   {
@@ -54,8 +54,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 1736,
-   "ciudades": 52
+   "total": 2148,
+   "ciudades": 55
   },
   {
    "estado": "Veracruz",
@@ -66,9 +66,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 30615,
+  "celdas_escaneadas": 31023,
   "celdas_total": 161650,
-  "porcentaje": 18.9,
+  "porcentaje": 19.2,
   "modo": "completo"
  },
  "aviso": "",
