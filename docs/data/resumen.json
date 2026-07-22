@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-22T22:11:45+00:00",
+ "actualizado": "2026-07-22T22:56:25+00:00",
  "env": "row",
- "total": 56315,
+ "total": 57161,
  "estados": [
   {
    "estado": "Campeche",
@@ -18,8 +18,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 14974,
-   "ciudades": 362
+   "total": 15245,
+   "ciudades": 370
   },
   {
    "estado": "Michoacán",
@@ -30,8 +30,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 170,
-   "ciudades": 18
+   "total": 529,
+   "ciudades": 44
   },
   {
    "estado": "México",
@@ -48,8 +48,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 1657,
-   "ciudades": 152
+   "total": 1873,
+   "ciudades": 171
   },
   {
    "estado": "Quintana Roo",
@@ -78,7 +78,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 35808,
+  "celdas_escaneadas": 35844,
   "celdas_total": 161650,
   "porcentaje": 22.2,
   "modo": "completo"
