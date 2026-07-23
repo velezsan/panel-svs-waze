@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-23T06:00:40+00:00",
+ "actualizado": "2026-07-23T06:02:06+00:00",
  "env": "row",
- "total": 62337,
+ "total": 62352,
  "estados": [
   {
    "estado": "Campeche",
@@ -78,13 +78,13 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 6106,
+   "total": 6121,
    "ciudades": 357
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 37446,
+  "celdas_escaneadas": 37449,
   "celdas_total": 161650,
   "porcentaje": 23.2,
   "modo": "completo"
