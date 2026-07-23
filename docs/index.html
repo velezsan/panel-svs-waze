@@ -58,6 +58,9 @@
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
   .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
   .volver{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.92rem;padding:0;margin-right:6px}
   footer{max-width:1100px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:.82rem}
   .cargando{color:var(--muted);padding:30px;text-align:center}
@@ -91,9 +94,13 @@
 
   <div id="contenido"><div class="cargando">Cargando datos…</div></div>
   <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
     <button id="pg-prev">← Anterior</button>
     <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
     <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
   </div>
 </main>
 <footer>
@@ -246,9 +253,14 @@
     $('contenido').innerHTML=html;
     const pgs=Math.max(1,Math.ceil(total/porPagina));
     $('pager').style.display=total>porPagina?'flex':'none';
-    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág. ${pagina+1}/${pgs}`;
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
+    $('pg-num').value=pagina+1;
+    $('pg-num').max=pgs;
+    $('pg-total').textContent=`/ ${pgs}`;
+    $('pg-first').disabled=pagina===0;
     $('pg-prev').disabled=pagina===0;
     $('pg-next').disabled=pagina>=pgs-1;
+    $('pg-last').disabled=pagina>=pgs-1;
   }
 
   $('contenido').addEventListener('click',e=>{
@@ -260,6 +272,17 @@
 
   $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
   $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintarTabla();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintarTabla();window.scrollTo(0,0);});
+  function irAPagina(){
+    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
+    let v=parseInt($('pg-num').value,10);
+    if(isNaN(v))v=pagina+1;
+    pagina=Math.min(Math.max(v,1),pgs)-1;
+    pintarTabla();window.scrollTo(0,0);
+  }
+  $('pg-num').addEventListener('change',irAPagina);
+  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
   function mostrarToast(msg){
     let t=document.getElementById('toast');
     if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
