@@ -395,7 +395,7 @@ class EstadosMX:
         return inside
 
     def estado_de(self, lon, lat):
-        key = (round(lon, 2), round(lat, 2))
+        key = (round(lon, 3), round(lat, 3))
         if key in self._cache:
             return self._cache[key]
         found = None
@@ -546,11 +546,40 @@ def largo_metros(seg):
     return total if total > 0 else None
 
 
+ALIAS_ESTADOS = {
+    "veracruz de ignacio de la llave": "Veracruz",
+    "coahuila de zaragoza": "Coahuila",
+    "michoacan de ocampo": "Michoacán",
+    "michoacán de ocampo": "Michoacán",
+    "queretaro de arteaga": "Querétaro",
+    "querétaro de arteaga": "Querétaro",
+    "estado de mexico": "México",
+    "estado de méxico": "México",
+    "distrito federal": "Ciudad de México",
+    "mexico city": "Ciudad de México",
+}
+
+
+def normalizar_estado(nombre, estados_mx):
+    """Convierte el nombre de estado que reporta Waze al nombre corto del panel."""
+    if not nombre:
+        return ""
+    n = nombre.strip()
+    low = n.lower()
+    if low in ALIAS_ESTADOS:
+        return ALIAS_ESTADOS[low]
+    for k, _r in estados_mx.features:
+        if k.lower() == low:
+            return k
+    return n
+
+
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
     streets = {s.get("id"): s for s in _objetos(data, "streets")}
     cities = {c.get("id"): c for c in _objetos(data, "cities")}
+    states = {s.get("id"): s for s in _objetos(data, "states")}
 
     # nombre por segmento (para sugerencias) y conectividad por nodos
     nombre_seg = {}
@@ -605,11 +634,15 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
         sugerido = max(sugerencias, key=sugerencias.get) if sugerencias else ""
 
         ciudad = ""
+        estado_wz = ""
         st = streets.get(seg.get("primaryStreetID"))
         if st and st.get("cityID") in cities:
             c = cities[st.get("cityID")]
             if not c.get("isEmpty"):
                 ciudad = (c.get("name") or "").strip()
+            edo = states.get(c.get("stateID"))
+            if edo:
+                estado_wz = (edo.get("name") or "").strip()
 
         geom = seg.get("geometry") or seg.get("geoJSONGeometry") or {}
         hallazgos.append({
@@ -618,6 +651,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "lon": round(lon, 6),
             "rt": rt,
             "ciudad": ciudad,
+            "edo": estado_wz,   # estado según Waze (el dato bueno)
             "sug": "",          # nombre según INEGI (se llena después)
             "conf": 0,           # % de confianza INEGI
             "vec": sugerido,     # respaldo: nombre de la vialidad vecina
@@ -920,10 +954,13 @@ def main():
                     del almacen[est]
         for celda_id, _bb, hallazgos in escaneadas:
             for h in hallazgos:
-                est = estados_mx.estado_de(h["lon"], h["lat"])
+                # estado según Waze (autoridad); el mapa propio solo de respaldo
+                est = (normalizar_estado(h.get("edo", ""), estados_mx)
+                       or estados_mx.estado_de(h["lon"], h["lat"]))
                 if solo_estados and est not in solo_estados:
                     continue
                 reg = dict(h)
+                reg.pop("edo", None)
                 reg["celda"] = celda_id
                 sid = str(h["id"])
                 reg["visto"] = vistos_prev[sid] if sid in vistos_prev else hoy
