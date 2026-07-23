@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-23T15:04:44+00:00",
+ "actualizado": "2026-07-23T15:46:51+00:00",
  "env": "row",
- "total": 64299,
+ "total": 65718,
  "estados": [
   {
    "estado": "Campeche",
@@ -36,8 +36,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 3883,
-   "ciudades": 144
+   "total": 5302,
+   "ciudades": 155
   },
   {
    "estado": "México",
@@ -84,7 +84,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 38456,
+  "celdas_escaneadas": 38462,
   "celdas_total": 161650,
   "porcentaje": 23.8,
   "modo": "completo"
