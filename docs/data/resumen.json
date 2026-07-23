@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-07-23T20:43:49+00:00",
+ "actualizado": "2026-07-23T21:24:13+00:00",
  "env": "row",
- "total": 65262,
+ "total": 65873,
  "estados": [
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 746,
-   "ciudades": 46
+   "total": 742,
+   "ciudades": 45
   },
   {
    "estado": "Chiapas",
@@ -18,8 +18,8 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 14,
-   "ciudades": 5
+   "total": 3,
+   "ciudades": 2
   },
   {
    "estado": "Guerrero",
@@ -30,14 +30,14 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 1081,
-   "ciudades": 40
+   "total": 992,
+   "ciudades": 33
   },
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 4856,
-   "ciudades": 154
+   "total": 5119,
+   "ciudades": 161
   },
   {
    "estado": "México",
@@ -54,14 +54,14 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 2826,
-   "ciudades": 273
+   "total": 3174,
+   "ciudades": 299
   },
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 688,
-   "ciudades": 22
+   "total": 680,
+   "ciudades": 20
   },
   {
    "estado": "Sonora",
@@ -78,15 +78,15 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 6970,
-   "ciudades": 412
+   "total": 6458,
+   "ciudades": 394
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 38462,
+  "celdas_escaneadas": 38485,
   "celdas_total": 161650,
-  "porcentaje": 24.1,
+  "porcentaje": 23.8,
   "modo": "completo"
  },
  "aviso": "",
