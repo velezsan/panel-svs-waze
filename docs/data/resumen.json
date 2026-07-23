@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-23T13:02:39+00:00",
+ "actualizado": "2026-07-23T13:43:13+00:00",
  "env": "row",
- "total": 65459,
+ "total": 63653,
  "estados": [
   {
    "estado": "Campeche",
@@ -36,8 +36,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 4950,
-   "ciudades": 155
+   "total": 3860,
+   "ciudades": 142
   },
   {
    "estado": "México",
@@ -54,8 +54,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 2889,
-   "ciudades": 283
+   "total": 2622,
+   "ciudades": 250
   },
   {
    "estado": "Quintana Roo",
@@ -84,7 +84,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 38471,
+  "celdas_escaneadas": 37938,
   "celdas_total": 161650,
   "porcentaje": 23.8,
   "modo": "completo"
