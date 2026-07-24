@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-23T23:33:31+00:00",
+ "actualizado": "2026-07-24T00:14:27+00:00",
  "env": "row",
- "total": 68275,
+ "total": 66413,
  "estados": [
   {
    "estado": "Campeche",
@@ -84,9 +84,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 38995,
+  "celdas_escaneadas": 38597,
   "celdas_total": 161650,
-  "porcentaje": 24.1,
+  "porcentaje": 23.9,
   "modo": "completo"
  },
  "aviso": "",
