@@ -144,6 +144,11 @@
     }
     if(resumen.aviso){ const a=$('aviso'); a.style.display='block'; a.textContent='⚠️ '+resumen.aviso; }
     const sel=$('sel-estado');
+    if(resumen.estados.length){
+      const ot=document.createElement('option');
+      ot.value='__todos';ot.textContent=`Todo México (${fmt(resumen.total)})`;
+      sel.appendChild(ot);
+    }
     resumen.estados.forEach(e=>{
       const o=document.createElement('option');
       o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
@@ -176,9 +181,23 @@
   async function cargarEstado(slug){
     if(!slug){ tablaEstados(); return; }
     $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
+    const esNacional=slug==='__todos';
     try{
-      const r=await fetch('data/estados/'+slug+'.json',{cache:'no-store'});
-      datosEstado=await r.json();
+      if(esNacional){
+        const listas=await Promise.all(resumen.estados.map(async e=>{
+          try{
+            const r=await fetch('data/estados/'+e.slug+'.json',{cache:'no-store'});
+            const d=await r.json();
+            return Object.values(d.segmentos||{}).map(s=>({...s,est:e.estado}));
+          }catch(_){return [];}
+        }));
+        const segs={};
+        listas.flat().forEach(s=>{segs[s.id]=s;});
+        datosEstado={segmentos:segs};
+      }else{
+        const r=await fetch('data/estados/'+slug+'.json',{cache:'no-store'});
+        datosEstado=await r.json();
+      }
     }catch(e){
       $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
       return;
@@ -186,7 +205,7 @@
     $('btn-volver').style.display='inline';
     $('pista').style.display='none';
     const regs=Object.values(datosEstado.segmentos||{});
-    const ciudades=[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
+    const ciudades=esNacional?[]:[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
     const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
     const sc=$('sel-ciudad'), st=$('sel-tipo');
     sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
@@ -197,6 +216,7 @@
       +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
       +'<option value="sinfecha">Sin fecha</option>';
     ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='inline-block');
+    if(esNacional){$('sel-ciudad').style.display='none';$('sel-ciudad').value='';}
     $('buscar').value='';
     filtrar();
   }
@@ -214,7 +234,7 @@
         else if(f==='nuevos'){ if(Date.now()-fechaDe(r.visto).getTime()>=48*3600*1000)return false; }
         else if(r.visto.slice(0,10)!==f)return false;
       }
-      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)))return false;
+      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)||(r.est||'').toLowerCase().includes(q)))return false;
       return true;
     });
     if(f&&f!=='sinfecha'){
@@ -252,7 +272,7 @@
         esNuevo=(Date.now()-d.getTime())<48*3600*1000;
       }
       html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
-        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
+        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
         <td>${sug}</td>
         <td class="fecha">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
         <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
