@@ -120,6 +120,8 @@
   function guardarVisitados(){try{localStorage.setItem('svs_visitados',JSON.stringify([...visitados]));}catch(e){}}
 
   const fmt=n=>n.toLocaleString('es-MX');
+  // "visto" puede ser solo fecha (2026-07-23) o fecha con hora (2026-07-23T05:32, UTC)
+  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
 
   function permalink(r){
     const env=(resumen&&resumen.env)||'usa';
@@ -189,7 +191,7 @@
     const sc=$('sel-ciudad'), st=$('sel-tipo');
     sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
     st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
-    const fechas=[...new Set(regs.map(r=>r.visto).filter(Boolean))].sort().reverse();
+    const fechas=[...new Set(regs.map(r=>(r.visto||'').slice(0,10)).filter(Boolean))].sort().reverse();
     const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
     $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option>'
       +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
@@ -209,13 +211,18 @@
       if(f){
         if(f==='sinfecha'){ if(r.visto)return false; }
         else if(!r.visto)return false;
-        else if(f==='nuevos'){ if(Date.now()-new Date(r.visto+'T12:00:00Z').getTime()>=48*3600*1000)return false; }
-        else if(r.visto!==f)return false;
+        else if(f==='nuevos'){ if(Date.now()-fechaDe(r.visto).getTime()>=48*3600*1000)return false; }
+        else if(r.visto.slice(0,10)!==f)return false;
       }
       if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)))return false;
       return true;
     });
-    lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    if(f&&f!=='sinfecha'){
+      // con filtro de fecha: los detectados más recientemente van hasta arriba
+      lista.sort((a,b)=>(b.visto||'').localeCompare(a.visto||'')||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    }else{
+      lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    }
     pagina=0;
     pintarTabla();
   }
@@ -239,8 +246,9 @@
       const vis=visitados.has(String(r.id));
       let det='—', esNuevo=false;
       if(r.visto){
-        const d=new Date(r.visto+'T12:00:00Z');
+        const d=fechaDe(r.visto);
         det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        if(r.visto.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
         esNuevo=(Date.now()-d.getTime())<48*3600*1000;
       }
       html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
