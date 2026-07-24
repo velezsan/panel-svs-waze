@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-24T20:40:45+00:00",
+ "actualizado": "2026-07-24T21:21:41+00:00",
  "env": "row",
- "total": 82507,
+ "total": 82989,
  "estados": [
   {
    "estado": "Campeche",
@@ -24,8 +24,8 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 841,
-   "ciudades": 35
+   "total": 910,
+   "ciudades": 41
   },
   {
    "estado": "Guerrero",
@@ -36,14 +36,14 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 28,
-   "ciudades": 5
+   "total": 40,
+   "ciudades": 7
   },
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 1983,
-   "ciudades": 91
+   "total": 2008,
+   "ciudades": 96
   },
   {
    "estado": "Morelos",
@@ -66,8 +66,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7369,
-   "ciudades": 500
+   "total": 7608,
+   "ciudades": 510
   },
   {
    "estado": "Quintana Roo",
@@ -90,21 +90,21 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 1000,
-   "ciudades": 57
+   "total": 1022,
+   "ciudades": 61
   },
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 8923,
-   "ciudades": 533
+   "total": 9038,
+   "ciudades": 541
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 42178,
+  "celdas_escaneadas": 42651,
   "celdas_total": 161650,
-  "porcentaje": 26.1,
+  "porcentaje": 26.4,
   "modo": "completo"
  },
  "aviso": "",
