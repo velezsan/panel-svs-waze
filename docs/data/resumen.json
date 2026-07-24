@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-24T02:25:16+00:00",
+ "actualizado": "2026-07-24T03:03:49+00:00",
  "env": "row",
- "total": 68790,
+ "total": 69202,
  "estados": [
   {
    "estado": "Campeche",
@@ -54,8 +54,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 3426,
-   "ciudades": 316
+   "total": 3838,
+   "ciudades": 348
   },
   {
    "estado": "Quintana Roo",
@@ -84,7 +84,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 39004,
+  "celdas_escaneadas": 39017,
   "celdas_total": 161650,
   "porcentaje": 24.1,
   "modo": "completo"
