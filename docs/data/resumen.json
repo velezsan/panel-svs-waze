@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-24T22:55:33+00:00",
+ "actualizado": "2026-07-24T23:36:26+00:00",
  "env": "row",
- "total": 84123,
+ "total": 85290,
  "estados": [
   {
    "estado": "Campeche",
@@ -54,8 +54,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 4600,
-   "ciudades": 203
+   "total": 4613,
+   "ciudades": 205
   },
   {
    "estado": "Oaxaca",
@@ -66,8 +66,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7608,
-   "ciudades": 510
+   "total": 7743,
+   "ciudades": 516
   },
   {
    "estado": "Quintana Roo",
@@ -90,19 +90,19 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 1022,
-   "ciudades": 61
+   "total": 1744,
+   "ciudades": 105
   },
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 9038,
-   "ciudades": 541
+   "total": 9335,
+   "ciudades": 556
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 42693,
+  "celdas_escaneadas": 42731,
   "celdas_total": 161650,
   "porcentaje": 26.4,
   "modo": "completo"
