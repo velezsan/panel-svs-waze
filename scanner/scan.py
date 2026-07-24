@@ -935,7 +935,7 @@ def main():
         """Vuelca lo escaneado al almacén y guarda los archivos del panel."""
         nonlocal escaneadas, celdas_aplicadas
         celdas_aplicadas += len(escaneadas)
-        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        hoy = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
         # fecha en que se detectó cada segmento por primera vez (se conserva)
         vistos_prev = {}
         for _e, _m in almacen.items():
