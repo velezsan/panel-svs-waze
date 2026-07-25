@@ -964,6 +964,7 @@ def main():
                 reg["celda"] = celda_id
                 sid = str(h["id"])
                 reg["visto"] = vistos_prev[sid] if sid in vistos_prev else hoy
+                reg["rev"] = hoy  # última vez que se escaneó (siempre se actualiza)
                 almacen.setdefault(est, {})[sid] = reg
         escaneadas = []
         celdas_hechas = len([1 for v in celdas_info.values()])
