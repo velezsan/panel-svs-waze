@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-25T07:12:50+00:00",
+ "actualizado": "2026-07-25T07:53:48+00:00",
  "env": "row",
- "total": 90676,
+ "total": 90430,
  "estados": [
   {
    "estado": "Campeche",
@@ -66,8 +66,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 7804,
-   "ciudades": 528
+   "total": 7781,
+   "ciudades": 525
   },
   {
    "estado": "Quintana Roo",
@@ -90,8 +90,8 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2718,
-   "ciudades": 150
+   "total": 2495,
+   "ciudades": 144
   },
   {
    "estado": "Veracruz",
@@ -102,7 +102,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 43770,
+  "celdas_escaneadas": 43761,
   "celdas_total": 161650,
   "porcentaje": 27.1,
   "modo": "completo"
