@@ -210,7 +210,7 @@
     const sc=$('sel-ciudad'), st=$('sel-tipo');
     sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
     st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
-    const fechas=[...new Set(regs.map(r=>(r.visto||'').slice(0,10)).filter(Boolean))].sort().reverse();
+    const fechas=[...new Set(regs.map(r=>(r.rev||r.visto||'').slice(0,10)).filter(Boolean))].sort().reverse();
     const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
     $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option>'
       +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
@@ -229,17 +229,17 @@
       if(c&&ciudad!==c)return false;
       if(t&&String(r.rt)!==t)return false;
       if(f){
-        if(f==='sinfecha'){ if(r.visto)return false; }
-        else if(!r.visto)return false;
-        else if(f==='nuevos'){ if(Date.now()-fechaDe(r.visto).getTime()>=48*3600*1000)return false; }
-        else if(r.visto.slice(0,10)!==f)return false;
+        const marca=r.rev||r.visto;
+        if(f==='sinfecha'){ if(marca)return false; }
+        else if(f==='nuevos'){ if(!r.visto||Date.now()-fechaDe(r.visto).getTime()>=48*3600*1000)return false; }
+        else if(!marca||marca.slice(0,10)!==f)return false;
       }
       if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)||(r.est||'').toLowerCase().includes(q)))return false;
       return true;
     });
     if(f&&f!=='sinfecha'){
       // con filtro de fecha: los detectados más recientemente van hasta arriba
-      lista.sort((a,b)=>(b.visto||'').localeCompare(a.visto||'')||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+      lista.sort((a,b)=>(b.rev||b.visto||'').localeCompare(a.rev||a.visto||'')||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
     }else{
       lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
     }
@@ -250,7 +250,7 @@
   function pintarTabla(){
     const total=lista.length;
     const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th>Detectado</th><th></th></tr></thead><tbody>`;
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th>Revisado</th><th></th></tr></thead><tbody>`;
     if(!total){
       html+='<tr><td colspan="5" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
@@ -265,12 +265,13 @@
       }
       const vis=visitados.has(String(r.id));
       let det='—', esNuevo=false;
-      if(r.visto){
-        const d=fechaDe(r.visto);
+      const marca=r.rev||r.visto;  // columna: último escaneo (o primera detección si no hay)
+      if(marca){
+        const d=fechaDe(marca);
         det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
-        if(r.visto.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
-        esNuevo=(Date.now()-d.getTime())<48*3600*1000;
+        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
       }
+      if(r.visto)esNuevo=(Date.now()-fechaDe(r.visto).getTime())<48*3600*1000;
       html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
         <td>${sug}</td>
