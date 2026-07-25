@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-25T17:43:47+00:00",
+ "actualizado": "2026-07-25T18:28:25+00:00",
  "env": "row",
- "total": 96370,
+ "total": 96346,
  "estados": [
   {
    "estado": "Campeche",
@@ -54,8 +54,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 9043,
-   "ciudades": 327
+   "total": 9019,
+   "ciudades": 328
   },
   {
    "estado": "Oaxaca",
