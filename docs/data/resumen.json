@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-26T17:38:52+00:00",
+ "actualizado": "2026-07-26T18:19:48+00:00",
  "env": "row",
- "total": 107010,
+ "total": 107963,
  "estados": [
   {
    "estado": "Campeche",
@@ -42,14 +42,14 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 1293,
-   "ciudades": 79
+   "total": 1454,
+   "ciudades": 85
   },
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 6175,
-   "ciudades": 275
+   "total": 7589,
+   "ciudades": 359
   },
   {
    "estado": "Morelos",
@@ -60,8 +60,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 14702,
-   "ciudades": 462
+   "total": 14045,
+   "ciudades": 458
   },
   {
    "estado": "Oaxaca",
@@ -108,7 +108,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 47352,
+  "celdas_escaneadas": 47415,
   "celdas_total": 161650,
   "porcentaje": 29.3,
   "modo": "completo"
