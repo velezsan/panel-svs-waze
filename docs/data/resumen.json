@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-26T04:18:50+00:00",
+ "actualizado": "2026-07-26T05:01:21+00:00",
  "env": "row",
- "total": 102147,
+ "total": 102450,
  "estados": [
   {
    "estado": "Campeche",
@@ -48,8 +48,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 5760,
-   "ciudades": 243
+   "total": 5983,
+   "ciudades": 264
   },
   {
    "estado": "Morelos",
@@ -60,8 +60,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 12151,
-   "ciudades": 393
+   "total": 12231,
+   "ciudades": 399
   },
   {
    "estado": "Oaxaca",
@@ -108,7 +108,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 46353,
+  "celdas_escaneadas": 46373,
   "celdas_total": 161650,
   "porcentaje": 28.7,
   "modo": "completo"
