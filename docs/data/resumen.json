@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-26T16:58:28+00:00",
+ "actualizado": "2026-07-26T17:38:52+00:00",
  "env": "row",
- "total": 106997,
+ "total": 107010,
  "estados": [
   {
    "estado": "Campeche",
@@ -42,8 +42,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 1245,
-   "ciudades": 78
+   "total": 1293,
+   "ciudades": 79
   },
   {
    "estado": "Michoacán",
@@ -108,7 +108,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 47338,
+  "celdas_escaneadas": 47352,
   "celdas_total": 161650,
   "porcentaje": 29.3,
   "modo": "completo"
