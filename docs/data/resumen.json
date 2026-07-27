@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-27T15:07:28+00:00",
+ "actualizado": "2026-07-27T15:14:07+00:00",
  "env": "row",
- "total": 121387,
+ "total": 121390,
  "estados": [
   {
    "estado": "Campeche",
@@ -84,8 +84,8 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 85,
-   "ciudades": 9
+   "total": 88,
+   "ciudades": 10
   },
   {
    "estado": "Quintana Roo",
@@ -126,7 +126,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 50591,
+  "celdas_escaneadas": 50598,
   "celdas_total": 161650,
   "porcentaje": 31.3,
   "modo": "completo"
