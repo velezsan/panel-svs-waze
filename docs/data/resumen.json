@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-27T09:17:31+00:00",
+ "actualizado": "2026-07-27T09:58:13+00:00",
  "env": "row",
- "total": 114401,
+ "total": 115624,
  "estados": [
   {
    "estado": "Campeche",
@@ -42,8 +42,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 2723,
-   "ciudades": 90
+   "total": 3930,
+   "ciudades": 102
   },
   {
    "estado": "Jalisco",
@@ -66,7 +66,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 15725,
+   "total": 15726,
    "ciudades": 502
   },
   {
@@ -78,8 +78,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 9032,
-   "ciudades": 623
+   "total": 9047,
+   "ciudades": 624
   },
   {
    "estado": "Querétaro",
@@ -120,7 +120,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 49023,
+  "celdas_escaneadas": 49039,
   "celdas_total": 161650,
   "porcentaje": 30.3,
   "modo": "completo"
