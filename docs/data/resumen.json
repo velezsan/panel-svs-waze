@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-27T11:19:19+00:00",
+ "actualizado": "2026-07-27T11:26:11+00:00",
  "env": "row",
- "total": 116888,
+ "total": 116986,
  "estados": [
   {
    "estado": "Campeche",
@@ -42,8 +42,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 3979,
-   "ciudades": 108
+   "total": 4077,
+   "ciudades": 112
   },
   {
    "estado": "Jalisco",
@@ -126,7 +126,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 49549,
+  "celdas_escaneadas": 49552,
   "celdas_total": 161650,
   "porcentaje": 30.7,
   "modo": "completo"
