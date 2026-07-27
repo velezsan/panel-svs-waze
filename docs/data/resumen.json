@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-27T03:29:27+00:00",
+ "actualizado": "2026-07-27T04:48:20+00:00",
  "env": "row",
- "total": 109185,
+ "total": 109746,
  "estados": [
   {
    "estado": "Campeche",
@@ -42,8 +42,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 903,
-   "ciudades": 35
+   "total": 1176,
+   "ciudades": 40
   },
   {
    "estado": "Jalisco",
@@ -66,8 +66,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 15193,
-   "ciudades": 481
+   "total": 15481,
+   "ciudades": 489
   },
   {
    "estado": "Oaxaca",
@@ -114,7 +114,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 47954,
+  "celdas_escaneadas": 47970,
   "celdas_total": 161650,
   "porcentaje": 29.7,
   "modo": "completo"
