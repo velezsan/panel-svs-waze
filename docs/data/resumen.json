@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-28T05:11:30+00:00",
+ "actualizado": "2026-07-28T05:52:19+00:00",
  "env": "row",
- "total": 134520,
+ "total": 135498,
  "estados": [
   {
    "estado": "Campeche",
@@ -30,8 +30,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 5504,
-   "ciudades": 298
+   "total": 6144,
+   "ciudades": 312
   },
   {
    "estado": "Guerrero",
@@ -84,8 +84,8 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 1224,
-   "ciudades": 77
+   "total": 1562,
+   "ciudades": 86
   },
   {
    "estado": "Quintana Roo",
@@ -126,7 +126,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 53226,
+  "celdas_escaneadas": 53234,
   "celdas_total": 161650,
   "porcentaje": 32.9,
   "modo": "completo"
