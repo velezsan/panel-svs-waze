@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-28T06:32:37+00:00",
+ "actualizado": "2026-07-28T07:11:21+00:00",
  "env": "row",
- "total": 136233,
+ "total": 137159,
  "estados": [
   {
    "estado": "Campeche",
@@ -48,8 +48,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 6829,
-   "ciudades": 324
+   "total": 7642,
+   "ciudades": 335
   },
   {
    "estado": "Michoacán",
@@ -90,7 +90,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 1393,
+   "total": 1411,
    "ciudades": 51
   },
   {
@@ -120,15 +120,15 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 527,
-   "ciudades": 32
+   "total": 622,
+   "ciudades": 37
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 53284,
+  "celdas_escaneadas": 53714,
   "celdas_total": 161650,
-  "porcentaje": 33.0,
+  "porcentaje": 33.2,
   "modo": "completo"
  },
  "aviso": "",
