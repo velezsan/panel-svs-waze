@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T06:37:36+00:00",
+ "actualizado": "2026-07-29T07:14:54+00:00",
  "env": "row",
- "total": 164997,
+ "total": 165316,
  "estados": [
   {
    "estado": "Campeche",
@@ -96,8 +96,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3162,
-   "ciudades": 55
+   "total": 3203,
+   "ciudades": 58
   },
   {
    "estado": "Sonora",
@@ -126,13 +126,13 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 3198,
-   "ciudades": 128
+   "total": 3476,
+   "ciudades": 135
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 58177,
+  "celdas_escaneadas": 58222,
   "celdas_total": 161650,
   "porcentaje": 36.0,
   "modo": "completo"
