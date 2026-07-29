@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T14:26:01+00:00",
+ "actualizado": "2026-07-29T14:28:19+00:00",
  "env": "row",
- "total": 171425,
+ "total": 171470,
  "estados": [
   {
    "estado": "Campeche",
@@ -132,8 +132,8 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 3779,
-   "ciudades": 159
+   "total": 3824,
+   "ciudades": 161
   },
   {
    "estado": "Zacatecas",
@@ -144,7 +144,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 60297,
+  "celdas_escaneadas": 60328,
   "celdas_total": 161650,
   "porcentaje": 37.3,
   "modo": "completo"
