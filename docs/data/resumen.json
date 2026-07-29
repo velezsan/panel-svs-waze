@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T00:27:39+00:00",
+ "actualizado": "2026-07-29T01:08:38+00:00",
  "env": "row",
- "total": 159813,
+ "total": 160887,
  "estados": [
   {
    "estado": "Campeche",
@@ -30,8 +30,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 14360,
-   "ciudades": 517
+   "total": 14663,
+   "ciudades": 520
   },
   {
    "estado": "Guerrero",
@@ -48,8 +48,8 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 12690,
-   "ciudades": 418
+   "total": 12989,
+   "ciudades": 428
   },
   {
    "estado": "Michoacán",
@@ -72,8 +72,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 1167,
-   "ciudades": 25
+   "total": 1287,
+   "ciudades": 32
   },
   {
    "estado": "Oaxaca",
@@ -96,8 +96,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3100,
-   "ciudades": 54
+   "total": 3103,
+   "ciudades": 56
   },
   {
    "estado": "Sonora",
@@ -126,15 +126,15 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 2065,
-   "ciudades": 99
+   "total": 2414,
+   "ciudades": 108
   }
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 57115,
+  "celdas_escaneadas": 57445,
   "celdas_total": 161650,
-  "porcentaje": 35.3,
+  "porcentaje": 35.5,
   "modo": "completo"
  },
  "aviso": "",
