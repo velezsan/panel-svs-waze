@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T18:04:07+00:00",
+ "actualizado": "2026-07-29T18:44:49+00:00",
  "env": "row",
- "total": 175247,
+ "total": 175119,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,8 +36,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 20115,
-   "ciudades": 653
+   "total": 20026,
+   "ciudades": 651
   },
   {
    "estado": "Guerrero",
@@ -108,8 +108,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 384,
-   "ciudades": 48
+   "total": 345,
+   "ciudades": 45
   },
   {
    "estado": "Sonora",
@@ -150,9 +150,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 63291,
+  "celdas_escaneadas": 63276,
   "celdas_total": 161650,
-  "porcentaje": 39.2,
+  "porcentaje": 39.1,
   "modo": "completo"
  },
  "aviso": "",
