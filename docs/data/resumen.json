@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T21:34:36+00:00",
+ "actualizado": "2026-07-29T22:15:43+00:00",
  "env": "row",
- "total": 178914,
+ "total": 178894,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -108,8 +108,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 1259,
-   "ciudades": 119
+   "total": 1239,
+   "ciudades": 115
   },
   {
    "estado": "Sonora",
@@ -150,7 +150,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 65405,
+  "celdas_escaneadas": 65398,
   "celdas_total": 161650,
   "porcentaje": 40.5,
   "modo": "completo"
