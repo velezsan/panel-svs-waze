@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-29T13:05:18+00:00",
+ "actualizado": "2026-07-29T13:45:34+00:00",
  "env": "row",
- "total": 170498,
+ "total": 170796,
  "estados": [
   {
    "estado": "Campeche",
@@ -30,8 +30,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 19235,
-   "ciudades": 597
+   "total": 19324,
+   "ciudades": 610
   },
   {
    "estado": "Guerrero",
@@ -42,8 +42,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 9139,
-   "ciudades": 344
+   "total": 9143,
+   "ciudades": 345
   },
   {
    "estado": "Jalisco",
@@ -72,8 +72,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 2240,
-   "ciudades": 60
+   "total": 2282,
+   "ciudades": 61
   },
   {
    "estado": "Oaxaca",
@@ -90,20 +90,20 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 4757,
-   "ciudades": 216
+   "total": 4771,
+   "ciudades": 217
   },
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 4133,
-   "ciudades": 58
+   "total": 4140,
+   "ciudades": 59
   },
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 63,
-   "ciudades": 3
+   "total": 100,
+   "ciudades": 8
   },
   {
    "estado": "Sonora",
@@ -126,14 +126,14 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 14900,
-   "ciudades": 931
+   "total": 14956,
+   "ciudades": 938
   },
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 3681,
-   "ciudades": 151
+   "total": 3730,
+   "ciudades": 158
   },
   {
    "estado": "Zacatecas",
@@ -144,9 +144,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 59563,
+  "celdas_escaneadas": 60039,
   "celdas_total": 161650,
-  "porcentaje": 36.8,
+  "porcentaje": 37.1,
   "modo": "completo"
  },
  "aviso": "",
