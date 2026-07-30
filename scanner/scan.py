@@ -927,6 +927,11 @@ def main():
     fallos_seguidos = 0
     sesion_usa = None
     celdas_run = set()
+
+    def sello_celda(n):
+        """Registro de celda escaneada, con fecha y hora (para el mapa)."""
+        return {"n": n, "c": ciclo,
+                "t": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")}
     pub_cada = cfg.get("publicar_cada_minutos", 40)
     ultima_pub = inicio
     celdas_aplicadas = 0
@@ -979,6 +984,13 @@ def main():
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
+        # datos para el mapa de escaneo del panel
+        save_json(os.path.join(DATA_DIR, "celdas.json"), {
+            "bbox": bbox_mx, "celda": celda, "cols": cols, "filas": filas,
+            "actualizado": datetime.now(timezone.utc).isoformat(),
+            "celdas": {k: [v.get("n", 0), v.get("t", "")]
+                       for k, v in celdas_info.items()},
+        }, compact=True)
         return resumen
 
     def _git(*args_git):
@@ -1056,7 +1068,7 @@ def main():
                     segs_en_celda = 0
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
-                celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
+                celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
                 if len(escaneadas) % 200 == 0:
@@ -1095,7 +1107,7 @@ def main():
                     dentro = any(estados_mx.dentro_de_alguno(px, py)
                                  for px, py in puntos_chk)
                 if not dentro:
-                    celdas_info[str(idx)] = {"n": 0, "c": ciclo}
+                    celdas_info[str(idx)] = sello_celda(0)
                     continue
                 # franja fronteriza: si el servidor NA tiene más datos ahí,
                 # esa zona vive en el otro servidor y no se debe reportar
@@ -1133,7 +1145,7 @@ def main():
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
-                celdas_info[str(idx)] = {"n": 1 if (h or segs_en_celda) else 0, "c": ciclo}
+                celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
                 if len(escaneadas) % 200 == 0:
