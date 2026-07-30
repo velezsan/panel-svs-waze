@@ -70,7 +70,7 @@
 <body>
 <header>
   <h1>Panel SVS <span class="wz">Waze</span> · Segmentos sin nombre</h1>
-  <p class="sub">México · Revisión automática diaria del mapa (datos del editor, modo práctica)</p>
+  <p class="sub">México · Revisión automática diaria del mapa (datos del editor, modo práctica) · <a href="mapa.html" style="color:var(--accent);text-decoration:none">🗺️ Mapa de escaneo</a></p>
 </header>
 <main>
   <div class="aviso" id="aviso"></div>
@@ -182,6 +182,8 @@
     if(!slug){ tablaEstados(); return; }
     $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
     const esNacional=slug==='__todos';
+    // recordar los filtros activos para conservarlos al cambiar de estado
+    const fPrev=$('sel-fecha').value, tPrev=$('sel-tipo').value;
     try{
       if(esNacional){
         const listas=await Promise.all(resumen.estados.map(async e=>{
@@ -217,6 +219,9 @@
       +'<option value="sinfecha">Sin fecha</option>';
     ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='inline-block');
     if(esNacional){$('sel-ciudad').style.display='none';$('sel-ciudad').value='';}
+    // restaurar los filtros que el usuario traía puestos (si siguen siendo válidos)
+    if([...$('sel-tipo').options].some(o=>o.value===tPrev))$('sel-tipo').value=tPrev;
+    if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
     $('buscar').value='';
     filtrar();
   }
