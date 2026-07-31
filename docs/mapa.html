@@ -25,6 +25,11 @@
   .leyenda span{display:inline-flex;align-items:center;gap:6px}
   .leyenda i{display:inline-block;width:14px;height:14px;border-radius:3px}
   .cargando{color:var(--muted);padding:40px;text-align:center}
+  .controles{display:flex;gap:8px;align-items:center;margin:0 2px 10px;color:var(--muted);font-size:.85rem;flex-wrap:wrap}
+  .controles button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+       padding:6px 13px;cursor:pointer;font-size:1rem;line-height:1}
+  .controles button:hover{border-color:var(--accent)}
+  #nivel{min-width:44px;text-align:center;color:var(--text)}
 </style>
 </head>
 <body>
@@ -43,6 +48,13 @@
     <span><i style="background:#3a4a6b"></i> escaneada (sin hora registrada)</span>
     <span><i style="background:#141a29;border:1px solid var(--line)"></i> pendiente</span>
   </div>
+  <div class="controles" id="controles" style="display:none">
+    <button id="btn-menos" title="Alejar">−</button>
+    <span id="nivel">×1</span>
+    <button id="btn-mas" title="Acercar">+</button>
+    <button id="btn-reset" title="Ver todo México">⟲ Todo</button>
+    <span>· rueda del mouse = zoom · arrastra para moverte · doble clic = acercar</span>
+  </div>
   <div id="marco"><div class="cargando" id="msg">Cargando mapa…</div><canvas id="cv" style="display:none"></canvas></div>
   <p class="sub" id="pie" style="margin-top:10px"></p>
 </main>
@@ -51,7 +63,9 @@
 (function(){
   const $=id=>document.getElementById(id);
   const GEO='https://raw.githubusercontent.com/velezsan/panel-svs-waze/main/scanner/mx_estados.geojson';
-  let meta=null, celdas=null;
+  let meta=null, celdas=null, geo=null;
+  let W=0, H=0, escala=2, base=null, cv=null, ctx=null;
+  let zoom=1, panX=0, panY=0;
 
   function colorEdad(t){
     if(!t) return '#3a4a6b';
@@ -63,24 +77,30 @@
     return '#1e3f66';
   }
 
-  function dibujar(geo){
-    const [lon1,lat1,lon2,lat2]=meta.bbox;
+  function prepararBase(){
     const cols=meta.cols, filas=meta.filas;
-    const escala=Math.min(3, Math.max(2, Math.floor(1500/cols)));
-    const W=cols*escala, H=filas*escala;
-    const cv=$('cv'); cv.width=W; cv.height=H;
-    const ctx=cv.getContext('2d');
-    ctx.fillStyle='#141a29'; ctx.fillRect(0,0,W,H);
-    const px=lon=>((lon-lon1)/(lon2-lon1))*W;
-    const py=lat=>H-((lat-lat1)/(lat2-lat1))*H;
-
+    escala=Math.min(3, Math.max(2, Math.floor(1500/cols)));
+    W=cols*escala; H=filas*escala;
+    base=document.createElement('canvas'); base.width=W; base.height=H;
+    const b=base.getContext('2d');
+    b.fillStyle='#141a29'; b.fillRect(0,0,W,H);
     for(const [id,val] of Object.entries(celdas)){
       const idx=+id, f=Math.floor(idx/cols), c=idx%cols;
-      ctx.fillStyle=colorEdad(val[1]);
-      ctx.fillRect(c*escala, H-(f+1)*escala, escala, escala);
+      b.fillStyle=colorEdad(val[1]);
+      b.fillRect(c*escala, H-(f+1)*escala, escala, escala);
     }
-    // contornos de estados encima
-    ctx.strokeStyle='rgba(147,160,184,0.55)'; ctx.lineWidth=1;
+  }
+
+  function draw(){
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.fillStyle='#141a29'; ctx.fillRect(0,0,W,H);
+    ctx.setTransform(zoom,0,0,zoom,panX,panY);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(base,0,0);
+    const [lon1,lat1,lon2,lat2]=meta.bbox;
+    const px=lon=>((lon-lon1)/(lon2-lon1))*W;
+    const py=lat=>H-((lat-lat1)/(lat2-lat1))*H;
+    ctx.strokeStyle='rgba(147,160,184,0.55)'; ctx.lineWidth=1/zoom;
     for(const ft of geo.features){
       const gg=ft.geometry;
       const polys=gg.type==='Polygon'?[gg.coordinates]:gg.coordinates;
@@ -92,16 +112,63 @@
         }
       }
     }
-    $('msg').style.display='none'; cv.style.display='block'; $('leyenda').style.display='flex';
+  }
 
-    // tooltip
+  function clampPan(){
+    panX=Math.min(0, Math.max(W-W*zoom, panX));
+    panY=Math.min(0, Math.max(H-H*zoom, panY));
+  }
+
+  function setZoom(nz, cx, cy){
+    nz=Math.min(40, Math.max(1, nz));
+    panX=cx-(nz/zoom)*(cx-panX);
+    panY=cy-(nz/zoom)*(cy-panY);
+    zoom=nz; clampPan(); draw();
+    $('nivel').textContent='×'+(zoom<10?Math.round(zoom*10)/10:Math.round(zoom));
+  }
+
+  function iniciar(){
+    cv=$('cv'); cv.width=W; cv.height=H; ctx=cv.getContext('2d');
+    draw();
+    $('msg').style.display='none'; cv.style.display='block';
+    $('leyenda').style.display='flex'; $('controles').style.display='flex';
+
+    const pos=ev=>{
+      const r=cv.getBoundingClientRect();
+      return [(ev.clientX-r.left)*(W/r.width), (ev.clientY-r.top)*(H/r.height)];
+    };
+    cv.addEventListener('wheel',ev=>{
+      ev.preventDefault();
+      const [x,y]=pos(ev);
+      setZoom(zoom*(ev.deltaY<0?1.25:0.8), x, y);
+    },{passive:false});
+    cv.addEventListener('dblclick',ev=>{ const [x,y]=pos(ev); setZoom(zoom*2, x, y); });
+
+    let drag=null, movio=false;
+    cv.addEventListener('mousedown',ev=>{
+      ev.preventDefault();
+      drag=[ev.clientX, ev.clientY, panX, panY]; movio=false;
+      cv.style.cursor='grabbing';
+    });
+    window.addEventListener('mouseup',()=>{ drag=null; cv.style.cursor='crosshair'; });
+    window.addEventListener('mousemove',ev=>{
+      if(!drag)return;
+      const r=cv.getBoundingClientRect();
+      panX=drag[2]+(ev.clientX-drag[0])*(W/r.width);
+      panY=drag[3]+(ev.clientY-drag[1])*(H/r.height);
+      movio=true; clampPan(); draw();
+    });
+
     const tip=$('tip');
     cv.addEventListener('mousemove',ev=>{
-      const r=cv.getBoundingClientRect();
-      const x=(ev.clientX-r.left)*(W/r.width), y=(ev.clientY-r.top)*(H/r.height);
-      const c=Math.floor(x/escala), f=Math.floor((H-y)/escala);
+      if(drag){ tip.style.display='none'; return; }
+      const [x,y]=pos(ev);
+      const wx=(x-panX)/zoom, wy=(y-panY)/zoom;
+      const cols=meta.cols, filas=meta.filas;
+      const c=Math.floor(wx/escala), f=Math.floor((H-wy)/escala);
       if(c<0||c>=cols||f<0||f>=filas){tip.style.display='none';return;}
       const id=String(f*cols+c);
+      const [lon1,lat1]=meta.bbox;
       const lon=(lon1+(c+0.5)*meta.celda).toFixed(3), lat=(lat1+(f+0.5)*meta.celda).toFixed(3);
       const v=celdas[id];
       let txt;
@@ -116,15 +183,20 @@
       tip.style.top=(ev.clientY+14)+'px';
     });
     cv.addEventListener('mouseleave',()=>{tip.style.display='none';});
+
+    $('btn-mas').addEventListener('click',()=>setZoom(zoom*1.5, W/2, H/2));
+    $('btn-menos').addEventListener('click',()=>setZoom(zoom/1.5, W/2, H/2));
+    $('btn-reset').addEventListener('click',()=>{ zoom=1; panX=0; panY=0; draw(); $('nivel').textContent='×1'; });
   }
 
   Promise.all([
     fetch('data/celdas.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}),
     fetch(GEO).then(r=>r.json())
-  ]).then(([d,geo])=>{
-    meta=d; celdas=d.celdas;
+  ]).then(([d,g])=>{
+    meta=d; celdas=d.celdas; geo=g;
+    prepararBase();
+    iniciar();
     const tot=Object.keys(celdas).length;
-    dibujar(geo);
     const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
     $('pie').textContent=`${tot.toLocaleString('es-MX')} celdas revisadas de ${(meta.cols*meta.filas).toLocaleString('es-MX')} · actualizado ${act} (tu hora) · pasa el cursor sobre el mapa para ver el detalle de cada celda`;
   }).catch(()=>{
