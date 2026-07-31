@@ -100,6 +100,23 @@
     const [lon1,lat1,lon2,lat2]=meta.bbox;
     const px=lon=>((lon-lon1)/(lon2-lon1))*W;
     const py=lat=>H-((lat-lat1)/(lat2-lat1))*H;
+    // oscurecer todo lo que queda fuera de México (mar y otros países):
+    // esas celdas se descartan sin escanearse y no deben verse como "escaneadas"
+    ctx.beginPath();
+    ctx.rect(0,0,W,H);
+    for(const ft of geo.features){
+      const gg=ft.geometry;
+      const polys=gg.type==='Polygon'?[gg.coordinates]:gg.coordinates;
+      for(const poly of polys){
+        for(const anillo of poly){
+          anillo.forEach((p,i)=>{ i?ctx.lineTo(px(p[0]),py(p[1])):ctx.moveTo(px(p[0]),py(p[1])); });
+          ctx.closePath();
+        }
+      }
+    }
+    ctx.fillStyle='rgba(15,20,32,0.85)';
+    ctx.fill('evenodd');
+    // contornos de estados
     ctx.strokeStyle='rgba(147,160,184,0.55)'; ctx.lineWidth=1/zoom;
     for(const ft of geo.features){
       const gg=ft.geometry;
