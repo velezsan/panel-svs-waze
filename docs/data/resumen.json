@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-07-31T09:31:55+00:00",
+ "actualizado": "2026-07-31T09:34:12+00:00",
  "env": "row",
- "total": 205253,
+ "total": 205257,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,8 +138,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 2669,
-   "ciudades": 118
+   "total": 2673,
+   "ciudades": 119
   },
   {
    "estado": "Sonora",
@@ -186,7 +186,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 91797,
+  "celdas_escaneadas": 91800,
   "celdas_total": 161650,
   "porcentaje": 56.8,
   "modo": "completo"
