@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-01T06:42:20+00:00",
+ "actualizado": "2026-08-01T07:22:38+00:00",
  "env": "row",
- "total": 210753,
+ "total": 211355,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,8 +36,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 1606,
-   "ciudades": 32
+   "total": 1891,
+   "ciudades": 37
   },
   {
    "estado": "Colima",
@@ -102,8 +102,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 2411,
-   "ciudades": 101
+   "total": 2728,
+   "ciudades": 117
   },
   {
    "estado": "Oaxaca",
@@ -186,7 +186,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 97163,
+  "celdas_escaneadas": 97222,
   "celdas_total": 161650,
   "porcentaje": 60.1,
   "modo": "completo"
