@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-01T07:24:42+00:00",
+ "actualizado": "2026-08-01T08:05:10+00:00",
  "env": "row",
- "total": 211402,
+ "total": 211343,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,8 +102,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 2775,
-   "ciudades": 119
+   "total": 2716,
+   "ciudades": 115
   },
   {
    "estado": "Oaxaca",
@@ -186,7 +186,7 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 97228,
+  "celdas_escaneadas": 97220,
   "celdas_total": 161650,
   "porcentaje": 60.1,
   "modo": "completo"
