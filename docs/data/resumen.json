@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-01T02:18:51+00:00",
+ "actualizado": "2026-08-01T02:59:49+00:00",
  "env": "row",
- "total": 207709,
+ "total": 208054,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,8 +36,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 283,
-   "ciudades": 19
+   "total": 294,
+   "ciudades": 21
   },
   {
    "estado": "Colima",
@@ -48,8 +48,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4116,
-   "ciudades": 120
+   "total": 4170,
+   "ciudades": 123
   },
   {
    "estado": "Guanajuato",
@@ -102,8 +102,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 1710,
-   "ciudades": 78
+   "total": 1885,
+   "ciudades": 86
   },
   {
    "estado": "Oaxaca",
@@ -138,8 +138,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 2815,
-   "ciudades": 132
+   "total": 2885,
+   "ciudades": 136
   },
   {
    "estado": "Sonora",
@@ -156,8 +156,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 3902,
-   "ciudades": 154
+   "total": 3937,
+   "ciudades": 155
   },
   {
    "estado": "Tlaxcala",
@@ -186,9 +186,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 95619,
+  "celdas_escaneadas": 96106,
   "celdas_total": 161650,
-  "porcentaje": 59.2,
+  "porcentaje": 59.5,
   "modo": "completo"
  },
  "aviso": "",
