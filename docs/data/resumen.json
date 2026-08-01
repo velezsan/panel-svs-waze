@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-01T01:38:09+00:00",
+ "actualizado": "2026-08-01T02:18:51+00:00",
  "env": "row",
- "total": 207463,
+ "total": 207709,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,7 +12,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 2191,
+   "total": 2193,
    "ciudades": 34
   },
   {
@@ -36,8 +36,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 235,
-   "ciudades": 15
+   "total": 283,
+   "ciudades": 19
   },
   {
    "estado": "Colima",
@@ -48,8 +48,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 4056,
-   "ciudades": 116
+   "total": 4116,
+   "ciudades": 120
   },
   {
    "estado": "Guanajuato",
@@ -102,8 +102,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 1671,
-   "ciudades": 77
+   "total": 1710,
+   "ciudades": 78
   },
   {
    "estado": "Oaxaca",
@@ -138,8 +138,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 2787,
-   "ciudades": 128
+   "total": 2815,
+   "ciudades": 132
   },
   {
    "estado": "Sonora",
@@ -156,8 +156,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 3833,
-   "ciudades": 150
+   "total": 3902,
+   "ciudades": 154
   },
   {
    "estado": "Tlaxcala",
@@ -186,9 +186,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 95100,
+  "celdas_escaneadas": 95619,
   "celdas_total": 161650,
-  "porcentaje": 58.8,
+  "porcentaje": 59.2,
   "modo": "completo"
  },
  "aviso": "",
