@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-01T05:18:37+00:00",
+ "actualizado": "2026-08-01T05:58:44+00:00",
  "env": "row",
- "total": 209177,
+ "total": 209926,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,8 +12,8 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 2193,
-   "ciudades": 34
+   "total": 2203,
+   "ciudades": 35
   },
   {
    "estado": "Campeche",
@@ -36,7 +36,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 948,
+   "total": 1368,
    "ciudades": 30
   },
   {
@@ -102,8 +102,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 2117,
-   "ciudades": 92
+   "total": 2411,
+   "ciudades": 101
   },
   {
    "estado": "Oaxaca",
@@ -156,7 +156,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 3963,
+   "total": 3988,
    "ciudades": 156
   },
   {
@@ -186,9 +186,9 @@
  ],
  "progreso": {
   "ciclo": 1,
-  "celdas_escaneadas": 96672,
+  "celdas_escaneadas": 97020,
   "celdas_total": 161650,
-  "porcentaje": 59.8,
+  "porcentaje": 60.0,
   "modo": "completo"
  },
  "aviso": "",
