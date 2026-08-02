@@ -1063,7 +1063,9 @@ def main():
                     time.sleep(3)
                     continue
                 segs_en_celda = contador["segs"] - segs_antes
-                if usa_n is not None and usa_n > segs_en_celda:
+                # si el servidor NA tiene datos significativos ahí, la zona es suya
+                # (NA devuelve 0 en todo el México que sí es de ROW)
+                if usa_n is not None and usa_n >= 5:
                     h = []
                     segs_en_celda = 0
                 else:
@@ -1138,7 +1140,9 @@ def main():
                     time.sleep(3)
                     continue
                 segs_en_celda = contador["segs"] - segs_antes
-                if usa_n is not None and usa_n > segs_en_celda:
+                # si el servidor NA tiene datos significativos ahí, la zona es suya
+                # (NA devuelve 0 en todo el México que sí es de ROW)
+                if usa_n is not None and usa_n >= 5:
                     log(f"Celda {idx}: franja del servidor NA "
                         f"({usa_n} segs en NA vs {segs_en_celda} en ROW); se omite")
                     h = []
