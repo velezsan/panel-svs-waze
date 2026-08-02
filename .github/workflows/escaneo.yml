@@ -45,7 +45,7 @@ jobs:
           python scanner/scan.py \
             --modo "${{ github.event.inputs.modo || 'completo' }}" \
             --minutos "${{ github.event.inputs.minutos || '210' }}" \
-            --zona "${{ github.event.inputs.zona || '' }}"
+            --zona="${{ github.event.inputs.zona || '' }}"
 
       - name: Guardar resultados
         run: |
