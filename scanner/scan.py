@@ -574,12 +574,30 @@ def normalizar_estado(nombre, estados_mx):
     return n
 
 
+CHAMPS_MX = {
+    "arielorellana", "arturoae", "camachista", "carloslaso", "davidabarca",
+    "drysoft", "editorbcmx", "eumirgarciac2", "maalrivba", "manufc122",
+    "gwm_", "hector_hf",
+}
+VENTANA_CHAMPS_DIAS = 60
+_champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda)
+
+
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
     streets = {s.get("id"): s for s in _objetos(data, "streets")}
     cities = {c.get("id"): c for c in _objetos(data, "cities")}
     states = {s.get("id"): s for s in _objetos(data, "states")}
+
+    # conteo de ediciones recientes de los Local Champs (cualquier tipo de vía)
+    usuarios = {u.get("id"): (u.get("userName") or "") for u in _objetos(data, "users")}
+    corte = (time.time() - VENTANA_CHAMPS_DIAS * 86400) * 1000
+    for seg in segs:
+        if (seg.get("updatedOn") or 0) >= corte:
+            un = usuarios.get(seg.get("updatedBy"), "")
+            if un and un.lower() in CHAMPS_MX:
+                _champs_celda.setdefault(un, set()).add(seg.get("id"))
 
     # nombre por segmento (para sugerencias) y conectividad por nodos
     nombre_seg = {}
@@ -853,12 +871,14 @@ def main():
             if 0 <= _c < cols and 0 <= _f < filas:
                 _v["celda"] = str(_f * cols + _c)
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
+    champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
             or estado.get("bbox_escaneo") not in (None, bbox_mx)):
         log("Cambió la zona o el tamaño de celda: reiniciando el recorrido")
         celdas_info, cursor, ciclo = {}, 0, 1
+        champs_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -982,6 +1002,7 @@ def main():
         }
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
+                       "champs": champs_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -990,6 +1011,18 @@ def main():
             "actualizado": datetime.now(timezone.utc).isoformat(),
             "celdas": {k: [v.get("n", 0), v.get("t", "")]
                        for k, v in celdas_info.items()},
+        }, compact=True)
+        # datos para la página de Local Champs
+        tot_champs = {}
+        for _m in champs_info.values():
+            for _k, _v in _m.items():
+                tot_champs[_k] = tot_champs.get(_k, 0) + _v
+        save_json(os.path.join(DATA_DIR, "champs.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(),
+            "ventana_dias": VENTANA_CHAMPS_DIAS,
+            "celdas_con_ediciones": len(champs_info),
+            "porcentaje_pais": progreso.get("porcentaje"),
+            "totales": tot_champs,
         }, compact=True)
         return resumen
 
@@ -1047,6 +1080,7 @@ def main():
                         usa_n = len(_objetos(d_usa, "segments"))
                     except Exception:
                         usa_n = None
+                _champs_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1068,8 +1102,13 @@ def main():
                 if usa_n is not None and usa_n >= 5:
                     h = []
                     segs_en_celda = 0
+                    _champs_celda.clear()  # celda del servidor NA: no cuenta
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                if _champs_celda:
+                    champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
+                else:
+                    champs_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1123,6 +1162,7 @@ def main():
                         usa_n = len(_objetos(d_usa, "segments"))
                     except Exception:
                         usa_n = None
+                _champs_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1147,8 +1187,13 @@ def main():
                         f"({usa_n} segs en NA vs {segs_en_celda} en ROW); se omite")
                     h = []
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
+                    _champs_celda.clear()  # celda del servidor NA: no cuenta
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
+                if _champs_celda:
+                    champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
+                else:
+                    champs_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
