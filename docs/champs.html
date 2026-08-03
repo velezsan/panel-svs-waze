@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local Champs · Panel SVS Waze</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:900px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:900px;margin:0 auto;padding:14px 20px 50px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.95rem}
+  th,td{padding:10px 14px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  .num{text-align:right;font-variant-numeric:tabular-nums}
+  .barra{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden;min-width:120px}
+  .barra i{display:block;height:100%;background:var(--accent);border-radius:4px}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.78rem;color:var(--muted);margin-left:8px}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:14px}
+  .pos{color:var(--muted);width:36px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🏆 Local Champs de México</h1>
+  <p class="sub">Segmentos editados por cada Local Champ en los últimos 60 días ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <p class="nota" id="nota"></p>
+  <p class="nota">El conteo se construye con lo que el escáner recorre: cada celda aporta los segmentos
+    cuya última edición (de cualquier tipo de vía) fue hecha por un Local Champ dentro de la ventana de 60 días.
+    La lista de Local Champs viene del
+    <a href="https://www.waze.com/discuss/t/local-champs/377004" target="_blank" rel="noopener" style="color:var(--accent)">foro oficial de la comunidad</a>.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>n.toLocaleString('es-MX');
+  fetch('data/champs.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      const tot=Object.entries(d.totales||{}).sort((a,b)=>b[1]-a[1]);
+      if(!tot.length){
+        $('contenido').innerHTML='<div class="cargando">Aún no hay ediciones registradas. El conteo crece con cada corrida del escáner.</div>';
+        return;
+      }
+      const max=tot[0][1]||1;
+      const suma=tot.reduce((a,x)=>a+x[1],0);
+      let html='<table><thead><tr><th></th><th>Local Champ</th><th class="num">Segmentos editados</th><th></th></tr></thead><tbody>';
+      tot.forEach(([nombre,n],i)=>{
+        html+=`<tr><td class="pos">${i+1}</td>`+
+          `<td><a href="https://www.waze.com/user/editor/${encodeURIComponent(nombre)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${nombre}</a>${i===0?' <span class="chip">líder</span>':''}</td>`+
+          `<td class="num">${fmt(n)}</td>`+
+          `<td><div class="barra"><i style="width:${Math.max(3,Math.round(100*n/max))}%"></i></div></td></tr>`;
+      });
+      html+='</tbody></table>';
+      $('contenido').innerHTML=html;
+      const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+      $('nota').textContent=`Total: ${fmt(suma)} segmentos editados por Local Champs (últimos ${d.ventana_dias||60} días) · `+
+        `cobertura: ${d.porcentaje_pais!=null?d.porcentaje_pais+'% del país escaneado':'en construcción'} · actualizado ${act} (tu hora). `+
+        `El número seguirá subiendo conforme el escáner recorra más territorio.`;
+    })
+    .catch(()=>{
+      $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Si esta sección es nueva, estará disponible después de la próxima corrida.</div>';
+    });
+})();
+</script>
+</body>
+</html>
