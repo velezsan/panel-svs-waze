@@ -135,8 +135,8 @@
     $('t-total').textContent=fmt(resumen.total);
     $('t-estados').textContent=resumen.estados.length;
     const p=resumen.progreso||{};
-    $('t-prog').textContent=(p.porcentaje!=null?p.porcentaje+'%':'—');
-    $('t-ciclo').textContent=p.ciclo?('vuelta '+p.ciclo+' al país'):'';
+    $('t-prog').textContent=(p.porcentaje_vuelta!=null?p.porcentaje_vuelta+'%':(p.porcentaje!=null?p.porcentaje+'%':'—'));
+    $('t-ciclo').textContent=p.ciclo?('de la vuelta '+p.ciclo+' al país'):'';
     if(resumen.actualizado){
       const d=new Date(resumen.actualizado);
       $('t-fecha').textContent=d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
