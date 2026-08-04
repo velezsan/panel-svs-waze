@@ -36,6 +36,7 @@ LASTRUN_PATH = os.path.join(BASE, "state", "last_run.json")
 DEBUG_PATH = os.path.join(BASE, "state", "debug_ultimo_error.txt")
 DATA_DIR = os.path.join(BASE, "docs", "data")
 ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
+CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
 
 # Servidores del WME. México vive en el entorno "row" (Rest of World).
 # El parámetro sandbox=true es el que usa el modo práctica: permite leer
@@ -582,6 +583,10 @@ CHAMPS_MX = {
 VENTANA_CHAMPS_DIAS = 60
 _champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda)
 
+# candado mínimo esperado por tipo de vía (etapa 1: sin PS)
+REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
+_candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
+
 
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
@@ -598,6 +603,34 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             un = usuarios.get(seg.get("updatedBy"), "")
             if un and un.lower() in CHAMPS_MX:
                 _champs_celda.setdefault(un, set()).add(seg.get("id"))
+
+    # candados bajos en vías importantes (FW, MH, Ramp, mH)
+    for seg in segs:
+        req = REQ_CANDADO.get(seg.get("roadType"))
+        if not req:
+            continue
+        lr = seg.get("lockRank")
+        lock = lr + 1 if isinstance(lr, int) else 1
+        if lock >= req:
+            continue
+        lon_c, lat_c = punto_medio(seg)
+        if lon_c is None:
+            continue
+        ciudad_c, edo_c = "", ""
+        stc = streets.get(seg.get("primaryStreetID"))
+        if stc and stc.get("cityID") in cities:
+            cc = cities[stc.get("cityID")]
+            if not cc.get("isEmpty"):
+                ciudad_c = (cc.get("name") or "").strip()
+            edoo = states.get(cc.get("stateID"))
+            if edoo:
+                edo_c = (edoo.get("name") or "").strip()
+        _candados_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_c, 6), "lon": round(lon_c, 6),
+            "rt": seg.get("roadType"), "lk": lock, "req": req,
+            "ciudad": ciudad_c, "edo": edo_c,
+            "nombre": nombre_de_calle(stc) or "",
+        }
 
     # nombre por segmento (para sugerencias) y conectividad por nodos
     nombre_seg = {}
@@ -872,6 +905,7 @@ def main():
                 _v["celda"] = str(_f * cols + _c)
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
+    candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -879,6 +913,7 @@ def main():
         log("Cambió la zona o el tamaño de celda: reiniciando el recorrido")
         celdas_info, cursor, ciclo = {}, 0, 1
         champs_info = {}
+        candados_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -1004,7 +1039,7 @@ def main():
         }
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
-                       "champs": champs_info,
+                       "champs": champs_info, "candados": candados_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -1025,6 +1060,32 @@ def main():
             "celdas_con_ediciones": len(champs_info),
             "porcentaje_pais": progreso.get("porcentaje"),
             "totales": tot_champs,
+        }, compact=True)
+        # panel de candados bajos: reagrupar por estado
+        cand_por_estado = {}
+        for regs in candados_info.values():
+            for r in regs:
+                est_c = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                reg_c = {k: v for k, v in r.items() if k != "edo"}
+                cand_por_estado.setdefault(est_c, {})[str(r["id"])] = reg_c
+        os.makedirs(CANDADOS_DIR, exist_ok=True)
+        slugs_c = set()
+        lista_c = []
+        for est_c, segs_c in sorted(cand_por_estado.items()):
+            slug_c = slugify(est_c)
+            slugs_c.add(slug_c)
+            save_json(os.path.join(CANDADOS_DIR, f"{slug_c}.json"),
+                      {"estado": est_c, "segmentos": segs_c}, compact=True)
+            lista_c.append({"estado": est_c, "slug": slug_c, "total": len(segs_c)})
+        for fn in os.listdir(CANDADOS_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_c:
+                os.remove(os.path.join(CANDADOS_DIR, fn))
+        save_json(os.path.join(CANDADOS_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_c),
+            "estados": lista_c,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
         }, compact=True)
         return resumen
 
@@ -1083,6 +1144,7 @@ def main():
                     except Exception:
                         usa_n = None
                 _champs_celda.clear()
+                _candados_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1105,12 +1167,17 @@ def main():
                     h = []
                     segs_en_celda = 0
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _candados_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
                     champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
                 else:
                     champs_info.pop(str(idx), None)
+                if _candados_celda:
+                    candados_info[str(idx)] = list(_candados_celda.values())
+                else:
+                    candados_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1165,6 +1232,7 @@ def main():
                     except Exception:
                         usa_n = None
                 _champs_celda.clear()
+                _candados_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1190,12 +1258,17 @@ def main():
                     h = []
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
+                    _candados_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
                     champs_info[str(idx)] = {k: len(v) for k, v in _champs_celda.items()}
                 else:
                     champs_info.pop(str(idx), None)
+                if _candados_celda:
+                    candados_info[str(idx)] = list(_candados_celda.values())
+                else:
+                    candados_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
