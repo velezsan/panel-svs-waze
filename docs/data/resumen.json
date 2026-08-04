@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-04T05:44:57+00:00",
+ "actualizado": "2026-08-04T06:25:08+00:00",
  "env": "row",
- "total": 234942,
+ "total": 234830,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -30,8 +30,8 @@
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 4614,
-   "ciudades": 239
+   "total": 4584,
+   "ciudades": 238
   },
   {
    "estado": "Chihuahua",
@@ -120,8 +120,8 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 19783,
-   "ciudades": 848
+   "total": 19701,
+   "ciudades": 847
   },
   {
    "estado": "Puebla",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161567,
   "celdas_total": 161650,
   "porcentaje": 99.9,
-  "porcentaje_vuelta": 8.8,
+  "porcentaje_vuelta": 9.1,
   "modo": "completo"
  },
  "aviso": "",
