@@ -998,6 +998,8 @@ def main():
             "celdas_escaneadas": celdas_hechas,
             "celdas_total": total_celdas,
             "porcentaje": round(100.0 * min(celdas_hechas, total_celdas) / total_celdas, 1),
+            # avance de la vuelta actual: posición del cursor en el barrido
+            "porcentaje_vuelta": round(100.0 * min(cursor, total_celdas) / total_celdas, 1),
             "modo": args.modo,
         }
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
