@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-05T16:02:41+00:00",
+ "actualizado": "2026-08-05T16:44:38+00:00",
  "env": "row",
- "total": 227961,
+ "total": 227949,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 12858,
-   "ciudades": 323
+   "total": 12841,
+   "ciudades": 321
   },
   {
    "estado": "Hidalgo",
@@ -120,8 +120,8 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 16586,
-   "ciudades": 762
+   "total": 16591,
+   "ciudades": 764
   },
   {
    "estado": "Puebla",
@@ -198,7 +198,7 @@
  ],
  "progreso": {
   "ciclo": 2,
-  "celdas_escaneadas": 161573,
+  "celdas_escaneadas": 161575,
   "celdas_total": 161650,
   "porcentaje": 100.0,
   "porcentaje_vuelta": 16.6,
