@@ -840,7 +840,20 @@ def main():
     ap.add_argument("--minutos", type=float, default=240)
     ap.add_argument("--zona", default="",
                     help='Re-escaneo prioritario: nombre de estado, "lat,lon" o "lon1,lat1,lon2,lat2"')
+    ap.add_argument("--panel", choices=["row", "na"], default="row",
+                    help="na = Panel SVS NA: la franja fronteriza que vive en el servidor NA")
     args = ap.parse_args()
+
+    # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
+    global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
+    panel_na = args.panel == "na"
+    if panel_na:
+        STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
+        LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
+        DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
+        DATA_DIR = os.path.join(BASE, "docs", "data-na")
+        ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
+        CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
 
     cfg = load_json(CONFIG_PATH, {})
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
@@ -851,6 +864,7 @@ def main():
     ciclos_vacia = cfg.get("reescanear_vacias_cada", 5)
     solo_estados = set(cfg.get("solo_estados") or [])
     franja_umbral = cfg.get("franja_umbral_grados", 0.5)
+    franja_na = cfg.get("franja_na_grados", 0.6)  # ancho de la franja del Panel NA
     usar_inegi = cfg.get("sugerencias_inegi", True)
     inegi = ConsultorINEGI(cfg.get("pausa_inegi_segundos", 0.15)) if usar_inegi else None
 
@@ -862,7 +876,11 @@ def main():
 
     # --- detección de entorno / acceso sin login
     try:
-        if estado.get("env"):
+        if panel_na:
+            env = "usa"  # el Panel NA siempre lee del servidor NA
+            sesion = nueva_sesion(env)
+            estado["env"] = env
+        elif estado.get("env"):
             env = estado["env"]
             sesion = nueva_sesion(env)
         else:
@@ -1134,7 +1152,7 @@ def main():
                 x1c, y1c, x2c, y2c = bb
                 mxc, myc = (x1c + x2c) / 2, (y1c + y2c) / 2
                 usa_n = None
-                if distancia_a_frontera(mxc, myc) < franja_umbral:
+                if not panel_na and distancia_a_frontera(mxc, myc) < franja_umbral:
                     try:
                         if sesion_usa is None:
                             sesion_usa = nueva_sesion("usa")
@@ -1161,6 +1179,12 @@ def main():
                     time.sleep(3)
                     continue
                 segs_en_celda = contador["segs"] - segs_antes
+                if panel_na and segs_en_celda < 5:
+                    # regla espejo: con tan pocos datos en NA, la celda vive en ROW
+                    h = []
+                    segs_en_celda = 0
+                    _champs_celda.clear()
+                    _candados_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1222,13 +1246,15 @@ def main():
                 else:
                     dentro = any(estados_mx.dentro_de_alguno(px, py)
                                  for px, py in puntos_chk)
+                if dentro and panel_na and distancia_a_frontera(mxc, myc) >= franja_na:
+                    dentro = False  # Panel NA: solo la franja fronteriza
                 if not dentro:
                     celdas_info[str(idx)] = sello_celda(0)
                     continue
                 # franja fronteriza: si el servidor NA tiene más datos ahí,
                 # esa zona vive en el otro servidor y no se debe reportar
                 usa_n = None
-                if distancia_a_frontera(mxc, myc) < franja_umbral:
+                if not panel_na and distancia_a_frontera(mxc, myc) < franja_umbral:
                     try:
                         if sesion_usa is None:
                             sesion_usa = nueva_sesion("usa")
@@ -1256,6 +1282,12 @@ def main():
                     time.sleep(3)
                     continue
                 segs_en_celda = contador["segs"] - segs_antes
+                if panel_na and segs_en_celda < 5:
+                    # regla espejo: con tan pocos datos en NA, la celda vive en ROW
+                    h = []
+                    segs_en_celda = 0
+                    _champs_celda.clear()
+                    _candados_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
