@@ -76,8 +76,8 @@
   <div class="aviso" id="aviso"></div>
 
   <div class="tiles">
-    <div class="tile"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en todo el país</div></div>
-    <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 32</div></div>
+    <div class="tile"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en la franja NA</div></div>
+    <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 6 fronterizos</div></div>
     <div class="tile"><div class="l">Cobertura del escaneo</div><div class="v" id="t-prog">—</div><div class="d" id="t-ciclo"></div></div>
     <div class="tile"><div class="l">Última actualización</div><div class="v" id="t-fecha" style="font-size:1.05rem">—</div><div class="d" id="t-hora"></div></div>
   </div>
@@ -146,7 +146,7 @@
     const sel=$('sel-estado');
     if(resumen.estados.length){
       const ot=document.createElement('option');
-      ot.value='__todos';ot.textContent=`Todo México (${fmt(resumen.total)})`;
+      ot.value='__todos';ot.textContent=`Toda la franja (${fmt(resumen.total)})`;
       sel.appendChild(ot);
     }
     resumen.estados.forEach(e=>{
