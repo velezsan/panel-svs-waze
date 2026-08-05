@@ -1175,6 +1175,12 @@ def main():
                 else:
                     champs_info.pop(str(idx), None)
                 if _candados_celda:
+                    _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_c = {p.get("id"): p.get("v", "")
+                               for p in candados_info.get(str(idx), [])}
+                    for _rc in _candados_celda.values():
+                        _rc["v"] = _prev_c.get(_rc["id"]) or _hoy_c
+                        _rc["r"] = _hoy_c
                     candados_info[str(idx)] = list(_candados_celda.values())
                 else:
                     candados_info.pop(str(idx), None)
@@ -1266,6 +1272,12 @@ def main():
                 else:
                     champs_info.pop(str(idx), None)
                 if _candados_celda:
+                    _hoy_c = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_c = {p.get("id"): p.get("v", "")
+                               for p in candados_info.get(str(idx), [])}
+                    for _rc in _candados_celda.values():
+                        _rc["v"] = _prev_c.get(_rc["id"]) or _hoy_c
+                        _rc["r"] = _hoy_c
                     candados_info[str(idx)] = list(_candados_celda.values())
                 else:
                     candados_info.pop(str(idx), None)
