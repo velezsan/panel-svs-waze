@@ -219,7 +219,7 @@
       const sel=$('sel-estado');
       if(d.estados&&d.estados.length){
         const ot=document.createElement('option');
-        ot.value='__todos';ot.textContent=`Todo México (${fmt(d.total)})`;
+        ot.value='__todos';ot.textContent=`Toda la franja (${fmt(d.total)})`;
         sel.appendChild(ot);
         d.estados.forEach(e=>{
           const o=document.createElement('option');
