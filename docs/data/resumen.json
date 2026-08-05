@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-05T11:28:49+00:00",
+ "actualizado": "2026-08-05T12:09:01+00:00",
  "env": "row",
- "total": 228549,
+ "total": 228418,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -162,7 +162,7 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 3554,
+   "total": 3535,
    "ciudades": 95
   },
   {
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 15785,
-   "ciudades": 989
+   "total": 15673,
+   "ciudades": 985
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161572,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 15.3,
+  "porcentaje_vuelta": 15.6,
   "modo": "completo"
  },
  "aviso": "",
