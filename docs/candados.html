@@ -33,6 +33,7 @@
   .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
   .quitar:hover{color:var(--text)}
   .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
   .lk{font-variant-numeric:tabular-nums;white-space:nowrap}
   .lk b{color:var(--warn)}
   .lk span{color:var(--accent2)}
@@ -57,6 +58,7 @@
   <div class="controls">
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
+    <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
     <span class="chip" id="resumen-chip" style="display:none"></span>
   </div>
   <div id="contenido"><div class="cargando">Cargando datos…</div></div>
@@ -85,11 +87,12 @@
 
   const tipoNombre=rt=>(indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);
   const permalink=r=>`https://www.waze.com/es-419/editor?env=row&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
 
   async function cargarEstado(slug){
-    if(!slug){$('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con candado bajo.</div>';$('pager').style.display='none';$('sel-tipo').style.display='none';return;}
+    if(!slug){$('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con candado bajo.</div>';$('pager').style.display='none';$('sel-tipo').style.display='none';$('sel-fecha').style.display='none';return;}
     $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
-    const tPrev=$('sel-tipo').value;
+    const tPrev=$('sel-tipo').value, fPrev=$('sel-fecha').value;
     try{
       if(slug==='__todos'){
         const listas=await Promise.all(indice.estados.map(async e=>{
@@ -114,15 +117,36 @@
     const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
     $('sel-tipo').innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
     $('sel-tipo').style.display='inline-block';
+    const fechas=[...new Set(regs.map(r=>(r.r||r.v||'').slice(0,10)).filter(Boolean))].sort().reverse();
+    const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+    $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option>'
+      +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
+      +'<option value="sinfecha">Sin fecha</option>';
+    $('sel-fecha').style.display='inline-block';
     if([...$('sel-tipo').options].some(o=>o.value===tPrev))$('sel-tipo').value=tPrev;
+    if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
     filtrar();
   }
 
   function filtrar(){
     if(!datos)return;
-    const t=$('sel-tipo').value;
-    lista=Object.values(datos.segmentos||{}).filter(r=>!t||String(r.rt)===t);
-    lista.sort((a,b)=>(a.req-a.lk)!==(b.req-b.lk)?(b.req-b.lk)-(a.req-a.lk):(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    const t=$('sel-tipo').value, f=$('sel-fecha').value;
+    lista=Object.values(datos.segmentos||{}).filter(r=>{
+      if(t&&String(r.rt)!==t)return false;
+      if(f){
+        const marca=r.r||r.v;
+        if(f==='sinfecha'){ if(marca)return false; }
+        else if(f==='nuevos'){ if(!r.v||Date.now()-fechaDe(r.v).getTime()>=48*3600*1000)return false; }
+        else if(!marca||marca.slice(0,10)!==f)return false;
+      }
+      return true;
+    });
+    if(f&&f!=='sinfecha'){
+      // con filtro de fecha: los escaneados más recientemente van hasta arriba
+      lista.sort((a,b)=>(b.r||b.v||'').localeCompare(a.r||a.v||'')||(b.req-b.lk)-(a.req-a.lk)||a.id-b.id);
+    }else{
+      lista.sort((a,b)=>(a.req-a.lk)!==(b.req-b.lk)?(b.req-b.lk)-(a.req-a.lk):(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    }
     pagina=0;
     pintar();
   }
@@ -130,16 +154,25 @@
   function pintar(){
     const total=lista.length;
     const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Candado</th><th></th></tr></thead><tbody>`;
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>`;
     if(!total){
-      html+='<tr><td colspan="5" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+      html+='<tr><td colspan="6" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
     lista.slice(ini,fin).forEach(r=>{
       const vis=visitados.has(String(r.id));
+      let det='—', esNuevo=false;
+      const marca=r.r||r.v;  // columna: último escaneo (o primera detección si no hay)
+      if(marca){
+        const d=fechaDe(marca);
+        det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+      }
+      if(r.v)esNuevo=(Date.now()-fechaDe(r.v).getTime())<48*3600*1000;
       html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
         <td>${r.nombre||'<span class="chip">sin nombre</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td class="lk"><b>${r.lk}</b> → <span>${r.req}</span></td>
+        <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
         <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
     html+='</tbody></table>';
@@ -177,6 +210,7 @@
   $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('sel-tipo').addEventListener('change',filtrar);
+  $('sel-fecha').addEventListener('change',filtrar);
 
   fetch('data/candados/index.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
