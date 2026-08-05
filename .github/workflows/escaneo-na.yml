@@ -1,0 +1,68 @@
+name: Escaneo NA (franja fronteriza)
+
+on:
+  schedule:
+    - cron: '17 2-22/4 * * *'   # 6 veces al día, intercalado con el escaneo ROW
+  workflow_dispatch:
+    inputs:
+      modo:
+        description: 'Modo de escaneo'
+        type: choice
+        default: completo
+        options: [test, completo]
+      minutos:
+        description: 'Duración máxima en minutos'
+        default: '210'
+      zona:
+        description: 'Re-escaneo prioritario: estado, "lat,lon" o bbox (vacío = barrido normal)'
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: escaneo-na
+  cancel-in-progress: false
+
+jobs:
+  escanear:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historial completo: evita conflictos falsos al hacer rebase
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Instalar dependencias
+        run: pip install requests
+
+      - name: Correr escáner (servidor NA)
+        run: |
+          python scanner/scan.py \
+            --panel na \
+            --modo "${{ github.event.inputs.modo || 'completo' }}" \
+            --minutos "${{ github.event.inputs.minutos || '210' }}" \
+            --zona="${{ github.event.inputs.zona || '' }}"
+
+      - name: Guardar resultados
+        run: |
+          git config user.name "escaner-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git rebase --abort 2>/dev/null || true
+          git add docs/data-na state
+          if git diff --cached --quiet; then
+            echo "Sin cambios que guardar"
+          else
+            git commit -m "Escaneo NA automático $(date -u +'%Y-%m-%d %H:%M UTC')"
+            ok=0
+            for i in 1 2 3; do
+              if git pull --rebase -X theirs origin ${GITHUB_REF_NAME} && git push; then ok=1; break; fi
+              git rebase --abort 2>/dev/null || true
+              sleep 10
+            done
+            [ "$ok" = "1" ]
+          fi
