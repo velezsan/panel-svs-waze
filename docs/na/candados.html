@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candados bajos · Panel SVS NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1100px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  .lk{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .lk b{color:var(--warn)}
+  .lk span{color:var(--accent2)}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>🔒 Candados bajos · NA</h1>
+  <p class="sub">Vías importantes con candado por debajo del estándar de México ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Elige un estado…</option></select>
+    <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
+    <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
+    <span class="chip" id="resumen-chip" style="display:none"></span>
+  </div>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Estándar aplicado: Autopista (FW) candado 5 · Carretera mayor (MH) 4 · Rampa 4 · Carretera menor (mH) 3.
+    Los segmentos sin candado explícito cuentan como nivel 1. Las Avenidas principales (PS) se agregarán en una etapa posterior.
+    Los datos se actualizan con cada corrida del escáner.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>n.toLocaleString('es-MX');
+  let indice=null, datos=null, lista=[], pagina=0, porPagina=100;
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_cand_na')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_cand_na',JSON.stringify([...visitados]));}catch(e){}}
+
+  const tipoNombre=rt=>(indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);
+  const permalink=r=>`https://www.waze.com/es-419/editor?env=usa&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
+
+  async function cargarEstado(slug){
+    if(!slug){$('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con candado bajo.</div>';$('pager').style.display='none';$('sel-tipo').style.display='none';$('sel-fecha').style.display='none';return;}
+    $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
+    const tPrev=$('sel-tipo').value, fPrev=$('sel-fecha').value;
+    try{
+      if(slug==='__todos'){
+        const listas=await Promise.all(indice.estados.map(async e=>{
+          try{
+            const r=await fetch('../data-na/candados/'+e.slug+'.json',{cache:'no-store'});
+            const d=await r.json();
+            return Object.values(d.segmentos||{}).map(s=>({...s,est:e.estado}));
+          }catch(_){return [];}
+        }));
+        const segs={};
+        listas.flat().forEach(s=>{segs[s.id]=s;});
+        datos={segmentos:segs};
+      }else{
+        const r=await fetch('../data-na/candados/'+slug+'.json',{cache:'no-store'});
+        datos=await r.json();
+      }
+    }catch(e){
+      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
+      return;
+    }
+    const regs=Object.values(datos.segmentos||{});
+    const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
+    $('sel-tipo').innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
+    $('sel-tipo').style.display='inline-block';
+    const fechas=[...new Set(regs.map(r=>(r.r||r.v||'').slice(0,10)).filter(Boolean))].sort().reverse();
+    const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
+    $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option>'
+      +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
+      +'<option value="sinfecha">Sin fecha</option>';
+    $('sel-fecha').style.display='inline-block';
+    if([...$('sel-tipo').options].some(o=>o.value===tPrev))$('sel-tipo').value=tPrev;
+    if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
+    filtrar();
+  }
+
+  function filtrar(){
+    if(!datos)return;
+    const t=$('sel-tipo').value, f=$('sel-fecha').value;
+    lista=Object.values(datos.segmentos||{}).filter(r=>{
+      if(t&&String(r.rt)!==t)return false;
+      if(f){
+        const marca=r.r||r.v;
+        if(f==='sinfecha'){ if(marca)return false; }
+        else if(f==='nuevos'){ if(!r.v||Date.now()-fechaDe(r.v).getTime()>=48*3600*1000)return false; }
+        else if(!marca||marca.slice(0,10)!==f)return false;
+      }
+      return true;
+    });
+    if(f&&f!=='sinfecha'){
+      // con filtro de fecha: los escaneados más recientemente van hasta arriba
+      lista.sort((a,b)=>(b.r||b.v||'').localeCompare(a.r||a.v||'')||(b.req-b.lk)-(a.req-a.lk)||a.id-b.id);
+    }else{
+      lista.sort((a,b)=>(a.req-a.lk)!==(b.req-b.lk)?(b.req-b.lk)-(a.req-a.lk):(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
+    }
+    pagina=0;
+    pintar();
+  }
+
+  function pintar(){
+    const total=lista.length;
+    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>`;
+    if(!total){
+      html+='<tr><td colspan="6" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+    }
+    lista.slice(ini,fin).forEach(r=>{
+      const vis=visitados.has(String(r.id));
+      let det='—', esNuevo=false;
+      const marca=r.r||r.v;  // columna: último escaneo (o primera detección si no hay)
+      if(marca){
+        const d=fechaDe(marca);
+        det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
+      }
+      if(r.v)esNuevo=(Date.now()-fechaDe(r.v).getTime())<48*3600*1000;
+      html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
+        <td>${r.nombre||'<span class="chip">sin nombre</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
+        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
+        <td class="lk"><b>${r.lk}</b> → <span>${r.req}</span></td>
+        <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
+        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
+    });
+    html+='</tbody></table>';
+    $('contenido').innerHTML=html;
+    const pgs=Math.max(1,Math.ceil(total/porPagina));
+    $('pager').style.display=total>porPagina?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
+    $('pg-num').value=pagina+1;
+    $('pg-num').max=pgs;
+    $('pg-total').textContent=`/ ${pgs}`;
+    $('pg-first').disabled=pagina===0;
+    $('pg-prev').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=pgs-1;
+    $('pg-last').disabled=pagina>=pgs-1;
+  }
+
+  $('contenido').addEventListener('click',e=>{
+    const q=e.target.closest('.quitar');
+    if(q){visitados.delete(String(q.dataset.quitar));guardar();pintar();return;}
+    const a=e.target.closest('a.wme');
+    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardar();setTimeout(pintar,150);}
+  });
+  $('pg-prev').addEventListener('click',()=>{pagina--;pintar();window.scrollTo(0,0);});
+  $('pg-next').addEventListener('click',()=>{pagina++;pintar();window.scrollTo(0,0);});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintar();window.scrollTo(0,0);});
+  function irAPagina(){
+    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
+    let v=parseInt($('pg-num').value,10);
+    if(isNaN(v))v=pagina+1;
+    pagina=Math.min(Math.max(v,1),pgs)-1;
+    pintar();window.scrollTo(0,0);
+  }
+  $('pg-num').addEventListener('change',irAPagina);
+  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
+  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
+  $('sel-tipo').addEventListener('change',filtrar);
+  $('sel-fecha').addEventListener('change',filtrar);
+
+  fetch('../data-na/candados/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      indice=d;
+      const sel=$('sel-estado');
+      if(d.estados&&d.estados.length){
+        const ot=document.createElement('option');
+        ot.value='__todos';ot.textContent=`Todo México (${fmt(d.total)})`;
+        sel.appendChild(ot);
+        d.estados.forEach(e=>{
+          const o=document.createElement('option');
+          o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
+          sel.appendChild(o);
+        });
+        const chip=$('resumen-chip');
+        chip.style.display='inline-block';
+        const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+        chip.textContent=`${fmt(d.total)} segmentos con candado bajo · actualizado ${act}`;
+        $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus segmentos con candado bajo.</div>';
+      }else{
+        $('contenido').innerHTML='<div class="cargando">Aún no hay datos. El conteo crece con cada corrida del escáner.</div>';
+      }
+    })
+    .catch(()=>{
+      $('contenido').innerHTML='<div class="cargando">Los datos se generan con las corridas del escáner. Si esta sección es nueva, estará disponible después de la próxima corrida.</div>';
+    });
+})();
+</script>
+</body>
+</html>
