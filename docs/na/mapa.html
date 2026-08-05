@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mapa de escaneo · Panel SVS NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1160px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1160px;margin:0 auto;padding:10px 20px 50px}
+  #marco{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px}
+  canvas{width:100%;height:auto;display:block;border-radius:8px;cursor:crosshair}
+  #tip{position:fixed;display:none;background:var(--panel2);border:1px solid var(--accent);color:var(--text);
+       padding:8px 12px;border-radius:8px;font-size:.85rem;pointer-events:none;z-index:9;max-width:260px}
+  .leyenda{display:flex;flex-wrap:wrap;gap:14px;margin:12px 2px;color:var(--muted);font-size:.85rem;align-items:center}
+  .leyenda span{display:inline-flex;align-items:center;gap:6px}
+  .leyenda i{display:inline-block;width:14px;height:14px;border-radius:3px}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .controles{display:flex;gap:8px;align-items:center;margin:0 2px 10px;color:var(--muted);font-size:.85rem;flex-wrap:wrap}
+  .controles button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+       padding:6px 13px;cursor:pointer;font-size:1rem;line-height:1}
+  .controles button:hover{border-color:var(--accent)}
+  #nivel{min-width:44px;text-align:center;color:var(--text)}
+</style>
+</head>
+<body>
+<header>
+  <h1>🗺️ Mapa de escaneo · NA</h1>
+  <p class="sub">Cada cuadrito es una celda del barrido, coloreada según hace cuánto se escaneó ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div class="leyenda" id="leyenda" style="display:none">
+    <span><i style="background:#9ecbff"></i> &lt; 6 h</span>
+    <span><i style="background:#5ea3ee"></i> 6–24 h</span>
+    <span><i style="background:#3f7fc4"></i> 1–3 días</span>
+    <span><i style="background:#2c5c94"></i> 3–7 días</span>
+    <span><i style="background:#1e3f66"></i> &gt; 7 días</span>
+    <span><i style="background:#3a4a6b"></i> escaneada (sin hora registrada)</span>
+    <span><i style="background:#141a29;border:1px solid var(--line)"></i> pendiente</span>
+  </div>
+  <div class="controles" id="controles" style="display:none">
+    <button id="btn-menos" title="Alejar">−</button>
+    <span id="nivel">×1</span>
+    <button id="btn-mas" title="Acercar">+</button>
+    <button id="btn-reset" title="Ver todo México">⟲ Todo</button>
+    <span>· rueda del mouse = zoom · arrastra para moverte · doble clic = acercar</span>
+  </div>
+  <div id="marco"><div class="cargando" id="msg">Cargando mapa…</div><canvas id="cv" style="display:none"></canvas></div>
+  <p class="sub" id="pie" style="margin-top:10px"></p>
+</main>
+<div id="tip"></div>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const GEO='https://raw.githubusercontent.com/velezsan/panel-svs-waze/main/scanner/mx_estados.geojson';
+  let meta=null, celdas=null, geo=null;
+  let W=0, H=0, escala=2, base=null, cv=null, ctx=null;
+  let zoom=1, panX=0, panY=0;
+
+  function colorEdad(t){
+    if(!t) return '#3a4a6b';
+    const h=(Date.now()-new Date(t+':00Z').getTime())/3.6e6;
+    if(h<6) return '#9ecbff';
+    if(h<24) return '#5ea3ee';
+    if(h<72) return '#3f7fc4';
+    if(h<168) return '#2c5c94';
+    return '#1e3f66';
+  }
+
+  function prepararBase(){
+    const cols=meta.cols, filas=meta.filas;
+    escala=Math.min(3, Math.max(2, Math.floor(1500/cols)));
+    W=cols*escala; H=filas*escala;
+    base=document.createElement('canvas'); base.width=W; base.height=H;
+    const b=base.getContext('2d');
+    b.fillStyle='#141a29'; b.fillRect(0,0,W,H);
+    for(const [id,val] of Object.entries(celdas)){
+      const idx=+id, f=Math.floor(idx/cols), c=idx%cols;
+      b.fillStyle=colorEdad(val[1]);
+      b.fillRect(c*escala, H-(f+1)*escala, escala, escala);
+    }
+  }
+
+  function draw(){
+    ctx.setTransform(1,0,0,1,0,0);
+    ctx.fillStyle='#141a29'; ctx.fillRect(0,0,W,H);
+    ctx.setTransform(zoom,0,0,zoom,panX,panY);
+    ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(base,0,0);
+    const [lon1,lat1,lon2,lat2]=meta.bbox;
+    const px=lon=>((lon-lon1)/(lon2-lon1))*W;
+    const py=lat=>H-((lat-lat1)/(lat2-lat1))*H;
+    // oscurecer todo lo que queda fuera de México (mar y otros países):
+    // esas celdas se descartan sin escanearse y no deben verse como "escaneadas"
+    ctx.beginPath();
+    ctx.rect(0,0,W,H);
+    for(const ft of geo.features){
+      const gg=ft.geometry;
+      const polys=gg.type==='Polygon'?[gg.coordinates]:gg.coordinates;
+      for(const poly of polys){
+        for(const anillo of poly){
+          anillo.forEach((p,i)=>{ i?ctx.lineTo(px(p[0]),py(p[1])):ctx.moveTo(px(p[0]),py(p[1])); });
+          ctx.closePath();
+        }
+      }
+    }
+    ctx.fillStyle='rgba(15,20,32,0.85)';
+    ctx.fill('evenodd');
+    // contornos de estados
+    ctx.strokeStyle='rgba(147,160,184,0.55)'; ctx.lineWidth=1/zoom;
+    for(const ft of geo.features){
+      const gg=ft.geometry;
+      const polys=gg.type==='Polygon'?[gg.coordinates]:gg.coordinates;
+      for(const poly of polys){
+        for(const anillo of poly){
+          ctx.beginPath();
+          anillo.forEach((p,i)=>{ i?ctx.lineTo(px(p[0]),py(p[1])):ctx.moveTo(px(p[0]),py(p[1])); });
+          ctx.closePath(); ctx.stroke();
+        }
+      }
+    }
+  }
+
+  function clampPan(){
+    panX=Math.min(0, Math.max(W-W*zoom, panX));
+    panY=Math.min(0, Math.max(H-H*zoom, panY));
+  }
+
+  function setZoom(nz, cx, cy){
+    nz=Math.min(40, Math.max(1, nz));
+    panX=cx-(nz/zoom)*(cx-panX);
+    panY=cy-(nz/zoom)*(cy-panY);
+    zoom=nz; clampPan(); draw();
+    $('nivel').textContent='×'+(zoom<10?Math.round(zoom*10)/10:Math.round(zoom));
+  }
+
+  function iniciar(){
+    cv=$('cv'); cv.width=W; cv.height=H; ctx=cv.getContext('2d');
+    draw();
+    $('msg').style.display='none'; cv.style.display='block';
+    $('leyenda').style.display='flex'; $('controles').style.display='flex';
+
+    const pos=ev=>{
+      const r=cv.getBoundingClientRect();
+      return [(ev.clientX-r.left)*(W/r.width), (ev.clientY-r.top)*(H/r.height)];
+    };
+    cv.addEventListener('wheel',ev=>{
+      ev.preventDefault();
+      const [x,y]=pos(ev);
+      setZoom(zoom*(ev.deltaY<0?1.25:0.8), x, y);
+    },{passive:false});
+    cv.addEventListener('dblclick',ev=>{ const [x,y]=pos(ev); setZoom(zoom*2, x, y); });
+
+    let drag=null, movio=false;
+    cv.addEventListener('mousedown',ev=>{
+      ev.preventDefault();
+      drag=[ev.clientX, ev.clientY, panX, panY]; movio=false;
+      cv.style.cursor='grabbing';
+    });
+    window.addEventListener('mouseup',()=>{ drag=null; cv.style.cursor='crosshair'; });
+    window.addEventListener('mousemove',ev=>{
+      if(!drag)return;
+      const r=cv.getBoundingClientRect();
+      panX=drag[2]+(ev.clientX-drag[0])*(W/r.width);
+      panY=drag[3]+(ev.clientY-drag[1])*(H/r.height);
+      movio=true; clampPan(); draw();
+    });
+
+    const tip=$('tip');
+    cv.addEventListener('mousemove',ev=>{
+      if(drag){ tip.style.display='none'; return; }
+      const [x,y]=pos(ev);
+      const wx=(x-panX)/zoom, wy=(y-panY)/zoom;
+      const cols=meta.cols, filas=meta.filas;
+      const c=Math.floor(wx/escala), f=Math.floor((H-wy)/escala);
+      if(c<0||c>=cols||f<0||f>=filas){tip.style.display='none';return;}
+      const id=String(f*cols+c);
+      const [lon1,lat1]=meta.bbox;
+      const lon=(lon1+(c+0.5)*meta.celda).toFixed(3), lat=(lat1+(f+0.5)*meta.celda).toFixed(3);
+      const v=celdas[id];
+      let txt;
+      if(!v){ txt='Pendiente de escanear'; }
+      else{
+        const cuando=v[1]?new Date(v[1]+':00Z').toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'sin hora registrada';
+        txt='Escaneada: '+cuando+(v[0]?' · con segmentos':' · vacía');
+      }
+      tip.textContent=txt+' · ('+lat+', '+lon+')';
+      tip.style.display='block';
+      tip.style.left=Math.min(ev.clientX+14, innerWidth-270)+'px';
+      tip.style.top=(ev.clientY+14)+'px';
+    });
+    cv.addEventListener('mouseleave',()=>{tip.style.display='none';});
+
+    $('btn-mas').addEventListener('click',()=>setZoom(zoom*1.5, W/2, H/2));
+    $('btn-menos').addEventListener('click',()=>setZoom(zoom/1.5, W/2, H/2));
+    $('btn-reset').addEventListener('click',()=>{ zoom=1; panX=0; panY=0; draw(); $('nivel').textContent='×1'; });
+  }
+
+  Promise.all([
+    fetch('../data-na/celdas.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw 0;return r.json();}),
+    fetch(GEO).then(r=>r.json())
+  ]).then(([d,g])=>{
+    meta=d; celdas=d.celdas; geo=g;
+    prepararBase();
+    iniciar();
+    const tot=Object.keys(celdas).length;
+    const act=d.actualizado?new Date(d.actualizado).toLocaleString('es-MX',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—';
+    $('pie').textContent=`${tot.toLocaleString('es-MX')} celdas revisadas de ${(meta.cols*meta.filas).toLocaleString('es-MX')} · actualizado ${act} (tu hora) · pasa el cursor sobre el mapa para ver el detalle de cada celda`;
+  }).catch(()=>{
+    $('msg').textContent='El mapa se llena con datos de las corridas del escáner. Si acabas de agregar esta función, estará disponible después de la próxima corrida.';
+  });
+})();
+</script>
+</body>
+</html>
