@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-06T12:18:05+00:00",
+ "actualizado": "2026-08-06T12:59:44+00:00",
  "env": "row",
- "total": 222478,
+ "total": 222149,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 11332,
-   "ciudades": 284
+   "total": 11039,
+   "ciudades": 285
   },
   {
    "estado": "Hidalgo",
@@ -90,7 +90,7 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 9849,
+   "total": 9837,
    "ciudades": 542
   },
   {
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 4176,
+   "total": 4159,
    "ciudades": 61
   },
   {
@@ -162,7 +162,7 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 3039,
+   "total": 3032,
    "ciudades": 90
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161579,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 20.6,
+  "porcentaje_vuelta": 20.8,
   "modo": "completo"
  },
  "aviso": "",
