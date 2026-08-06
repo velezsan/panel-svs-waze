@@ -1118,7 +1118,7 @@ def main():
             _git("rebase", "--abort")  # limpia cualquier rebase atorado de un intento previo
             _git("config", "user.name", "escaner-bot")
             _git("config", "user.email", "actions@users.noreply.github.com")
-            _git("add", "docs/data", "state")
+            _git("add", os.path.relpath(DATA_DIR, BASE), "state")
             r = _git("commit", "-m", etiqueta)
             if r.returncode == 0:
                 for _ in range(3):
