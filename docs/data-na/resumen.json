@@ -1,0 +1,70 @@
+{
+ "actualizado": "2026-08-06T02:40:49+00:00",
+ "env": "usa",
+ "total": 3501,
+ "estados": [
+  {
+   "estado": "Arizona",
+   "slug": "arizona",
+   "total": 2,
+   "ciudades": 1
+  },
+  {
+   "estado": "Chihuahua",
+   "slug": "chihuahua",
+   "total": 944,
+   "ciudades": 13
+  },
+  {
+   "estado": "Coahuila",
+   "slug": "coahuila",
+   "total": 332,
+   "ciudades": 15
+  },
+  {
+   "estado": "Nuevo León",
+   "slug": "nuevo-leon",
+   "total": 4,
+   "ciudades": 1
+  },
+  {
+   "estado": "Sonora",
+   "slug": "sonora",
+   "total": 605,
+   "ciudades": 11
+  },
+  {
+   "estado": "Tamaulipas",
+   "slug": "tamaulipas",
+   "total": 1614,
+   "ciudades": 29
+  }
+ ],
+ "progreso": {
+  "ciclo": 1,
+  "celdas_escaneadas": 151744,
+  "celdas_total": 161650,
+  "porcentaje": 93.9,
+  "porcentaje_vuelta": 93.9,
+  "modo": "completo"
+ },
+ "aviso": "",
+ "tipos": {
+  "1": "Calle",
+  "2": "Avenida principal",
+  "3": "Autopista",
+  "4": "Rampa",
+  "5": "Sendero peatonal",
+  "6": "Carretera mayor",
+  "7": "Carretera menor",
+  "8": "Terracería",
+  "10": "Andador",
+  "15": "Ferry",
+  "16": "Escaleras",
+  "17": "Camino privado",
+  "18": "Vía de tren",
+  "19": "Pista de aterrizaje",
+  "20": "Camino de estacionamiento",
+  "22": "Callejón"
+ }
+}
