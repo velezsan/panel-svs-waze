@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-06T07:55:08+00:00",
+ "actualizado": "2026-08-06T08:35:33+00:00",
  "env": "row",
- "total": 224191,
+ "total": 223811,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,7 +24,7 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 1580,
+   "total": 1579,
    "ciudades": 82
   },
   {
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 12309,
-   "ciudades": 291
+   "total": 11937,
+   "ciudades": 290
   },
   {
    "estado": "Hidalgo",
@@ -162,7 +162,7 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 3100,
+   "total": 3099,
    "ciudades": 88
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161579,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 19.6,
+  "porcentaje_vuelta": 19.9,
   "modo": "completo"
  },
  "aviso": "",
