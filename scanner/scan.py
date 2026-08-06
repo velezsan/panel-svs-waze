@@ -871,6 +871,8 @@ def main():
     inicio = time.time()
     limite = inicio + args.minutos * 60
     estados_mx = EstadosMX(GEOJSON_PATH)
+    # nombres válidos de estados mexicanos (para descartar lo que caiga en EUA)
+    nombres_mx = {k for k, _r in estados_mx.features} | set(ALIAS_ESTADOS.values())
     estado = load_json(STATE_PATH, {})
     contador = {"req": 0, "segs": 0}
 
@@ -1035,6 +1037,12 @@ def main():
                 # estado según Waze (autoridad); el mapa propio solo de respaldo
                 est = (normalizar_estado(h.get("edo", ""), estados_mx)
                        or estados_mx.estado_de(h["lon"], h["lat"]))
+                if panel_na:
+                    # Panel NA: solo segmentos en territorio mexicano
+                    if est not in nombres_mx:
+                        continue  # Waze lo reporta en un estado de EUA
+                    if not h.get("edo") and not estados_mx.dentro_de_alguno(h["lon"], h["lat"]):
+                        continue  # sin estado de Waze y el punto cae fuera de México
                 if solo_estados and est not in solo_estados:
                     continue
                 reg = dict(h)
@@ -1045,6 +1053,10 @@ def main():
                 reg["rev"] = hoy  # última vez que se escaneó (siempre se actualiza)
                 almacen.setdefault(est, {})[sid] = reg
         escaneadas = []
+        if panel_na:
+            # purgar grupos que no sean estados mexicanos (p. ej. Texas de corridas previas)
+            for _e in [e for e in list(almacen) if e not in nombres_mx]:
+                del almacen[_e]
         celdas_hechas = len([1 for v in celdas_info.values()])
         progreso = {
             "ciclo": ciclo,
@@ -1085,6 +1097,11 @@ def main():
             for r in regs:
                 est_c = (normalizar_estado(r.get("edo", ""), estados_mx)
                          or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_c not in nombres_mx:
+                        continue  # candado del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
                 reg_c = {k: v for k, v in r.items() if k != "edo"}
                 cand_por_estado.setdefault(est_c, {})[str(r["id"])] = reg_c
         os.makedirs(CANDADOS_DIR, exist_ok=True)
