@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-06T00:21:10+00:00",
+ "actualizado": "2026-08-06T01:03:05+00:00",
  "env": "row",
- "total": 226291,
+ "total": 225545,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -30,8 +30,8 @@
   {
    "estado": "Chiapas",
    "slug": "chiapas",
-   "total": 3650,
-   "ciudades": 219
+   "total": 3615,
+   "ciudades": 218
   },
   {
    "estado": "Chihuahua",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 13080,
-   "ciudades": 310
+   "total": 12768,
+   "ciudades": 306
   },
   {
    "estado": "Hidalgo",
@@ -120,13 +120,13 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 15435,
-   "ciudades": 751
+   "total": 15319,
+   "ciudades": 739
   },
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 9860,
+   "total": 9876,
    "ciudades": 718
   },
   {
@@ -162,8 +162,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 3288,
-   "ciudades": 91
+   "total": 3278,
+   "ciudades": 90
   },
   {
    "estado": "Tamaulipas",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 15105,
-   "ciudades": 972
+   "total": 14816,
+   "ciudades": 968
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161578,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 18.5,
+  "porcentaje_vuelta": 18.6,
   "modo": "completo"
  },
  "aviso": "",
