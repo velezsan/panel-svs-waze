@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-07T14:20:32+00:00",
+ "actualizado": "2026-08-07T15:01:33+00:00",
  "env": "row",
- "total": 220359,
+ "total": 220478,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -96,7 +96,7 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 7022,
+   "total": 7093,
    "ciudades": 191
   },
   {
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 14341,
-   "ciudades": 951
+   "total": 14386,
+   "ciudades": 954
   },
   {
    "estado": "Yucatán",
