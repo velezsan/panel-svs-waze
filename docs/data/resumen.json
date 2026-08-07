@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-08-07T04:30:31+00:00",
+ "actualizado": "2026-08-07T05:11:17+00:00",
  "env": "row",
  "total": 221526,
  "estados": [
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 10738,
-   "ciudades": 278
+   "total": 10839,
+   "ciudades": 279
   },
   {
    "estado": "Hidalgo",
@@ -90,8 +90,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 9628,
-   "ciudades": 543
+   "total": 9579,
+   "ciudades": 542
   },
   {
    "estado": "Morelos",
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 4142,
-   "ciudades": 59
+   "total": 4166,
+   "ciudades": 61
   },
   {
    "estado": "San Luis Potosí",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161580,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 22.2,
+  "porcentaje_vuelta": 21.8,
   "modo": "completo"
  },
  "aviso": "",
