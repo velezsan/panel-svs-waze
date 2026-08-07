@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-07T21:58:33+00:00",
+ "actualizado": "2026-08-07T22:38:49+00:00",
  "env": "usa",
- "total": 4158,
+ "total": 4128,
  "estados": [
   {
    "estado": "Baja California",
@@ -12,13 +12,13 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 864,
+   "total": 873,
    "ciudades": 12
   },
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 288,
+   "total": 291,
    "ciudades": 15
   },
   {
@@ -36,7 +36,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 758,
+   "total": 728,
    "ciudades": 24
   }
  ],
@@ -45,7 +45,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 63.2,
+  "porcentaje_vuelta": 70.7,
   "modo": "completo"
  },
  "aviso": "",
