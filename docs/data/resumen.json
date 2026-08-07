@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-07T07:18:46+00:00",
+ "actualizado": "2026-08-07T08:01:04+00:00",
  "env": "row",
- "total": 221204,
+ "total": 221279,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,7 +72,7 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 10617,
+   "total": 10655,
    "ciudades": 278
   },
   {
@@ -96,8 +96,8 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 7378,
-   "ciudades": 204
+   "total": 7385,
+   "ciudades": 206
   },
   {
    "estado": "México",
@@ -126,8 +126,8 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 9414,
-   "ciudades": 692
+   "total": 9435,
+   "ciudades": 695
   },
   {
    "estado": "Querétaro",
