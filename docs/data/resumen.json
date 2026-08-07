@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-07T21:14:48+00:00",
+ "actualizado": "2026-08-07T21:21:55+00:00",
  "env": "row",
- "total": 218722,
+ "total": 218715,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3785,
-   "ciudades": 56
+   "total": 3778,
+   "ciudades": 55
   },
   {
    "estado": "San Luis Potosí",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161585,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 23.5,
+  "porcentaje_vuelta": 23.8,
   "modo": "completo"
  },
  "aviso": "",
