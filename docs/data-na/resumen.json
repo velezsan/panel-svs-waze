@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-08-07T10:45:48+00:00",
+ "actualizado": "2026-08-07T11:26:59+00:00",
  "env": "usa",
- "total": 5414,
+ "total": 5344,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 2535,
-   "ciudades": 59
+   "total": 2487,
+   "ciudades": 58
   },
   {
    "estado": "Chihuahua",
@@ -30,7 +30,7 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 500,
+   "total": 478,
    "ciudades": 17
   },
   {
