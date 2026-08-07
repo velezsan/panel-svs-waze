@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-07T03:47:58+00:00",
+ "actualizado": "2026-08-07T04:30:31+00:00",
  "env": "row",
- "total": 221373,
+ "total": 221526,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 10741,
-   "ciudades": 279
+   "total": 10738,
+   "ciudades": 278
   },
   {
    "estado": "Hidalgo",
@@ -96,14 +96,14 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 7378,
-   "ciudades": 204
+   "total": 7459,
+   "ciudades": 212
   },
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 15766,
-   "ciudades": 503
+   "total": 15775,
+   "ciudades": 505
   },
   {
    "estado": "Nayarit",
@@ -120,14 +120,14 @@
   {
    "estado": "Oaxaca",
    "slug": "oaxaca",
-   "total": 14908,
-   "ciudades": 711
+   "total": 14874,
+   "ciudades": 707
   },
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 9459,
-   "ciudades": 695
+   "total": 9473,
+   "ciudades": 696
   },
   {
    "estado": "Querétaro",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 14408,
-   "ciudades": 955
+   "total": 14418,
+   "ciudades": 956
   },
   {
    "estado": "Yucatán",
