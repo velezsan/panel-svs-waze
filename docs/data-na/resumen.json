@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-08-07T02:16:38+00:00",
+ "actualizado": "2026-08-07T02:56:48+00:00",
  "env": "usa",
- "total": 5991,
+ "total": 5816,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 2869,
-   "ciudades": 73
+   "total": 2705,
+   "ciudades": 68
   },
   {
    "estado": "Chihuahua",
@@ -30,8 +30,8 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 661,
-   "ciudades": 18
+   "total": 650,
+   "ciudades": 17
   },
   {
    "estado": "Tamaulipas",
@@ -42,10 +42,10 @@
  ],
  "progreso": {
   "ciclo": 2,
-  "celdas_escaneadas": 161643,
+  "celdas_escaneadas": 161645,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 95.8,
+  "porcentaje_vuelta": 97.4,
   "modo": "completo"
  },
  "aviso": "",
