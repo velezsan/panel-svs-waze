@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T07:17:19+00:00",
+ "actualizado": "2026-08-08T08:05:19+00:00",
  "env": "row",
- "total": 216446,
+ "total": 216212,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -96,14 +96,14 @@
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 6022,
-   "ciudades": 180
+   "total": 6001,
+   "ciudades": 177
   },
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 14819,
-   "ciudades": 481
+   "total": 14706,
+   "ciudades": 478
   },
   {
    "estado": "Nayarit",
@@ -126,7 +126,7 @@
   {
    "estado": "Puebla",
    "slug": "puebla",
-   "total": 8858,
+   "total": 8758,
    "ciudades": 669
   },
   {
@@ -198,7 +198,7 @@
  ],
  "progreso": {
   "ciclo": 2,
-  "celdas_escaneadas": 161586,
+  "celdas_escaneadas": 161587,
   "celdas_total": 161650,
   "porcentaje": 100.0,
   "porcentaje_vuelta": 24.5,
