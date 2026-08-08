@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T12:55:37+00:00",
+ "actualizado": "2026-08-08T13:55:45+00:00",
  "env": "row",
- "total": 215457,
+ "total": 215417,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,8 +54,8 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 772,
-   "ciudades": 35
+   "total": 732,
+   "ciudades": 34
   },
   {
    "estado": "Durango",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161589,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 25.1,
+  "porcentaje_vuelta": 25.4,
   "modo": "completo"
  },
  "aviso": "",
