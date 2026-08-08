@@ -1182,6 +1182,12 @@ def main():
     def _git(*args_git):
         return subprocess.run(["git", *args_git], cwd=BASE, capture_output=True, text=True)
 
+    def _motivo_git(r):
+        """Resume el error de un comando git para poder verlo en la bitácora."""
+        txt = ((r.stderr or "") + " " + (r.stdout or "")).strip()
+        txt = " ".join(txt.split())
+        return txt[-220:] if txt else f"código {r.returncode}"
+
     def publicar_git(etiqueta):
         """Commit y push intermedios (solo dentro de GitHub Actions)."""
         if not os.environ.get("GITHUB_ACTIONS"):
@@ -1193,17 +1199,21 @@ def main():
             _git("add", os.path.relpath(DATA_DIR, BASE), "state")
             r = _git("commit", "-m", etiqueta)
             if r.returncode == 0:
-                for _ in range(3):
+                motivo = ""
+                for _ in range(5):
                     p = _git("pull", "--rebase", "-X", "theirs", "origin", "main")
                     if p.returncode != 0:
+                        motivo = "pull -> " + _motivo_git(p)
                         _git("rebase", "--abort")
                         time.sleep(5)
                         continue
-                    if _git("push", "origin", "main").returncode == 0:
+                    q = _git("push", "origin", "main")
+                    if q.returncode == 0:
                         log(f"Publicación parcial hecha: {etiqueta}")
                         return
+                    motivo = "push -> " + _motivo_git(q)
                     time.sleep(5)
-                log("No se pudo publicar parcial; se reintentará en la siguiente")
+                log(f"No se pudo publicar parcial ({motivo}); se reintentará en la siguiente")
         except Exception as e:
             log(f"No se pudo publicar parcial ({e}); se publicará al final")
 
