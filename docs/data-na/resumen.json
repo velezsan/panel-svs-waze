@@ -1,12 +1,12 @@
 {
- "actualizado": "2026-08-08T04:18:54+00:00",
+ "actualizado": "2026-08-08T05:04:42+00:00",
  "env": "usa",
- "total": 3259,
+ "total": 3262,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 1433,
+   "total": 1436,
    "ciudades": 36
   },
   {
