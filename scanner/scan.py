@@ -1188,32 +1188,53 @@ def main():
         txt = " ".join(txt.split())
         return txt[-220:] if txt else f"código {r.returncode}"
 
+    def _rutas_propias():
+        """Rutas que publica este panel (cada panel tiene las suyas, no se pisan)."""
+        rutas = []
+        for p in (DATA_DIR, STATE_PATH, LASTRUN_PATH, DEBUG_PATH):
+            rel = os.path.relpath(p, BASE)
+            if os.path.exists(p) or _git("ls-files", "--error-unmatch", rel).returncode == 0:
+                rutas.append(rel)
+        return rutas
+
     def publicar_git(etiqueta):
-        """Commit y push intermedios (solo dentro de GitHub Actions)."""
+        """Commit y push intermedios (solo dentro de GitHub Actions).
+
+        Se publica SIN rebase: se coloca la rama sobre origin/main y se vuelven
+        a marcar solo las rutas de este panel. Antes se hacía rebase con
+        -X theirs, que no sabe resolver los conflictos borrado/modificación
+        (cuando el escáner elimina el archivo de un estado que quedó vacío) y
+        dejaba de publicar durante horas.
+        """
         if not os.environ.get("GITHUB_ACTIONS"):
             return
         try:
             _git("rebase", "--abort")  # limpia cualquier rebase atorado de un intento previo
             _git("config", "user.name", "escaner-bot")
             _git("config", "user.email", "actions@users.noreply.github.com")
-            _git("add", os.path.relpath(DATA_DIR, BASE), "state")
-            r = _git("commit", "-m", etiqueta)
-            if r.returncode == 0:
-                motivo = ""
-                for _ in range(5):
-                    p = _git("pull", "--rebase", "-X", "theirs", "origin", "main")
-                    if p.returncode != 0:
-                        motivo = "pull -> " + _motivo_git(p)
-                        _git("rebase", "--abort")
-                        time.sleep(5)
-                        continue
-                    q = _git("push", "origin", "main")
-                    if q.returncode == 0:
-                        log(f"Publicación parcial hecha: {etiqueta}")
-                        return
-                    motivo = "push -> " + _motivo_git(q)
+            motivo = ""
+            for _ in range(5):
+                f = _git("fetch", "origin", "main")
+                if f.returncode != 0:
+                    motivo = "fetch -> " + _motivo_git(f)
                     time.sleep(5)
-                log(f"No se pudo publicar parcial ({motivo}); se reintentará en la siguiente")
+                    continue
+                _git("reset", "--mixed", "origin/main")
+                _git("add", "-A", *_rutas_propias())
+                if _git("diff", "--cached", "--quiet").returncode == 0:
+                    return  # nada nuevo que publicar
+                c = _git("commit", "-m", etiqueta)
+                if c.returncode != 0:
+                    motivo = "commit -> " + _motivo_git(c)
+                    time.sleep(5)
+                    continue
+                q = _git("push", "origin", "HEAD:main")
+                if q.returncode == 0:
+                    log(f"Publicación parcial hecha: {etiqueta}")
+                    return
+                motivo = "push -> " + _motivo_git(q)
+                time.sleep(5)
+            log(f"No se pudo publicar parcial ({motivo}); se reintentará en la siguiente")
         except Exception as e:
             log(f"No se pudo publicar parcial ({e}); se publicará al final")
 
