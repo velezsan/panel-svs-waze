@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T16:45:38+00:00",
+ "actualizado": "2026-08-08T17:39:21+00:00",
  "env": "row",
- "total": 215369,
+ "total": 215475,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -42,7 +42,7 @@
   {
    "estado": "Ciudad de México",
    "slug": "ciudad-de-mexico",
-   "total": 1699,
+   "total": 1797,
    "ciudades": 17
   },
   {
@@ -102,7 +102,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 14573,
+   "total": 14581,
    "ciudades": 475
   },
   {
@@ -198,7 +198,7 @@
  ],
  "progreso": {
   "ciclo": 2,
-  "celdas_escaneadas": 161592,
+  "celdas_escaneadas": 161594,
   "celdas_total": 161650,
   "porcentaje": 100.0,
   "porcentaje_vuelta": 25.8,
