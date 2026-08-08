@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T00:48:25+00:00",
+ "actualizado": "2026-08-08T01:29:16+00:00",
  "env": "usa",
- "total": 3685,
+ "total": 4100,
  "estados": [
   {
    "estado": "Baja California",
@@ -45,7 +45,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 96.8,
+  "porcentaje_vuelta": 81.8,
   "modo": "completo"
  },
  "aviso": "",
