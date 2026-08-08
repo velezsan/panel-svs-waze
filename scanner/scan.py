@@ -758,6 +758,25 @@ def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_
         return out
 
 
+def ids_de_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
+    """Conjunto de ids de segmentos que ese servidor tiene en el bbox."""
+    try:
+        data = pedir_celda(sesion, env, bbox, pausa, tipos)
+        contador["req"] += 1
+        return {s.get("id") for s in _objetos(data, "segments")}
+    except AreaError:
+        contador["req"] += 1
+        if profundidad >= 5:
+            return set()
+        x1, y1, x2, y2 = bbox
+        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+        out = set()
+        for sub in ([x1, y1, mx, my], [mx, y1, x2, my],
+                    [x1, my, mx, y2], [mx, my, x2, y2]):
+            out |= ids_de_bbox(sesion, env, sub, tipos, pausa, contador, profundidad + 1)
+        return out
+
+
 def detectar_entorno(cfg, pausa):
     """Averigua en qué servidor (usa/row) vive México y si hay acceso sin login."""
     errores = {}
@@ -1001,6 +1020,7 @@ def main():
     hallados_run = 0
     fallos_seguidos = 0
     sesion_usa = None
+    sesion_row = None
     celdas_run = set()
 
     def sello_celda(n):
@@ -1202,6 +1222,23 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
+                if panel_na and (h or _candados_celda or _champs_celda):
+                    # tierra adentro el servidor NA guarda copias huérfanas: se ven
+                    # en el editor pero no existen en el mapa vivo ni se pueden editar.
+                    # Un segmento real de la franja existe en AMBOS servidores.
+                    try:
+                        if sesion_row is None:
+                            sesion_row = nueva_sesion("row")
+                        ids_row = ids_de_bbox(sesion_row, "row", bb, tipos, pausa, contador)
+                        h = [x for x in h if x.get("id") in ids_row]
+                        for _k in [k for k in _candados_celda if k not in ids_row]:
+                            del _candados_celda[_k]
+                        for _u in list(_champs_celda):
+                            _champs_celda[_u] &= ids_row
+                            if not _champs_celda[_u]:
+                                del _champs_celda[_u]
+                    except Exception as e:
+                        log(f"Celda {idx}: no se pudo verificar contra ROW ({e})")
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1305,6 +1342,23 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
+                if panel_na and (h or _candados_celda or _champs_celda):
+                    # tierra adentro el servidor NA guarda copias huérfanas: se ven
+                    # en el editor pero no existen en el mapa vivo ni se pueden editar.
+                    # Un segmento real de la franja existe en AMBOS servidores.
+                    try:
+                        if sesion_row is None:
+                            sesion_row = nueva_sesion("row")
+                        ids_row = ids_de_bbox(sesion_row, "row", bb, tipos, pausa, contador)
+                        h = [x for x in h if x.get("id") in ids_row]
+                        for _k in [k for k in _candados_celda if k not in ids_row]:
+                            del _candados_celda[_k]
+                        for _u in list(_champs_celda):
+                            _champs_celda[_u] &= ids_row
+                            if not _champs_celda[_u]:
+                                del _champs_celda[_u]
+                    except Exception as e:
+                        log(f"Celda {idx}: no se pudo verificar contra ROW ({e})")
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
