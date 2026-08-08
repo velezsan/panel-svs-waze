@@ -588,9 +588,62 @@ REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
 _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
 
 
+FILTRAR_RESTRINGIDAS = False  # lo enciende el Panel NA
+
+
+def _punto_en_anillo(lon, lat, anillo):
+    """Point-in-polygon clásico (rayo horizontal)."""
+    dentro = False
+    n = len(anillo)
+    j = n - 1
+    for i in range(n):
+        xi, yi = anillo[i][0], anillo[i][1]
+        xj, yj = anillo[j][0], anillo[j][1]
+        if (yi > lat) != (yj > lat):
+            corte = (xj - xi) * (lat - yi) / ((yj - yi) or 1e-12) + xi
+            if lon < corte:
+                dentro = not dentro
+        j = i
+    return dentro
+
+
+def areas_restringidas(data):
+    """Polígonos que el propio Waze marca como NO editables en este entorno.
+
+    En la respuesta vienen como restrictedEditingAreas con type INVALID_ENV:
+    son las zonas que pertenecen al otro servidor (copias huérfanas que se ven
+    en el editor pero no existen en el mapa vivo). Solo se aplica al Panel NA.
+    """
+    if not FILTRAR_RESTRINGIDAS:
+        return []
+    anillos = []
+    for a in _objetos(data, "restrictedEditingAreas"):
+        geo = (a or {}).get("geometry") or {}
+        coords = geo.get("coordinates") or []
+        if geo.get("type") == "Polygon":
+            coords = [coords]
+        for poly in coords:
+            if poly and len(poly[0]) >= 4:
+                anillos.append(poly[0])  # anillo exterior
+    return anillos
+
+
+def en_area_restringida(anillos, lon, lat):
+    return any(_punto_en_anillo(lon, lat, a) for a in anillos)
+
+
 def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     """Extrae de la respuesta los segmentos sin nombre + sugerencia de nombre."""
     segs = _objetos(data, "segments")
+    # descartar lo que cae en zonas no editables de este entorno (Panel NA)
+    _restr = areas_restringidas(data)
+    if _restr:
+        _vivos = []
+        for _s in segs:
+            _lo, _la = punto_medio(_s)
+            if _lo is None or not en_area_restringida(_restr, _lo, _la):
+                _vivos.append(_s)
+        segs = _vivos
     streets = {s.get("id"): s for s in _objetos(data, "streets")}
     cities = {c.get("id"): c for c in _objetos(data, "cities")}
     states = {s.get("id"): s for s in _objetos(data, "states")}
@@ -758,25 +811,6 @@ def escanear_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0, min_
         return out
 
 
-def ids_de_bbox(sesion, env, bbox, tipos, pausa, contador, profundidad=0):
-    """Conjunto de ids de segmentos que ese servidor tiene en el bbox."""
-    try:
-        data = pedir_celda(sesion, env, bbox, pausa, tipos)
-        contador["req"] += 1
-        return {s.get("id") for s in _objetos(data, "segments")}
-    except AreaError:
-        contador["req"] += 1
-        if profundidad >= 5:
-            return set()
-        x1, y1, x2, y2 = bbox
-        mx, my = (x1 + x2) / 2, (y1 + y2) / 2
-        out = set()
-        for sub in ([x1, y1, mx, my], [mx, y1, x2, my],
-                    [x1, my, mx, y2], [mx, my, x2, y2]):
-            out |= ids_de_bbox(sesion, env, sub, tipos, pausa, contador, profundidad + 1)
-        return out
-
-
 def detectar_entorno(cfg, pausa):
     """Averigua en qué servidor (usa/row) vive México y si hay acceso sin login."""
     errores = {}
@@ -865,8 +899,10 @@ def main():
 
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
+    global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     if panel_na:
+        FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
@@ -1020,7 +1056,6 @@ def main():
     hallados_run = 0
     fallos_seguidos = 0
     sesion_usa = None
-    sesion_row = None
     celdas_run = set()
 
     def sello_celda(n):
@@ -1222,23 +1257,6 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
-                if panel_na and (h or _candados_celda or _champs_celda):
-                    # tierra adentro el servidor NA guarda copias huérfanas: se ven
-                    # en el editor pero no existen en el mapa vivo ni se pueden editar.
-                    # Un segmento real de la franja existe en AMBOS servidores.
-                    try:
-                        if sesion_row is None:
-                            sesion_row = nueva_sesion("row")
-                        ids_row = ids_de_bbox(sesion_row, "row", bb, tipos, pausa, contador)
-                        h = [x for x in h if x.get("id") in ids_row]
-                        for _k in [k for k in _candados_celda if k not in ids_row]:
-                            del _candados_celda[_k]
-                        for _u in list(_champs_celda):
-                            _champs_celda[_u] &= ids_row
-                            if not _champs_celda[_u]:
-                                del _champs_celda[_u]
-                    except Exception as e:
-                        log(f"Celda {idx}: no se pudo verificar contra ROW ({e})")
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1342,23 +1360,6 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
-                if panel_na and (h or _candados_celda or _champs_celda):
-                    # tierra adentro el servidor NA guarda copias huérfanas: se ven
-                    # en el editor pero no existen en el mapa vivo ni se pueden editar.
-                    # Un segmento real de la franja existe en AMBOS servidores.
-                    try:
-                        if sesion_row is None:
-                            sesion_row = nueva_sesion("row")
-                        ids_row = ids_de_bbox(sesion_row, "row", bb, tipos, pausa, contador)
-                        h = [x for x in h if x.get("id") in ids_row]
-                        for _k in [k for k in _candados_celda if k not in ids_row]:
-                            del _candados_celda[_k]
-                        for _u in list(_champs_celda):
-                            _champs_celda[_u] &= ids_row
-                            if not _champs_celda[_u]:
-                                del _champs_celda[_u]
-                    except Exception as e:
-                        log(f"Celda {idx}: no se pudo verificar contra ROW ({e})")
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
