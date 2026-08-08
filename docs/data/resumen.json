@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T08:45:50+00:00",
+ "actualizado": "2026-08-08T09:25:03+00:00",
  "env": "row",
- "total": 216209,
+ "total": 215834,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,8 +24,8 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 1360,
-   "ciudades": 72
+   "total": 1354,
+   "ciudades": 70
   },
   {
    "estado": "Chiapas",
@@ -54,8 +54,8 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 947,
-   "ciudades": 43
+   "total": 802,
+   "ciudades": 38
   },
   {
    "estado": "Durango",
@@ -90,20 +90,20 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 9287,
-   "ciudades": 529
+   "total": 9200,
+   "ciudades": 522
   },
   {
    "estado": "Morelos",
    "slug": "morelos",
-   "total": 6001,
-   "ciudades": 177
+   "total": 5959,
+   "ciudades": 175
   },
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 14706,
-   "ciudades": 478
+   "total": 14611,
+   "ciudades": 474
   },
   {
    "estado": "Nayarit",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161587,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 24.5,
+  "porcentaje_vuelta": 24.8,
   "modo": "completo"
  },
  "aviso": "",
