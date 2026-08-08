@@ -86,7 +86,7 @@
   function guardar(){try{localStorage.setItem('svs_visitados_cand_na',JSON.stringify([...visitados]));}catch(e){}}
 
   const tipoNombre=rt=>(indice&&indice.tipos&&indice.tipos[String(rt)])||('Tipo '+rt);
-  const permalink=r=>`https://www.waze.com/es-419/editor?env=usa&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  const permalink=r=>`https://www.waze.com/editor?env=usa&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
   const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
 
   async function cargarEstado(slug){
