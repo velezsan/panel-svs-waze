@@ -505,6 +505,8 @@ def pedir_celda(sesion, env, bbox, pausa, tipos=None):
         if "area" in err.lower() or "exceed" in err.lower() or "large" in err.lower():
             raise AreaError(err[:300])
         raise RuntimeError(err[:300])
+    if isinstance(data, dict):
+        data["_bbox_pedido"] = list(bbox)  # para saber si la zona restringida cubre todo
     return data
 
 
@@ -625,6 +627,19 @@ def areas_restringidas(data):
         for poly in coords:
             if poly and len(poly[0]) >= 4:
                 anillos.append(poly[0])  # anillo exterior
+    # Waze recorta el polígono al bbox pedido, y además devuelve segmentos que
+    # solo TOCAN ese bbox (su punto medio puede caer fuera). Si la zona
+    # restringida cubre el bbox completo, la celda entera es del otro servidor:
+    # nada de lo que venga en esa respuesta se puede editar aquí.
+    bb = data.get("_bbox_pedido") if isinstance(data, dict) else None
+    if anillos and bb:
+        eps = 1e-6
+        for anillo in anillos:
+            xs = [p[0] for p in anillo]
+            ys = [p[1] for p in anillo]
+            if (min(xs) <= bb[0] + eps and max(xs) >= bb[2] - eps
+                    and min(ys) <= bb[1] + eps and max(ys) >= bb[3] - eps):
+                return "TODO"
     return anillos
 
 
@@ -637,7 +652,9 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     segs = _objetos(data, "segments")
     # descartar lo que cae en zonas no editables de este entorno (Panel NA)
     _restr = areas_restringidas(data)
-    if _restr:
+    if _restr == "TODO":
+        segs = []  # la celda completa pertenece al otro servidor
+    elif _restr:
         _vivos = []
         for _s in segs:
             _lo, _la = punto_medio(_s)
