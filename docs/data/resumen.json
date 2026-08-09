@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-08T23:35:07+00:00",
+ "actualizado": "2026-08-09T00:15:36+00:00",
  "env": "row",
- "total": 214982,
+ "total": 214914,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -174,14 +174,14 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2984,
+   "total": 2982,
    "ciudades": 166
   },
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 13433,
-   "ciudades": 932
+   "total": 13367,
+   "ciudades": 931
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161598,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 26.4,
+  "porcentaje_vuelta": 26.5,
   "modo": "completo"
  },
  "aviso": "",
