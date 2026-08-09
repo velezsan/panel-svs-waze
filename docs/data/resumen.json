@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-09T15:41:58+00:00",
+ "actualizado": "2026-08-09T16:22:42+00:00",
  "env": "row",
- "total": 210055,
+ "total": 209301,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -78,8 +78,8 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 9148,
-   "ciudades": 346
+   "total": 9145,
+   "ciudades": 345
   },
   {
    "estado": "Jalisco",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 13168,
-   "ciudades": 457
+   "total": 12424,
+   "ciudades": 450
   },
   {
    "estado": "Nayarit",
@@ -174,8 +174,8 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2492,
-   "ciudades": 154
+   "total": 2485,
+   "ciudades": 152
   },
   {
    "estado": "Veracruz",
