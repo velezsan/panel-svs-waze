@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-09T08:45:01+00:00",
+ "actualizado": "2026-08-09T09:25:05+00:00",
  "env": "usa",
- "total": 1655,
+ "total": 1648,
  "estados": [
   {
    "estado": "Baja California",
@@ -18,8 +18,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 66,
-   "ciudades": 10
+   "total": 59,
+   "ciudades": 9
   },
   {
    "estado": "Nuevo León",
@@ -45,7 +45,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 70.7,
+  "porcentaje_vuelta": 80.8,
   "modo": "completo"
  },
  "aviso": "",
