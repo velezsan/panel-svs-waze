@@ -52,16 +52,21 @@ jobs:
           git config user.name "escaner-bot"
           git config user.email "actions@users.noreply.github.com"
           git rebase --abort 2>/dev/null || true
-          git add docs/data state
-          if git diff --cached --quiet; then
-            echo "Sin cambios que guardar"
-          else
-            git commit -m "Escaneo automático $(date -u +'%Y-%m-%d %H:%M UTC')"
-            ok=0
-            for i in 1 2 3; do
-              if git pull --rebase -X theirs origin ${GITHUB_REF_NAME} && git push; then ok=1; break; fi
-              git rebase --abort 2>/dev/null || true
-              sleep 10
+          # Sin rebase: la rama se coloca sobre origin y se vuelven a marcar solo
+          # las rutas de este panel. El rebase fallaba ("unstaged changes") porque
+          # el árbol conserva copias viejas de los archivos del otro escáner.
+          ok=0
+          for i in 1 2 3 4 5; do
+            git fetch origin ${GITHUB_REF_NAME} || { sleep 10; continue; }
+            git reset --mixed origin/${GITHUB_REF_NAME}
+            for p in docs/data state/scan_state.json state/last_run.json state/debug_ultimo_error.txt; do
+              git add -A "$p" 2>/dev/null || true
             done
-            [ "$ok" = "1" ]
-          fi
+            if git diff --cached --quiet; then
+              echo "Sin cambios que guardar"; ok=1; break
+            fi
+            git commit -m "Escaneo automático $(date -u +'%Y-%m-%d %H:%M UTC')"
+            if git push origin HEAD:${GITHUB_REF_NAME}; then ok=1; break; fi
+            sleep 10
+          done
+          [ "$ok" = "1" ]
