@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-09T07:20:49+00:00",
+ "actualizado": "2026-08-09T07:22:24+00:00",
  "env": "usa",
- "total": 1655,
+ "total": 1645,
  "estados": [
   {
    "estado": "Baja California",
@@ -36,7 +36,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 437,
+   "total": 427,
    "ciudades": 21
   }
  ],
