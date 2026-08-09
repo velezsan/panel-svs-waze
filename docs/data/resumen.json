@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-09T04:29:38+00:00",
+ "actualizado": "2026-08-09T05:09:51+00:00",
  "env": "row",
- "total": 214331,
+ "total": 213929,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,8 +54,8 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 674,
-   "ciudades": 31
+   "total": 665,
+   "ciudades": 30
   },
   {
    "estado": "Durango",
@@ -84,14 +84,14 @@
   {
    "estado": "Jalisco",
    "slug": "jalisco",
-   "total": 14769,
-   "ciudades": 516
+   "total": 14721,
+   "ciudades": 514
   },
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 8957,
-   "ciudades": 518
+   "total": 8857,
+   "ciudades": 514
   },
   {
    "estado": "Morelos",
@@ -174,14 +174,14 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2941,
-   "ciudades": 166
+   "total": 2775,
+   "ciudades": 163
   },
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 13367,
-   "ciudades": 931
+   "total": 13288,
+   "ciudades": 928
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161598,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 26.8,
+  "porcentaje_vuelta": 27.1,
   "modo": "completo"
  },
  "aviso": "",
