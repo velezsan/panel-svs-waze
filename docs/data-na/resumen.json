@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-08-09T12:16:10+00:00",
+ "actualizado": "2026-08-09T12:56:34+00:00",
  "env": "usa",
- "total": 1606,
+ "total": 1587,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 876,
-   "ciudades": 26
+   "total": 857,
+   "ciudades": 25
   },
   {
    "estado": "Chihuahua",
@@ -45,7 +45,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 97.7,
+  "porcentaje_vuelta": 98.1,
   "modo": "completo"
  },
  "aviso": "",
