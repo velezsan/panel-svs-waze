@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-10T18:39:43+00:00",
+ "actualizado": "2026-08-10T18:45:57+00:00",
  "env": "usa",
- "total": 937,
+ "total": 936,
  "estados": [
   {
    "estado": "Baja California",
@@ -18,7 +18,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 26,
+   "total": 25,
    "ciudades": 5
   },
   {
@@ -39,7 +39,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 77.6,
+  "porcentaje_vuelta": 78.5,
   "modo": "completo"
  },
  "aviso": "",
