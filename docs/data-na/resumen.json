@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-10T10:07:20+00:00",
+ "actualizado": "2026-08-10T10:47:29+00:00",
  "env": "usa",
- "total": 1182,
+ "total": 1148,
  "estados": [
   {
    "estado": "Baja California",
@@ -18,14 +18,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 59,
-   "ciudades": 9
-  },
-  {
-   "estado": "Nuevo León",
-   "slug": "nuevo-leon",
-   "total": 4,
-   "ciudades": 1
+   "total": 29,
+   "ciudades": 5
   },
   {
    "estado": "Sonora",
@@ -45,7 +39,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 67.4,
+  "porcentaje_vuelta": 81.2,
   "modo": "completo"
  },
  "aviso": "",
