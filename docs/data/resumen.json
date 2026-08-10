@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-10T06:04:08+00:00",
+ "actualizado": "2026-08-10T06:07:58+00:00",
  "env": "row",
- "total": 206821,
+ "total": 206765,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,7 +102,7 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 11648,
+   "total": 11592,
    "ciudades": 433
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161609,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 29.0,
+  "porcentaje_vuelta": 29.1,
   "modo": "completo"
  },
  "aviso": "",
