@@ -40,6 +40,7 @@
   .falta{display:inline-block;background:#3a2c14;color:#ffd9a0;border:1px solid var(--warn);
          border-radius:6px;padding:2px 7px;font-size:.78rem;white-space:nowrap}
   tr.pendiente td{background:#1a2033}
+  .lk{font-variant-numeric:tabular-nums;white-space:nowrap;color:var(--warn);font-weight:600}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
@@ -82,6 +83,7 @@
   <p class="nota">Los cuatro pases de referencia son IAVE, PASE, TELEVía y VIAPASS. Un segmento que ya los tiene
     los cuatro es el candidato directo a que le agregues easytrip; conforme lo agregues, la lista se vacía sola.
     Los marcados como incompletos traen menos de esos cuatro, así que puede faltarles algo más.
+    La columna de candado es el nivel que tiene hoy el segmento en el editor.
     Los datos se actualizan con cada corrida del escáner.</p>
 </main>
 <script>
@@ -152,9 +154,9 @@
   function pintar(){
     const total=lista.length;
     const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Pases</th><th>Revisado</th><th></th></tr></thead><tbody>`;
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Nombre</th><th>Ciudad</th><th>Pases</th><th>Candado</th><th>Revisado</th><th></th></tr></thead><tbody>`;
     if(!total){
-      html+='<tr><td colspan="6" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
+      html+='<tr><td colspan="7" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
     lista.slice(ini,fin).forEach(r=>{
       const vis=visitados.has(String(r.id));
@@ -173,6 +175,7 @@
         <td>${r.nombre||'<span class="chip">sin nombre</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
         <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}</td>
         <td>${chips}</td>
+        <td class="lk">${r.lk||'—'}</td>
         <td style="white-space:nowrap">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
         <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
     });
