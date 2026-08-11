@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-11T05:14:03+00:00",
+ "actualizado": "2026-08-11T05:54:17+00:00",
  "env": "row",
- "total": 203290,
+ "total": 203262,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,7 +66,7 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 19933,
+   "total": 19919,
    "ciudades": 647
   },
   {
@@ -78,7 +78,7 @@
   {
    "estado": "Hidalgo",
    "slug": "hidalgo",
-   "total": 7881,
+   "total": 7880,
    "ciudades": 325
   },
   {
@@ -132,7 +132,7 @@
   {
    "estado": "Querétaro",
    "slug": "queretaro",
-   "total": 4769,
+   "total": 4756,
    "ciudades": 218
   },
   {
