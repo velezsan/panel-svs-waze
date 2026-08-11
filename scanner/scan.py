@@ -37,6 +37,7 @@ DEBUG_PATH = os.path.join(BASE, "state", "debug_ultimo_error.txt")
 DATA_DIR = os.path.join(BASE, "docs", "data")
 ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
 CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
+PASES_DIR = os.path.join(DATA_DIR, "pases")
 
 # Servidores del WME. México vive en el entorno "row" (Rest of World).
 # El parámetro sandbox=true es el que usa el modo práctica: permite leer
@@ -588,6 +589,46 @@ _champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda
 # candado mínimo esperado por tipo de vía (etapa 1: sin PS)
 REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
 _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
+_pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
+
+# Pases de peaje de México tal como los nombra Waze en las restricciones.
+# La lista es solo para mostrarlos bonito: si aparece uno nuevo se guarda igual.
+PASES_CONOCIDOS = {
+    "iave-mexico": "IAVE",
+    "tag-pase-mexico": "PASE",
+    "televia-mexico": "TELEVía",
+    "viapass-mexico": "VIAPASS",
+    "easytrip-mexico": "easytrip",
+}
+
+
+def pases_de_segmento(seg):
+    """Suscripciones de peaje que trae la restricción del segmento."""
+    subs = set()
+    for r in seg.get("restrictions") or []:
+        for lista in ((r or {}).get("driveProfiles") or {}).values():
+            if not isinstance(lista, list):
+                continue
+            for item in lista:
+                if isinstance(item, dict):
+                    for sub in item.get("subscriptions") or []:
+                        if sub:
+                            subs.add(str(sub))
+    return sorted(subs)
+
+
+def _ciudad_estado(seg, streets, cities, states):
+    """Calle, ciudad y estado del segmento según el catálogo de la respuesta."""
+    st = streets.get(seg.get("primaryStreetID"))
+    ciudad = edo = ""
+    if st and st.get("cityID") in cities:
+        c = cities[st.get("cityID")]
+        if not c.get("isEmpty"):
+            ciudad = (c.get("name") or "").strip()
+        e = states.get(c.get("stateID"))
+        if e:
+            edo = (e.get("name") or "").strip()
+    return st, ciudad, edo
 
 
 FILTRAR_RESTRINGIDAS = False  # lo enciende el Panel NA
@@ -700,6 +741,22 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "rt": seg.get("roadType"), "lk": lock, "req": req,
             "ciudad": ciudad_c, "edo": edo_c,
             "nombre": nombre_de_calle(stc) or "",
+        }
+
+    # segmentos con restricción de pases de peaje (IAVE, PASE, TELEVía, VIAPASS…)
+    for seg in segs:
+        subs = pases_de_segmento(seg)
+        if not subs:
+            continue
+        lon_p, lat_p = punto_medio(seg)
+        if lon_p is None:
+            continue
+        stp, ciudad_p, edo_p = _ciudad_estado(seg, streets, cities, states)
+        _pases_celda[seg.get("id")] = {
+            "id": seg.get("id"), "lat": round(lat_p, 6), "lon": round(lon_p, 6),
+            "rt": seg.get("roadType"), "pases": subs,
+            "ciudad": ciudad_p, "edo": edo_p,
+            "nombre": nombre_de_calle(stp) or "",
         }
 
     # nombre por segmento (para sugerencias) y conectividad por nodos
@@ -916,6 +973,7 @@ def main():
 
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
+    global PASES_DIR
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     if panel_na:
@@ -926,6 +984,7 @@ def main():
         DATA_DIR = os.path.join(BASE, "docs", "data-na")
         ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
         CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
+        PASES_DIR = os.path.join(DATA_DIR, "pases")
 
     cfg = load_json(CONFIG_PATH, {})
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
@@ -998,6 +1057,7 @@ def main():
     celdas_info = estado.get("celdas", {})  # idx -> {"n": segs, "c": ciclo}
     champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
     candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
+    pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -1006,6 +1066,7 @@ def main():
         celdas_info, cursor, ciclo = {}, 0, 1
         champs_info = {}
         candados_info = {}
+        pases_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -1142,6 +1203,7 @@ def main():
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
                        "champs": champs_info, "candados": candados_info,
+                       "pases": pases_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -1193,6 +1255,38 @@ def main():
             "total": sum(e["total"] for e in lista_c),
             "estados": lista_c,
             "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
+        # panel de pases de peaje: reagrupar por estado
+        pases_por_estado = {}
+        for regs in pases_info.values():
+            for r in regs:
+                est_p = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_p not in nombres_mx:
+                        continue  # del lado de EUA: no se incluye
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_p = {k: v for k, v in r.items() if k != "edo"}
+                pases_por_estado.setdefault(est_p, {})[str(r["id"])] = reg_p
+        os.makedirs(PASES_DIR, exist_ok=True)
+        slugs_p = set()
+        lista_p = []
+        for est_p, segs_p in sorted(pases_por_estado.items()):
+            slug_p = slugify(est_p)
+            slugs_p.add(slug_p)
+            save_json(os.path.join(PASES_DIR, f"{slug_p}.json"),
+                      {"estado": est_p, "segmentos": segs_p}, compact=True)
+            lista_p.append({"estado": est_p, "slug": slug_p, "total": len(segs_p)})
+        for fn in os.listdir(PASES_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_p:
+                os.remove(os.path.join(PASES_DIR, fn))
+        save_json(os.path.join(PASES_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_p),
+            "estados": lista_p,
+            "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+            "nombres_pases": PASES_CONOCIDOS,
         }, compact=True)
         return resumen
 
@@ -1283,6 +1377,7 @@ def main():
                         usa_n = None
                 _champs_celda.clear()
                 _candados_celda.clear()
+                _pases_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1305,6 +1400,7 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
+                    _pases_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1312,6 +1408,7 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
+                    _pases_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1328,6 +1425,16 @@ def main():
                     candados_info[str(idx)] = list(_candados_celda.values())
                 else:
                     candados_info.pop(str(idx), None)
+                if _pases_celda:
+                    _hoy_p = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_p = {p.get("id"): p.get("v", "")
+                               for p in pases_info.get(str(idx), [])}
+                    for _rp in _pases_celda.values():
+                        _rp["v"] = _prev_p.get(_rp["id"]) or _hoy_p
+                        _rp["r"] = _hoy_p
+                    pases_info[str(idx)] = list(_pases_celda.values())
+                else:
+                    pases_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1385,6 +1492,7 @@ def main():
                         usa_n = None
                 _champs_celda.clear()
                 _candados_celda.clear()
+                _pases_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1408,6 +1516,7 @@ def main():
                     segs_en_celda = 0
                     _champs_celda.clear()
                     _candados_celda.clear()
+                    _pases_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1417,6 +1526,7 @@ def main():
                     segs_en_celda = 0  # tratarla como vacía: re-checar solo de vez en cuando
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
+                    _pases_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1433,6 +1543,16 @@ def main():
                     candados_info[str(idx)] = list(_candados_celda.values())
                 else:
                     candados_info.pop(str(idx), None)
+                if _pases_celda:
+                    _hoy_p = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_p = {p.get("id"): p.get("v", "")
+                               for p in pases_info.get(str(idx), [])}
+                    for _rp in _pases_celda.values():
+                        _rp["v"] = _prev_p.get(_rp["id"]) or _hoy_p
+                        _rp["r"] = _hoy_p
+                    pases_info[str(idx)] = list(_pases_celda.values())
+                else:
+                    pases_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
