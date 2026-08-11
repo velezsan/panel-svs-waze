@@ -755,6 +755,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
         _pases_celda[seg.get("id")] = {
             "id": seg.get("id"), "lat": round(lat_p, 6), "lon": round(lon_p, 6),
             "rt": seg.get("roadType"), "pases": subs,
+            "lk": (seg.get("lockRank") + 1) if isinstance(seg.get("lockRank"), int) else 1,
             "ciudad": ciudad_p, "edo": edo_p,
             "nombre": nombre_de_calle(stp) or "",
         }
