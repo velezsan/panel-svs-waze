@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-12T16:09:15+00:00",
+ "actualizado": "2026-08-12T16:49:43+00:00",
  "env": "row",
- "total": 199801,
+ "total": 199719,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -108,7 +108,7 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 4512,
+   "total": 4502,
    "ciudades": 200
   },
   {
@@ -138,7 +138,7 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3723,
+   "total": 3706,
    "ciudades": 54
   },
   {
@@ -186,8 +186,8 @@
   {
    "estado": "Yucatán",
    "slug": "yucatan",
-   "total": 3856,
-   "ciudades": 165
+   "total": 3801,
+   "ciudades": 164
   },
   {
    "estado": "Zacatecas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161628,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 34.1,
+  "porcentaje_vuelta": 34.2,
   "modo": "completo"
  },
  "aviso": "",
