@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-13T19:27:29+00:00",
+ "actualizado": "2026-08-13T20:07:35+00:00",
  "env": "row",
- "total": 195075,
+ "total": 194936,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -66,8 +66,8 @@
   {
    "estado": "Guanajuato",
    "slug": "guanajuato",
-   "total": 16804,
-   "ciudades": 592
+   "total": 16665,
+   "ciudades": 590
   },
   {
    "estado": "Guerrero",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 39.2,
+  "porcentaje_vuelta": 39.5,
   "modo": "completo"
  },
  "aviso": "",
