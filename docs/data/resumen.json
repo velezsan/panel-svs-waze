@@ -1,12 +1,12 @@
 {
- "actualizado": "2026-08-14T07:14:17+00:00",
+ "actualizado": "2026-08-14T07:54:28+00:00",
  "env": "row",
- "total": 193823,
+ "total": 193184,
  "estados": [
   {
    "estado": "Aguascalientes",
    "slug": "aguascalientes",
-   "total": 2565,
+   "total": 2554,
    "ciudades": 105
   },
   {
@@ -108,8 +108,8 @@
   {
    "estado": "Nayarit",
    "slug": "nayarit",
-   "total": 4312,
-   "ciudades": 197
+   "total": 4300,
+   "ciudades": 196
   },
   {
    "estado": "Nuevo León",
@@ -144,8 +144,8 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 4858,
-   "ciudades": 336
+   "total": 4715,
+   "ciudades": 328
   },
   {
    "estado": "Sinaloa",
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 4002,
-   "ciudades": 162
+   "total": 3818,
+   "ciudades": 160
   },
   {
    "estado": "Tlaxcala",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 11448,
-   "ciudades": 858
+   "total": 11412,
+   "ciudades": 856
   },
   {
    "estado": "Yucatán",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 7684,
-   "ciudades": 442
+   "total": 7431,
+   "ciudades": 428
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 43.1,
+  "porcentaje_vuelta": 43.5,
   "modo": "completo"
  },
  "aviso": "",
