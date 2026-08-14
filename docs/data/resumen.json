@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-14T12:13:31+00:00",
+ "actualizado": "2026-08-14T12:53:42+00:00",
  "env": "row",
- "total": 191497,
+ "total": 190802,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 3089,
+   "total": 3078,
    "ciudades": 57
   },
   {
@@ -144,13 +144,13 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 4446,
-   "ciudades": 317
+   "total": 4288,
+   "ciudades": 315
   },
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 5294,
+   "total": 5286,
    "ciudades": 233
   },
   {
@@ -168,7 +168,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 3575,
+   "total": 3239,
    "ciudades": 153
   },
   {
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 6440,
-   "ciudades": 391
+   "total": 6258,
+   "ciudades": 385
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 46.0,
+  "porcentaje_vuelta": 46.4,
   "modo": "completo"
  },
  "aviso": "",
