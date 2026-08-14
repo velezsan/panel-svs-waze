@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-14T09:58:34+00:00",
+ "actualizado": "2026-08-14T10:04:16+00:00",
  "env": "row",
- "total": 192192,
+ "total": 192002,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 6829,
+   "total": 6639,
    "ciudades": 404
   }
  ],
