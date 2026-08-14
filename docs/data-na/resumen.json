@@ -1,12 +1,12 @@
 {
- "actualizado": "2026-08-14T06:22:28+00:00",
+ "actualizado": "2026-08-14T07:02:55+00:00",
  "env": "usa",
- "total": 507,
+ "total": 499,
  "estados": [
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 247,
+   "total": 246,
    "ciudades": 8
   },
   {
@@ -30,16 +30,16 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 164,
+   "total": 157,
    "ciudades": 6
   }
  ],
  "progreso": {
-  "ciclo": 19,
+  "ciclo": 20,
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 99.0,
+  "porcentaje_vuelta": 62.5,
   "modo": "completo"
  },
  "aviso": "",
