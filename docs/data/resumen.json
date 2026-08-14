@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-14T06:30:57+00:00",
+ "actualizado": "2026-08-14T06:32:37+00:00",
  "env": "row",
- "total": 193166,
+ "total": 193162,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -168,7 +168,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 3818,
+   "total": 3814,
    "ciudades": 160
   },
   {
