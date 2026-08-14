@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-14T14:29:35+00:00",
+ "actualizado": "2026-08-14T15:09:50+00:00",
  "env": "row",
- "total": 190444,
+ "total": 190426,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -150,7 +150,7 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 5217,
+   "total": 5218,
    "ciudades": 228
   },
   {
@@ -192,7 +192,7 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 6129,
+   "total": 6110,
    "ciudades": 374
   }
  ],
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 47.3,
+  "porcentaje_vuelta": 47.7,
   "modo": "completo"
  },
  "aviso": "",
