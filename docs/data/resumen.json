@@ -1,13 +1,13 @@
 {
- "actualizado": "2026-08-14T04:30:08+00:00",
+ "actualizado": "2026-08-14T05:10:26+00:00",
  "env": "row",
- "total": 194063,
+ "total": 194010,
  "estados": [
   {
    "estado": "Aguascalientes",
    "slug": "aguascalientes",
-   "total": 2625,
-   "ciudades": 108
+   "total": 2579,
+   "ciudades": 106
   },
   {
    "estado": "Baja California",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 7704,
-   "ciudades": 445
+   "total": 7697,
+   "ciudades": 444
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 42.1,
+  "porcentaje_vuelta": 42.5,
   "modo": "completo"
  },
  "aviso": "",
