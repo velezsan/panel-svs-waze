@@ -588,6 +588,10 @@ _champs_celda = {}  # userName -> ids de segmentos editados (se vacía por celda
 
 # candado mínimo esperado por tipo de vía (etapa 1: sin PS)
 REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
+# tipos extra que solo revisa el Panel NA (el de México los añadirá después):
+# las avenidas principales (PS) deben tener al menos candado 2, así que
+# aparecen en la lista las que están en nivel 1.
+REQ_CANDADO_EXTRA = {}
 _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
 _pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
 
@@ -717,7 +721,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
 
     # candados bajos en vías importantes (FW, MH, Ramp, mH)
     for seg in segs:
-        req = REQ_CANDADO.get(seg.get("roadType"))
+        req = REQ_CANDADO.get(seg.get("roadType")) or REQ_CANDADO_EXTRA.get(seg.get("roadType"))
         if not req:
             continue
         lr = seg.get("lockRank")
@@ -974,11 +978,12 @@ def main():
 
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
-    global PASES_DIR
+    global PASES_DIR, REQ_CANDADO_EXTRA
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     if panel_na:
         FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
+        REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1 (solo en el Panel NA por ahora)
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
