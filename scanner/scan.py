@@ -1447,7 +1447,7 @@ def main():
             "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "total": sum(e["total"] for e in lista_o),
             "estados": lista_o,
-            "palabras": len(PALABRAS_MAL),
+            "palabras": PALABRAS_MAL,  # la lista completa, para mostrarla en la página
         }, compact=True)
         # panel de comentarios de mapa (map notes): reagrupar por estado
         coms_por_estado = {}
