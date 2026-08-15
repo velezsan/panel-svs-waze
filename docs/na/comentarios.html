@@ -39,6 +39,15 @@
   .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .lk{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
   .vencido{color:var(--warn);font-size:.8rem;white-space:nowrap}
+  .hilo-btn{display:inline-block;margin-top:5px;color:var(--accent);cursor:pointer;font-size:.82rem;font-weight:600}
+  .hilo-btn:hover{text-decoration:underline}
+  tr.hilo td{background:var(--panel2);padding:10px 16px}
+  .msg{padding:6px 0;border-bottom:1px solid var(--line)}
+  .msg:last-child{border-bottom:none}
+  .msg .quien{color:var(--accent);font-weight:600;font-size:.84rem}
+  .msg .cuando{color:var(--muted);font-size:.78rem;margin-left:6px}
+  .msg .txt{font-size:.88rem;white-space:pre-wrap;word-break:break-word;margin-top:2px}
+  td.fecha{white-space:nowrap;font-size:.86rem}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
@@ -61,7 +70,7 @@
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-lock" style="display:none"><option value="">Todos los candados</option></select>
     <select id="sel-autor" style="display:none"><option value="">Todos los autores</option></select>
-    <input type="search" class="buscar" id="buscar" placeholder="Buscar en asunto o descripción…" style="display:none">
+    <input type="search" class="buscar" id="buscar" placeholder="Buscar en asunto, descripción o respuestas…" style="display:none">
     <span class="chip" id="resumen-chip" style="display:none"></span>
   </div>
   <div id="contenido"><div class="cargando">Cargando datos…</div></div>
@@ -75,7 +84,7 @@
     <button id="pg-last" title="Última página">»</button>
   </div>
   <p class="nota">Son los comentarios de mapa que cualquier editor puede dejar en el WME.
-    Se muestran el asunto, la descripción, el nivel de bloqueo, quién lo creó y quién lo editó por última vez.
+    Se muestran el asunto, la descripción, el nivel de bloqueo, quién lo creó, quién lo editó por última vez y las fechas de creación y modificación. Si la nota tiene respuestas, el botón 💬 despliega el hilo completo; el buscador también mira dentro de ellas.
     Los marcados como vencidos ya pasaron su fecha de cierre. Los datos se actualizan con cada corrida del escáner.</p>
 </main>
 <script>
@@ -143,7 +152,10 @@
     lista=regs.filter(r=>{
       if(fl && String(r.lk)!==fl) return false;
       if(fa && r.autor!==fa) return false;
-      if(q && !((r.asunto||'').toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q))) return false;
+      if(q){
+        const enHilo=(r.conv||[]).some(m=>(m.t||'').toLowerCase().includes(q)||(m.u||'').toLowerCase().includes(q));
+        if(!((r.asunto||'').toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q) || enHilo)) return false;
+      }
       return true;
     }).sort((a,b)=>(b.creado||'').localeCompare(a.creado||''));
     pagina=0;
@@ -163,25 +175,41 @@
     const filas=trozo.map(r=>{
       const hecho=visitados.has(r.id);
       const vencido=r.fin && r.fin<HOY;
+      const conv=r.conv||[];
+      const hilo=conv.length?`<tr class="hilo" data-for="${esc(r.id)}" style="display:none"><td colspan="7">`+
+        conv.map(m=>`<div class="msg"><span class="quien">${esc(m.u)||'(sin autor)'}</span><span class="cuando">${esc(m.f)||''}</span><div class="txt">${esc(m.t)}</div></div>`).join('')+
+        `</td></tr>`:'';
       return `<tr class="${hecho?'visitado':''}" data-id="${esc(r.id)}">
         <td class="asunto">${esc(r.asunto)||'<span style="color:var(--muted)">(sin asunto)</span>'}
           ${vencido?`<div class="vencido">⚠️ venció ${esc(r.fin)}</div>`:''}</td>
-        <td class="desc">${esc(r.desc)||'—'}</td>
+        <td class="desc">${esc(r.desc)||'<span style="opacity:.6">—</span>'}
+          ${conv.length?`<div class="hilo-btn" data-abre="${esc(r.id)}">💬 ${conv.length} ${conv.length===1?'respuesta':'respuestas'}</div>`:''}</td>
         <td class="lk">${r.lk}</td>
         <td class="gente">${esc(r.autor)||'—'}${r.editor&&r.editor!==r.autor?`<div class="ed">editó: ${esc(r.editor)}</div>`:''}</td>
-        <td>${esc(r.creado)||'—'}</td>
+        <td class="fecha">${esc(r.creado)||'—'}</td>
+        <td class="fecha">${esc(r.editado)||'—'}</td>
         <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
           ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
-      </tr>`;
+      </tr>${hilo}`;
     }).join('');
     $('contenido').innerHTML=`<table><thead><tr>
-        <th>Asunto</th><th>Descripción</th><th>Candado</th><th>Creó / editó</th><th>Creado</th><th></th>
+        <th>Asunto</th><th>Descripción</th><th>Candado</th><th>Creó / editó</th><th>Creado</th><th>Modificado</th><th></th>
       </tr></thead><tbody>${filas}</tbody></table>`;
     $('contenido').querySelectorAll('a.wme').forEach(a=>{
       a.addEventListener('click',()=>{
         const id=a.closest('tr').dataset.id;
         visitados.add(id); guardar();
         a.classList.add('hecho'); a.closest('tr').classList.add('visitado');
+      });
+    });
+    $('contenido').querySelectorAll('.hilo-btn').forEach(b=>{
+      b.addEventListener('click',()=>{
+        const fila=$('contenido').querySelector(`tr.hilo[data-for="${b.dataset.abre}"]`);
+        if(!fila) return;
+        const abierto=fila.style.display!=='none';
+        fila.style.display=abierto?'none':'table-row';
+        const n=fila.querySelectorAll('.msg').length;
+        b.textContent=(abierto?'💬 ':'▲ ')+n+' '+(n===1?'respuesta':'respuestas');
       });
     });
     $('contenido').querySelectorAll('.quitar').forEach(q=>{
