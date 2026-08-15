@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-15T22:03:41+00:00",
+ "actualizado": "2026-08-15T22:44:22+00:00",
  "env": "row",
- "total": 183954,
+ "total": 183699,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,8 +48,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 5049,
-   "ciudades": 158
+   "total": 5015,
+   "ciudades": 156
   },
   {
    "estado": "Colima",
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 5816,
-   "ciudades": 178
+   "total": 5595,
+   "ciudades": 172
   },
   {
    "estado": "Guanajuato",
