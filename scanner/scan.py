@@ -39,6 +39,8 @@ ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
 CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
 PASES_DIR = os.path.join(DATA_DIR, "pases")
 COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
+ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
+PALABRAS_PATH = os.path.join(BASE, "scanner", "palabras_mal_escritas.json")
 
 # Servidores del WME. México vive en el entorno "row" (Rest of World).
 # El parámetro sandbox=true es el que usa el modo práctica: permite leer
@@ -458,6 +460,38 @@ def nueva_sesion(env):
     return s
 
 
+_RE_TOKEN = re.compile(r"[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+")
+
+
+def revisar_ortografia(nombre):
+    """Busca palabras mal escritas en un nombre de calle.
+
+    Devuelve (sugerencia, [palabras corregidas]); ("", []) si no hay nada que
+    corregir. Respeta las mayúsculas del original: JUAREZ -> JUÁREZ,
+    Juarez -> Juárez, juarez -> juárez.
+    """
+    if not nombre or not PALABRAS_MAL:
+        return "", []
+    encontradas = []
+
+    def _cambia(m):
+        t = m.group(0)
+        bien = PALABRAS_MAL.get(t.lower())
+        if not bien:
+            return t
+        encontradas.append(bien)
+        if t.isupper() and len(t) > 1:
+            return bien.upper()
+        if t[0].isupper():
+            return bien[0].upper() + bien[1:]
+        return bien.lower()
+
+    sug = _RE_TOKEN.sub(_cambia, nombre)
+    if not encontradas or sug == nombre:
+        return "", []
+    return sug, encontradas
+
+
 def _fecha_corta(v):
     """Waze mezcla epoch en milisegundos y texto; devuelve AAAA-MM-DD."""
     if isinstance(v, (int, float)) and v > 0:
@@ -629,6 +663,10 @@ REQ_CANDADO_EXTRA = {}
 _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
 _pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
 _comentarios_celda = {}  # id -> comentario de mapa (se vacía por celda)
+_ortografia_celda = {}  # idCalle -> calle mal escrita (se vacía por celda)
+# revisión de ortografía en los nombres de calle (solo Panel NA por ahora)
+REVISAR_ORTOGRAFIA = False
+PALABRAS_MAL = {}  # forma incorrecta en minúsculas -> forma correcta
 # los comentarios de mapa (map notes) solo se piden en el Panel NA por ahora
 PEDIR_COMENTARIOS = False
 
@@ -788,6 +826,31 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "ciudad": ciudad_c, "edo": edo_c,
             "nombre": nombre_c,
         }
+
+    # nombres de calle mal escritos (una entrada por calle, no por segmento)
+    if REVISAR_ORTOGRAFIA:
+        for seg in segs:
+            sid = seg.get("primaryStreetID")
+            if sid is None or str(sid) in _ortografia_celda:
+                continue
+            st_o, ciudad_o, edo_o = _ciudad_estado(seg, streets, cities, states)
+            nom_o = nombre_de_calle(st_o)
+            if not nom_o:
+                continue
+            sug_o, palabras_o = revisar_ortografia(nom_o)
+            if not sug_o:
+                continue
+            lon_o, lat_o = punto_medio(seg)
+            if lon_o is None:
+                continue
+            _ortografia_celda[str(sid)] = {
+                "sid": str(sid), "id": seg.get("id"),
+                "lat": round(lat_o, 6), "lon": round(lon_o, 6),
+                "nombre": nom_o, "sug": sug_o,
+                "pal": sorted(set(palabras_o)),
+                "rt": seg.get("roadType"),
+                "ciudad": ciudad_o, "edo": edo_o,
+            }
 
     # comentarios de mapa (map notes): asunto, descripción, candado y autores
     if PEDIR_COMENTARIOS:
@@ -1057,12 +1120,17 @@ def main():
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
     global PASES_DIR, REQ_CANDADO_EXTRA, COMENTARIOS_DIR, PEDIR_COMENTARIOS
+    global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     if panel_na:
         FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
         REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1 (solo en el Panel NA por ahora)
         PEDIR_COMENTARIOS = True  # notas de mapa (solo en el Panel NA por ahora)
+        REVISAR_ORTOGRAFIA = True  # calles mal escritas (solo en el Panel NA por ahora)
+        PALABRAS_MAL = {k.lower(): v for k, v in
+                        (load_json(PALABRAS_PATH, {}).get("palabras") or {}).items()}
+        log(f"revisión de ortografía: {len(PALABRAS_MAL)} palabras cargadas")
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
@@ -1071,6 +1139,7 @@ def main():
         CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
         PASES_DIR = os.path.join(DATA_DIR, "pases")
         COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
+        ORTOGRAFIA_DIR = os.path.join(DATA_DIR, "ortografia")
 
     cfg = load_json(CONFIG_PATH, {})
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
@@ -1145,6 +1214,7 @@ def main():
     candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
     pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
     comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
+    ortografia_info = estado.get("ortografia", {})  # idx -> [calles mal escritas]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -1155,6 +1225,7 @@ def main():
         candados_info = {}
         pases_info = {}
         comentarios_info = {}
+        ortografia_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -1292,6 +1363,7 @@ def main():
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
                        "champs": champs_info, "candados": candados_info,
                        "pases": pases_info, "comentarios": comentarios_info,
+                       "ortografia": ortografia_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -1345,6 +1417,37 @@ def main():
             "total": sum(e["total"] for e in lista_c),
             "estados": lista_c,
             "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
+        # panel de calles mal escritas: reagrupar por estado
+        orto_por_estado = {}
+        for regs in ortografia_info.values():
+            for r in regs:
+                est_o = (normalizar_estado(r.get("edo", ""), estados_mx)
+                         or estados_mx.estado_de(r["lon"], r["lat"]))
+                if panel_na:
+                    if est_o not in nombres_mx:
+                        continue  # calle del lado de EUA: en inglés no lleva acentos
+                    if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                reg_o = {k: v for k, v in r.items() if k != "edo"}
+                orto_por_estado.setdefault(est_o, {})[r["sid"]] = reg_o
+        os.makedirs(ORTOGRAFIA_DIR, exist_ok=True)
+        slugs_o = set()
+        lista_o = []
+        for est_o, calles_o in sorted(orto_por_estado.items()):
+            slug_o = slugify(est_o)
+            slugs_o.add(slug_o)
+            save_json(os.path.join(ORTOGRAFIA_DIR, f"{slug_o}.json"),
+                      {"estado": est_o, "calles": calles_o}, compact=True)
+            lista_o.append({"estado": est_o, "slug": slug_o, "total": len(calles_o)})
+        for fn in os.listdir(ORTOGRAFIA_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_o:
+                os.remove(os.path.join(ORTOGRAFIA_DIR, fn))
+        save_json(os.path.join(ORTOGRAFIA_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_o),
+            "estados": lista_o,
+            "palabras": len(PALABRAS_MAL),
         }, compact=True)
         # panel de comentarios de mapa (map notes): reagrupar por estado
         coms_por_estado = {}
@@ -1497,6 +1600,7 @@ def main():
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _comentarios_celda.clear()
+                _ortografia_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1521,6 +1625,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _comentarios_celda.clear()
+                    _ortografia_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1530,6 +1635,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _comentarios_celda.clear()
+                    _ortografia_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1560,6 +1666,10 @@ def main():
                     comentarios_info[str(idx)] = list(_comentarios_celda.values())
                 else:
                     comentarios_info.pop(str(idx), None)
+                if _ortografia_celda:
+                    ortografia_info[str(idx)] = list(_ortografia_celda.values())
+                else:
+                    ortografia_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1619,6 +1729,7 @@ def main():
                 _candados_celda.clear()
                 _pases_celda.clear()
                 _comentarios_celda.clear()
+                _ortografia_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1644,6 +1755,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _comentarios_celda.clear()
+                    _ortografia_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1655,6 +1767,7 @@ def main():
                     _candados_celda.clear()
                     _pases_celda.clear()
                     _comentarios_celda.clear()
+                    _ortografia_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1685,6 +1798,10 @@ def main():
                     comentarios_info[str(idx)] = list(_comentarios_celda.values())
                 else:
                     comentarios_info.pop(str(idx), None)
+                if _ortografia_celda:
+                    ortografia_info[str(idx)] = list(_ortografia_celda.values())
+                else:
+                    ortografia_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
