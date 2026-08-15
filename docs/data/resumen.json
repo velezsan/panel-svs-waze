@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-15T14:25:32+00:00",
+ "actualizado": "2026-08-15T15:05:39+00:00",
  "env": "row",
- "total": 184712,
+ "total": 184659,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -150,7 +150,7 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 4672,
+   "total": 4637,
    "ciudades": 214
   },
   {
@@ -168,7 +168,7 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1806,
+   "total": 1788,
    "ciudades": 126
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161633,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 59.5,
+  "porcentaje_vuelta": 59.8,
   "modo": "completo"
  },
  "aviso": "",
