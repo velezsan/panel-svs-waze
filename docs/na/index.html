@@ -84,6 +84,15 @@
   </div>
 
   <div class="grupo">
+    <h2>Calles mal escritas</h2>
+    <p class="g-sub">Nombres de calle a los que les falta un acento o una eñe, con la escritura correcta.</p>
+    <div class="tiles">
+      <a class="tile" href="mal-escritas.html"><div class="l">Calles mal escritas</div><div class="v" id="o-total">—</div><div class="d">acumuladas en la franja NA</div></a>
+      <a class="tile" href="mal-escritas.html"><div class="l">Estados con pendientes</div><div class="v" id="o-estados">—</div><div class="d">de 6 fronterizos</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
     <h2>Secciones</h2>
     <div class="secciones">
       <a class="seccion" href="sin-nombre.html">
@@ -100,6 +109,11 @@
         <div class="t">💬 Comentarios de mapa</div>
         <div class="d">Notas del mapa con asunto, descripción, bloqueo, creador y último editor.</div>
         <div class="n" id="n-comentarios"></div>
+      </a>
+      <a class="seccion" href="mal-escritas.html">
+        <div class="t">✏️ Calles mal escritas</div>
+        <div class="d">Nombres sin acento o sin eñe, con la corrección lista para copiar.</div>
+        <div class="n" id="n-ortografia"></div>
       </a>
       <a class="seccion" href="champs.html">
         <div class="t">🏆 Local Champs</div>
@@ -140,6 +154,15 @@
       pon('n-sinnombre', fmt(d.total)+' pendientes en '+((d.estados||[]).length)+' estados');
     })
     .catch(()=>{ pon('t-prog','—'); pon('n-sinnombre','sin datos todavía'); });
+
+  fetch('../data-na/ortografia/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('o-total', fmt(d.total));
+      pon('o-estados', (d.estados||[]).length);
+      pon('n-ortografia', fmt(d.total)+' calles en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('o-total','—'); pon('o-estados','—'); pon('n-ortografia','sin datos todavía'); });
 
   fetch('../data-na/comentarios/index.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
