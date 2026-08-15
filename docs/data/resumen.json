@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-15T17:25:10+00:00",
+ "actualizado": "2026-08-15T18:08:13+00:00",
  "env": "row",
- "total": 184544,
+ "total": 184464,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 7736,
+   "total": 7728,
    "ciudades": 226
   },
   {
@@ -150,7 +150,7 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 4637,
+   "total": 4570,
    "ciudades": 214
   },
   {
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1771,
-   "ciudades": 126
+   "total": 1766,
+   "ciudades": 125
   },
   {
    "estado": "Tlaxcala",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161633,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 60.2,
+  "porcentaje_vuelta": 60.4,
   "modo": "completo"
  },
  "aviso": "",
