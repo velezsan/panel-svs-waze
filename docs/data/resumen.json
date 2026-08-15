@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-15T06:03:53+00:00",
+ "actualizado": "2026-08-15T06:44:28+00:00",
  "env": "row",
- "total": 184853,
+ "total": 184812,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -150,7 +150,7 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 4695,
+   "total": 4654,
    "ciudades": 214
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 55.6,
+  "porcentaje_vuelta": 56.2,
   "modo": "completo"
  },
  "aviso": "",
