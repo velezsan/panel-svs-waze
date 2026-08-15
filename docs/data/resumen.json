@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-15T18:55:22+00:00",
+ "actualizado": "2026-08-15T19:36:37+00:00",
  "env": "row",
- "total": 184299,
+ "total": 184281,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -48,7 +48,7 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 5052,
+   "total": 5050,
    "ciudades": 158
   },
   {
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 7728,
+   "total": 7725,
    "ciudades": 226
   },
   {
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 1766,
-   "ciudades": 125
+   "total": 1753,
+   "ciudades": 124
   },
   {
    "estado": "Tlaxcala",
