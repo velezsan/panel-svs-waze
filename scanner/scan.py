@@ -799,7 +799,19 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             _cre = _fecha_corta(com.get("createdOn"))
             _act = _fecha_corta(com.get("updatedOn"))
             _fin = _fecha_corta(com.get("endDate"))
-            _comentarios_celda[str(com.get("id"))] = {
+            conv = []
+            for msg in (com.get("conversation") or []):
+                if not isinstance(msg, dict):
+                    continue
+                txt = (msg.get("text") or "").strip()
+                if not txt:
+                    continue
+                conv.append({
+                    "u": usuarios.get(msg.get("userID"), "") or "",
+                    "t": txt[:400],
+                    "f": _fecha_corta(msg.get("createdOn")),
+                })
+            reg_m = {
                 "id": str(com.get("id")),
                 "lat": round(lat_m, 6), "lon": round(lon_m, 6),
                 "asunto": (com.get("subject") or "").strip()[:150],
@@ -809,6 +821,9 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
                 "editor": usuarios.get(com.get("updatedBy"), "") or "",
                 "creado": _cre, "editado": _act, "fin": _fin,
             }
+            if conv:
+                reg_m["conv"] = conv[:60]  # hilos larguísimos se recortan
+            _comentarios_celda[str(com.get("id"))] = reg_m
 
     # segmentos con restricción de pases de peaje (IAVE, PASE, TELEVía, VIAPASS…)
     for seg in segs:
