@@ -770,6 +770,11 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             continue
         ciudad_c, edo_c = "", ""
         stc = streets.get(seg.get("primaryStreetID"))
+        nombre_c = nombre_de_calle(stc) or ""
+        if seg.get("roadType") == 2 and not nombre_c:
+            # una avenida principal sin nombre se atiende en la lista de
+            # segmentos sin nombre, no en la de bloqueos
+            continue
         if stc and stc.get("cityID") in cities:
             cc = cities[stc.get("cityID")]
             if not cc.get("isEmpty"):
@@ -781,7 +786,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "id": seg.get("id"), "lat": round(lat_c, 6), "lon": round(lon_c, 6),
             "rt": seg.get("roadType"), "lk": lock, "req": req,
             "ciudad": ciudad_c, "edo": edo_c,
-            "nombre": nombre_de_calle(stc) or "",
+            "nombre": nombre_c,
         }
 
     # comentarios de mapa (map notes): asunto, descripción, candado y autores
@@ -1297,6 +1302,8 @@ def main():
         cand_por_estado = {}
         for regs in candados_info.values():
             for r in regs:
+                if r.get("rt") == 2 and not (r.get("nombre") or "").strip():
+                    continue  # PS sin nombre: va en la lista de segmentos sin nombre
                 est_c = (normalizar_estado(r.get("edo", ""), estados_mx)
                          or estados_mx.estado_de(r["lon"], r["lat"]))
                 if panel_na:
