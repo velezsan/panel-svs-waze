@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comentarios de mapa · velezss NA</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1150px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1150px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select,input.buscar{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  td.asunto{font-weight:600;max-width:260px}
+  td.desc{color:var(--muted);font-size:.86rem;max-width:330px}
+  td.gente{white-space:nowrap;font-size:.86rem}
+  td.gente .ed{color:var(--muted)}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .lk{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:700}
+  .vencido{color:var(--warn);font-size:.8rem;white-space:nowrap}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+</style>
+</head>
+<body>
+<header>
+  <h1>💬 Comentarios de mapa</h1>
+  <p class="sub">Notas de mapa (map notes) dentro de la franja fronteriza ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Elige un estado…</option></select>
+    <select id="sel-lock" style="display:none"><option value="">Todos los candados</option></select>
+    <select id="sel-autor" style="display:none"><option value="">Todos los autores</option></select>
+    <input type="search" class="buscar" id="buscar" placeholder="Buscar en asunto o descripción…" style="display:none">
+    <span class="chip" id="resumen-chip" style="display:none"></span>
+  </div>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Son los comentarios de mapa que cualquier editor puede dejar en el WME.
+    Se muestran el asunto, la descripción, el nivel de bloqueo, quién lo creó y quién lo editó por última vez.
+    Los marcados como vencidos ya pasaron su fecha de cierre. Los datos se actualizan con cada corrida del escáner.</p>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>Number(n||0).toLocaleString('es-MX');
+  let indice=null, lista=[], pagina=0, porPagina=100;
+  const HOY=new Date().toISOString().slice(0,10);
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_coms_na')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_coms_na',JSON.stringify([...visitados]));}catch(e){}}
+
+  const permalink=r=>`https://www.waze.com/editor?env=usa&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&mapComments=${r.id}`;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+  async function cargarEstado(slug){
+    if(!slug){
+      $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus comentarios de mapa.</div>';
+      $('pager').style.display='none'; $('sel-lock').style.display='none';
+      $('sel-autor').style.display='none'; $('buscar').style.display='none';
+      $('resumen-chip').style.display='none';
+      return;
+    }
+    $('contenido').innerHTML='<div class="cargando">Cargando comentarios…</div>';
+    let regs=[];
+    try{
+      if(slug==='__todos'){
+        const listas=await Promise.all(indice.estados.map(async e=>{
+          try{
+            const r=await fetch('../data-na/comentarios/'+e.slug+'.json',{cache:'no-store'});
+            const d=await r.json();
+            return Object.values(d.comentarios||{}).map(c=>({...c,est:e.estado}));
+          }catch(_){return [];}
+        }));
+        const vistos={};
+        listas.flat().forEach(c=>{vistos[c.id]=c;});
+        regs=Object.values(vistos);
+      }else{
+        const r=await fetch('../data-na/comentarios/'+slug+'.json',{cache:'no-store'});
+        const d=await r.json();
+        regs=Object.values(d.comentarios||{}).map(c=>({...c,est:d.estado}));
+      }
+    }catch(e){
+      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
+      return;
+    }
+    const locks=[...new Set(regs.map(r=>r.lk))].sort((a,b)=>a-b);
+    $('sel-lock').innerHTML='<option value="">Todos los candados</option>'+
+      locks.map(l=>`<option value="${l}">Candado ${l}</option>`).join('');
+    $('sel-lock').style.display='inline-block';
+    const autores=[...new Set(regs.map(r=>r.autor).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'es'));
+    $('sel-autor').innerHTML='<option value="">Todos los autores</option>'+
+      autores.map(a=>`<option value="${esc(a)}">${esc(a)}</option>`).join('');
+    $('sel-autor').style.display='inline-block';
+    $('buscar').style.display='inline-block';
+    window.__regs=regs;
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros(){
+    const regs=window.__regs||[];
+    const fl=$('sel-lock').value, fa=$('sel-autor').value;
+    const q=($('buscar').value||'').trim().toLowerCase();
+    lista=regs.filter(r=>{
+      if(fl && String(r.lk)!==fl) return false;
+      if(fa && r.autor!==fa) return false;
+      if(q && !((r.asunto||'').toLowerCase().includes(q) || (r.desc||'').toLowerCase().includes(q))) return false;
+      return true;
+    }).sort((a,b)=>(b.creado||'').localeCompare(a.creado||''));
+    pagina=0;
+    const venc=lista.filter(r=>r.fin && r.fin<HOY).length;
+    $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' comentarios'+(venc?' · '+venc+' vencidos':'');
+    $('resumen-chip').style.display='inline-block';
+    pintar();
+  }
+
+  function pintar(){
+    if(!lista.length){
+      $('contenido').innerHTML='<div class="cargando">No hay comentarios con esos filtros.</div>';
+      $('pager').style.display='none';
+      return;
+    }
+    const ini=pagina*porPagina, trozo=lista.slice(ini,ini+porPagina);
+    const filas=trozo.map(r=>{
+      const hecho=visitados.has(r.id);
+      const vencido=r.fin && r.fin<HOY;
+      return `<tr class="${hecho?'visitado':''}" data-id="${esc(r.id)}">
+        <td class="asunto">${esc(r.asunto)||'<span style="color:var(--muted)">(sin asunto)</span>'}
+          ${vencido?`<div class="vencido">⚠️ venció ${esc(r.fin)}</div>`:''}</td>
+        <td class="desc">${esc(r.desc)||'—'}</td>
+        <td class="lk">${r.lk}</td>
+        <td class="gente">${esc(r.autor)||'—'}${r.editor&&r.editor!==r.autor?`<div class="ed">editó: ${esc(r.editor)}</div>`:''}</td>
+        <td>${esc(r.creado)||'—'}</td>
+        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
+          ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
+      </tr>`;
+    }).join('');
+    $('contenido').innerHTML=`<table><thead><tr>
+        <th>Asunto</th><th>Descripción</th><th>Candado</th><th>Creó / editó</th><th>Creado</th><th></th>
+      </tr></thead><tbody>${filas}</tbody></table>`;
+    $('contenido').querySelectorAll('a.wme').forEach(a=>{
+      a.addEventListener('click',()=>{
+        const id=a.closest('tr').dataset.id;
+        visitados.add(id); guardar();
+        a.classList.add('hecho'); a.closest('tr').classList.add('visitado');
+      });
+    });
+    $('contenido').querySelectorAll('.quitar').forEach(q=>{
+      q.addEventListener('click',()=>{
+        const tr=q.closest('tr');
+        visitados.delete(tr.dataset.id); guardar(); pintar();
+      });
+    });
+    const paginas=Math.ceil(lista.length/porPagina);
+    $('pager').style.display=paginas>1?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(Math.min(ini+porPagina,lista.length))} de ${fmt(lista.length)}`;
+    $('pg-num').value=pagina+1; $('pg-num').max=paginas;
+    $('pg-total').textContent='de '+fmt(paginas);
+    $('pg-prev').disabled=pagina===0; $('pg-first').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=paginas-1; $('pg-last').disabled=pagina>=paginas-1;
+  }
+
+  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
+  ['sel-lock','sel-autor'].forEach(id=>$(id).addEventListener('change',aplicarFiltros));
+  $('buscar').addEventListener('input',aplicarFiltros);
+  $('pg-prev').addEventListener('click',()=>{if(pagina>0){pagina--;pintar();window.scrollTo(0,0);}});
+  $('pg-next').addEventListener('click',()=>{if((pagina+1)*porPagina<lista.length){pagina++;pintar();window.scrollTo(0,0);}});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.ceil(lista.length/porPagina)-1;pintar();window.scrollTo(0,0);});
+  $('pg-num').addEventListener('change',()=>{
+    const p=parseInt($('pg-num').value,10);
+    const paginas=Math.ceil(lista.length/porPagina);
+    if(p>=1&&p<=paginas){pagina=p-1;pintar();window.scrollTo(0,0);}
+  });
+
+  fetch('../data-na/comentarios/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      indice=d;
+      const sel=$('sel-estado');
+      if(d.estados&&d.estados.length){
+        const ot=document.createElement('option');
+        ot.value='__todos'; ot.textContent=`Toda la franja (${fmt(d.total)})`;
+        sel.appendChild(ot);
+        d.estados.forEach(e=>{
+          const o=document.createElement('option');
+          o.value=e.slug; o.textContent=`${e.estado} (${fmt(e.total)})`;
+          sel.appendChild(o);
+        });
+        $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus comentarios de mapa.</div>';
+      }else{
+        $('contenido').innerHTML='<div class="cargando">Todavía no hay comentarios registrados. Aparecerán conforme avance el escaneo.</div>';
+      }
+    })
+    .catch(()=>{
+      $('contenido').innerHTML='<div class="cargando">Todavía no hay datos de comentarios. Aparecerán tras la próxima corrida del escáner.</div>';
+    });
+})();
+</script>
+</body>
+</html>
