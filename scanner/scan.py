@@ -38,6 +38,7 @@ DATA_DIR = os.path.join(BASE, "docs", "data")
 ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
 CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
 PASES_DIR = os.path.join(DATA_DIR, "pases")
+COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
 
 # Servidores del WME. México vive en el entorno "row" (Rest of World).
 # El parámetro sandbox=true es el que usa el modo práctica: permite leer
@@ -457,6 +458,36 @@ def nueva_sesion(env):
     return s
 
 
+def _fecha_corta(v):
+    """Waze mezcla epoch en milisegundos y texto; devuelve AAAA-MM-DD."""
+    if isinstance(v, (int, float)) and v > 0:
+        try:
+            return datetime.fromtimestamp(v / 1000, timezone.utc).strftime("%Y-%m-%d")
+        except (ValueError, OSError, OverflowError):
+            return ""
+    if isinstance(v, str) and len(v) >= 10:
+        return v[:10]
+    return ""
+
+
+def centro_geometria(geo):
+    """Promedio de los vértices de una geometría (punto, línea o polígono)."""
+    puntos = []
+    def _rec(v):
+        if isinstance(v, (list, tuple)):
+            if len(v) == 2 and all(isinstance(x, (int, float)) for x in v):
+                puntos.append((float(v[0]), float(v[1])))
+            else:
+                for x in v:
+                    _rec(x)
+    if isinstance(geo, dict):
+        _rec(geo.get("coordinates"))
+    if not puntos:
+        return None, None
+    return (sum(p[0] for p in puntos) / len(puntos),
+            sum(p[1] for p in puntos) / len(puntos))
+
+
 def _objetos(data, clave):
     v = data.get(clave)
     if isinstance(v, dict):
@@ -488,6 +519,9 @@ def pedir_celda(sesion, env, bbox, pausa, tipos=None):
         "zoomLevel": "17",
         "sandbox": "true",  # el truco del modo práctica: lectura sin login
     }
+    if PEDIR_COMENTARIOS:
+        # trae las notas de mapa en la misma petición, sin llamadas extra
+        params["mapComments"] = "true"
     time.sleep(pausa)
     r = sesion.get(ENDPOINTS[env], params=params, timeout=60)
     texto = r.text[:2000]
@@ -594,6 +628,9 @@ REQ_CANDADO = {3: 5, 6: 4, 4: 4, 7: 3}  # FW, MH, Ramp, mH
 REQ_CANDADO_EXTRA = {}
 _candados_celda = {}  # id -> registro de candado bajo (se vacía por celda)
 _pases_celda = {}  # id -> segmento con pases de peaje (se vacía por celda)
+_comentarios_celda = {}  # id -> comentario de mapa (se vacía por celda)
+# los comentarios de mapa (map notes) solo se piden en el Panel NA por ahora
+PEDIR_COMENTARIOS = False
 
 # Pases de peaje de México tal como los nombra Waze en las restricciones.
 # La lista es solo para mostrarlos bonito: si aparece uno nuevo se guarda igual.
@@ -746,6 +783,27 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
             "ciudad": ciudad_c, "edo": edo_c,
             "nombre": nombre_de_calle(stc) or "",
         }
+
+    # comentarios de mapa (map notes): asunto, descripción, candado y autores
+    if PEDIR_COMENTARIOS:
+        for com in _objetos(data, "mapComments"):
+            lon_m, lat_m = centro_geometria(com.get("geometry"))
+            if lon_m is None:
+                continue
+            lr_m = com.get("lockRank")
+            _cre = _fecha_corta(com.get("createdOn"))
+            _act = _fecha_corta(com.get("updatedOn"))
+            _fin = _fecha_corta(com.get("endDate"))
+            _comentarios_celda[str(com.get("id"))] = {
+                "id": str(com.get("id")),
+                "lat": round(lat_m, 6), "lon": round(lon_m, 6),
+                "asunto": (com.get("subject") or "").strip()[:150],
+                "desc": (com.get("body") or "").strip()[:400],
+                "lk": (lr_m + 1 if isinstance(lr_m, int) else 1),
+                "autor": usuarios.get(com.get("createdBy"), "") or "",
+                "editor": usuarios.get(com.get("updatedBy"), "") or "",
+                "creado": _cre, "editado": _act, "fin": _fin,
+            }
 
     # segmentos con restricción de pases de peaje (IAVE, PASE, TELEVía, VIAPASS…)
     for seg in segs:
@@ -978,12 +1036,13 @@ def main():
 
     # el Panel NA usa sus propios archivos de estado y datos (docs/data-na)
     global STATE_PATH, LASTRUN_PATH, DEBUG_PATH, DATA_DIR, ESTADOS_DIR, CANDADOS_DIR
-    global PASES_DIR, REQ_CANDADO_EXTRA
+    global PASES_DIR, REQ_CANDADO_EXTRA, COMENTARIOS_DIR, PEDIR_COMENTARIOS
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
     if panel_na:
         FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
         REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1 (solo en el Panel NA por ahora)
+        PEDIR_COMENTARIOS = True  # notas de mapa (solo en el Panel NA por ahora)
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
@@ -991,6 +1050,7 @@ def main():
         ESTADOS_DIR = os.path.join(DATA_DIR, "estados")
         CANDADOS_DIR = os.path.join(DATA_DIR, "candados")
         PASES_DIR = os.path.join(DATA_DIR, "pases")
+        COMENTARIOS_DIR = os.path.join(DATA_DIR, "comentarios")
 
     cfg = load_json(CONFIG_PATH, {})
     bbox_mx = cfg.get("bbox", [-118.45, 14.5, -86.65, 32.75])
@@ -1064,6 +1124,7 @@ def main():
     champs_info = estado.get("champs", {})  # idx -> {userName: segs editados}
     candados_info = estado.get("candados", {})  # idx -> [registros de candado bajo]
     pases_info = estado.get("pases", {})  # idx -> [segmentos con pases de peaje]
+    comentarios_info = estado.get("comentarios", {})  # idx -> [notas de mapa]
     cursor = estado.get("cursor", 0)
     ciclo = estado.get("ciclo", 1)
     if (estado.get("celda_grados") not in (None, celda)
@@ -1073,6 +1134,7 @@ def main():
         champs_info = {}
         candados_info = {}
         pases_info = {}
+        comentarios_info = {}
 
     if args.modo == "test":
         log("MODO PRUEBA: escaneando solo el centro de Guadalajara")
@@ -1209,7 +1271,7 @@ def main():
         resumen = guardar_almacen(almacen, {"env": env, "progreso": progreso})
         estado.update({"cursor": cursor, "ciclo": ciclo, "celdas": celdas_info,
                        "champs": champs_info, "candados": candados_info,
-                       "pases": pases_info,
+                       "pases": pases_info, "comentarios": comentarios_info,
                        "env": env, "celda_grados": celda, "bbox_escaneo": bbox_mx})
         save_json(STATE_PATH, estado, compact=True)
         # datos para el mapa de escaneo del panel
@@ -1261,6 +1323,34 @@ def main():
             "total": sum(e["total"] for e in lista_c),
             "estados": lista_c,
             "tipos": {str(k): v for k, v in ROAD_TYPE_NAMES.items()},
+        }, compact=True)
+        # panel de comentarios de mapa (map notes): reagrupar por estado
+        coms_por_estado = {}
+        for regs in comentarios_info.values():
+            for r in regs:
+                est_m = estados_mx.estado_de(r["lon"], r["lat"])
+                if panel_na:
+                    if est_m not in nombres_mx:
+                        continue  # nota del lado de EUA: no se incluye
+                    if not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
+                        continue
+                coms_por_estado.setdefault(est_m, {})[r["id"]] = r
+        os.makedirs(COMENTARIOS_DIR, exist_ok=True)
+        slugs_m = set()
+        lista_m = []
+        for est_m, coms_m in sorted(coms_por_estado.items()):
+            slug_m = slugify(est_m)
+            slugs_m.add(slug_m)
+            save_json(os.path.join(COMENTARIOS_DIR, f"{slug_m}.json"),
+                      {"estado": est_m, "comentarios": coms_m}, compact=True)
+            lista_m.append({"estado": est_m, "slug": slug_m, "total": len(coms_m)})
+        for fn in os.listdir(COMENTARIOS_DIR):
+            if fn.endswith(".json") and fn[:-5] != "index" and fn[:-5] not in slugs_m:
+                os.remove(os.path.join(COMENTARIOS_DIR, fn))
+        save_json(os.path.join(COMENTARIOS_DIR, "index.json"), {
+            "actualizado": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "total": sum(e["total"] for e in lista_m),
+            "estados": lista_m,
         }, compact=True)
         # panel de pases de peaje: reagrupar por estado
         pases_por_estado = {}
@@ -1384,6 +1474,7 @@ def main():
                 _champs_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
+                _comentarios_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1407,6 +1498,7 @@ def main():
                     _champs_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _comentarios_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1415,6 +1507,7 @@ def main():
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _comentarios_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1441,6 +1534,10 @@ def main():
                     pases_info[str(idx)] = list(_pases_celda.values())
                 else:
                     pases_info.pop(str(idx), None)
+                if _comentarios_celda:
+                    comentarios_info[str(idx)] = list(_comentarios_celda.values())
+                else:
+                    comentarios_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
@@ -1499,6 +1596,7 @@ def main():
                 _champs_celda.clear()
                 _candados_celda.clear()
                 _pases_celda.clear()
+                _comentarios_celda.clear()
                 segs_antes = contador["segs"]
                 try:
                     h = escanear_bbox(sesion, env, bb, tipos, pausa, contador,
@@ -1523,6 +1621,7 @@ def main():
                     _champs_celda.clear()
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _comentarios_celda.clear()
                 # si el servidor NA tiene datos significativos ahí, la zona es suya
                 # (NA devuelve 0 en todo el México que sí es de ROW)
                 if usa_n is not None and usa_n >= 5:
@@ -1533,6 +1632,7 @@ def main():
                     _champs_celda.clear()  # celda del servidor NA: no cuenta
                     _candados_celda.clear()
                     _pases_celda.clear()
+                    _comentarios_celda.clear()
                 else:
                     h = enriquecer_con_inegi(h, inegi, limite, sugs_previas)
                 if _champs_celda:
@@ -1559,6 +1659,10 @@ def main():
                     pases_info[str(idx)] = list(_pases_celda.values())
                 else:
                     pases_info.pop(str(idx), None)
+                if _comentarios_celda:
+                    comentarios_info[str(idx)] = list(_comentarios_celda.values())
+                else:
+                    comentarios_info.pop(str(idx), None)
                 celdas_info[str(idx)] = sello_celda(1 if (h or segs_en_celda) else 0)
                 escaneadas.append((str(idx), bb, h))
                 hallados_run += len(h)
