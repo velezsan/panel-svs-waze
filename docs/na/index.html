@@ -36,6 +36,9 @@
   a.seccion .t{font-weight:700;font-size:1rem;margin-bottom:2px}
   a.seccion .d{color:var(--muted);font-size:.84rem}
   a.seccion .n{color:var(--accent);font-weight:700;font-size:.9rem}
+  a.tile{display:block;text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
+  a.tile:hover{border-color:var(--accent);background:var(--panel2)}
+  a.tile .v{color:var(--accent)}
   footer{max-width:1100px;margin:0 auto;padding:10px 20px 40px;color:var(--muted);font-size:.82rem}
 </style>
 </head>
@@ -57,8 +60,8 @@
     <h2>Segmentos sin nombre</h2>
     <p class="g-sub">Calles y avenidas principales que deberían tener nombre y no lo tienen.</p>
     <div class="tiles">
-      <div class="tile"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en la franja NA</div></div>
-      <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 6 fronterizos</div></div>
+      <a class="tile" href="sin-nombre.html"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en la franja NA</div></a>
+      <a class="tile" href="sin-nombre.html"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 6 fronterizos</div></a>
     </div>
   </div>
 
@@ -66,8 +69,17 @@
     <h2>Segmentos con bloqueo bajo</h2>
     <p class="g-sub">Vías importantes con candado por debajo del estándar, incluidas las avenidas principales en nivel 1.</p>
     <div class="tiles">
-      <div class="tile"><div class="l">Segmentos con bloqueo bajo</div><div class="v" id="c-total">—</div><div class="d">acumulados en la franja NA</div></div>
-      <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="c-estados">—</div><div class="d">de 6 fronterizos</div></div>
+      <a class="tile" href="candados.html"><div class="l">Segmentos con bloqueo bajo</div><div class="v" id="c-total">—</div><div class="d">acumulados en la franja NA</div></a>
+      <a class="tile" href="candados.html"><div class="l">Estados con pendientes</div><div class="v" id="c-estados">—</div><div class="d">de 6 fronterizos</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>Comentarios de mapa</h2>
+    <p class="g-sub">Las notas que los editores dejan en el mapa, con su asunto, descripción, bloqueo y autores.</p>
+    <div class="tiles">
+      <a class="tile" href="comentarios.html"><div class="l">Comentarios de mapa</div><div class="v" id="m-total">—</div><div class="d">acumulados en la franja NA</div></a>
+      <a class="tile" href="comentarios.html"><div class="l">Estados con comentarios</div><div class="v" id="m-estados">—</div><div class="d">de 6 fronterizos</div></a>
     </div>
   </div>
 
@@ -83,6 +95,11 @@
         <div class="t">🔒 Segmentos con bloqueo bajo</div>
         <div class="d">Vías por debajo del candado estándar, incluidas las PS en nivel 1.</div>
         <div class="n" id="n-candados"></div>
+      </a>
+      <a class="seccion" href="comentarios.html">
+        <div class="t">💬 Comentarios de mapa</div>
+        <div class="d">Notas del mapa con asunto, descripción, bloqueo, creador y último editor.</div>
+        <div class="n" id="n-comentarios"></div>
       </a>
       <a class="seccion" href="champs.html">
         <div class="t">🏆 Local Champs</div>
@@ -123,6 +140,15 @@
       pon('n-sinnombre', fmt(d.total)+' pendientes en '+((d.estados||[]).length)+' estados');
     })
     .catch(()=>{ pon('t-prog','—'); pon('n-sinnombre','sin datos todavía'); });
+
+  fetch('../data-na/comentarios/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('m-total', fmt(d.total));
+      pon('m-estados', (d.estados||[]).length);
+      pon('n-comentarios', fmt(d.total)+' notas en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('m-total','—'); pon('m-estados','—'); pon('n-comentarios','sin datos todavía'); });
 
   fetch('../data-na/candados/index.json',{cache:'no-store'})
     .then(r=>{if(!r.ok)throw 0;return r.json();})
