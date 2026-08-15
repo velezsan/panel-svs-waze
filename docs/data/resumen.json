@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-14T23:34:18+00:00",
+ "actualizado": "2026-08-15T00:14:28+00:00",
  "env": "row",
- "total": 186109,
+ "total": 185115,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 2614,
+   "total": 2399,
    "ciudades": 57
   },
   {
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 6430,
-   "ciudades": 187
+   "total": 6344,
+   "ciudades": 182
   },
   {
    "estado": "Guanajuato",
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 7738,
+   "total": 7737,
    "ciudades": 226
   },
   {
@@ -144,14 +144,14 @@
   {
    "estado": "San Luis Potosí",
    "slug": "san-luis-potosi",
-   "total": 4210,
-   "ciudades": 310
+   "total": 4205,
+   "ciudades": 309
   },
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 4912,
-   "ciudades": 220
+   "total": 4705,
+   "ciudades": 215
   },
   {
    "estado": "Sonora",
@@ -168,8 +168,8 @@
   {
    "estado": "Tamaulipas",
    "slug": "tamaulipas",
-   "total": 2418,
-   "ciudades": 142
+   "total": 1948,
+   "ciudades": 131
   },
   {
    "estado": "Tlaxcala",
@@ -192,8 +192,8 @@
   {
    "estado": "Zacatecas",
    "slug": "zacatecas",
-   "total": 4902,
-   "ciudades": 345
+   "total": 4892,
+   "ciudades": 343
   }
  ],
  "progreso": {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161631,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 52.3,
+  "porcentaje_vuelta": 52.9,
   "modo": "completo"
  },
  "aviso": "",
