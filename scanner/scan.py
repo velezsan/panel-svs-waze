@@ -1668,6 +1668,12 @@ def main():
                 else:
                     comentarios_info.pop(str(idx), None)
                 if _ortografia_celda:
+                    _hoy_o = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_o = {p.get("sid"): p.get("v", "")
+                               for p in ortografia_info.get(str(idx), [])}
+                    for _ro in _ortografia_celda.values():
+                        _ro["v"] = _prev_o.get(_ro["sid"]) or _hoy_o  # primera vez que se vio
+                        _ro["r"] = _hoy_o  # última revisión
                     ortografia_info[str(idx)] = list(_ortografia_celda.values())
                 else:
                     ortografia_info.pop(str(idx), None)
@@ -1800,6 +1806,12 @@ def main():
                 else:
                     comentarios_info.pop(str(idx), None)
                 if _ortografia_celda:
+                    _hoy_o = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M")
+                    _prev_o = {p.get("sid"): p.get("v", "")
+                               for p in ortografia_info.get(str(idx), [])}
+                    for _ro in _ortografia_celda.values():
+                        _ro["v"] = _prev_o.get(_ro["sid"]) or _hoy_o  # primera vez que se vio
+                        _ro["r"] = _hoy_o  # última revisión
                     ortografia_info[str(idx)] = list(_ortografia_celda.values())
                 else:
                     ortografia_info.pop(str(idx), None)
