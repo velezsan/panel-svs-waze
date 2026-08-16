@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-16T06:12:32+00:00",
+ "actualizado": "2026-08-16T06:53:02+00:00",
  "env": "row",
- "total": 181517,
+ "total": 181330,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -18,7 +18,7 @@
   {
    "estado": "Baja California Sur",
    "slug": "baja-california-sur",
-   "total": 2396,
+   "total": 2332,
    "ciudades": 56
   },
   {
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 6958,
-   "ciudades": 220
+   "total": 6835,
+   "ciudades": 218
   },
   {
    "estado": "Oaxaca",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161634,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 62.1,
+  "porcentaje_vuelta": 62.4,
   "modo": "completo"
  },
  "aviso": "",
