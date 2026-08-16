@@ -2,6 +2,7 @@
  "_comentario": "Palabras mal escritas que busca el Panel NA en los nombres de calle. La clave es la forma incorrecta en minúsculas y sin acentos; el valor es la forma correcta. Puedes editar este archivo directamente en GitHub: el escáner lo lee en cada corrida, no hace falta tocar el código.",
  "_descartadas": {
   "canada": "choca con Canadá y con calles en inglés",
+  "canon": "'Canon' es palabra válida (canon, y la marca Canon), no siempre es Cañón",
   "cortes": "'Cortes' es plural de corte y apellido válido sin acento",
   "forum": "'Forum' sin acento es nombre propio de plazas comerciales (Forum Buenavista, Forum Tlaquepaque)",
   "german": "'German' es nombre válido en inglés",
@@ -70,7 +71,6 @@
   "camion": "Camión",
   "campeon": "Campeón",
   "cancun": "Cancún",
-  "canon": "Cañón",
   "cantabrico": "Cantábrico",
   "cantaro": "Cántaro",
   "cantu": "Cantú",
