@@ -1123,14 +1123,15 @@ def main():
     global ORTOGRAFIA_DIR, REVISAR_ORTOGRAFIA, PALABRAS_MAL
     global FILTRAR_RESTRINGIDAS
     panel_na = args.panel == "na"
+    # secciones que corren en los dos paneles
+    PEDIR_COMENTARIOS = True  # notas de mapa
+    REVISAR_ORTOGRAFIA = True  # calles mal escritas
+    PALABRAS_MAL = {k.lower(): v for k, v in
+                    (load_json(PALABRAS_PATH, {}).get("palabras") or {}).items()}
+    log(f"revisión de ortografía: {len(PALABRAS_MAL)} palabras cargadas")
     if panel_na:
         FILTRAR_RESTRINGIDAS = True  # descartar lo que Waze marca como no editable
-        REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1 (solo en el Panel NA por ahora)
-        PEDIR_COMENTARIOS = True  # notas de mapa (solo en el Panel NA por ahora)
-        REVISAR_ORTOGRAFIA = True  # calles mal escritas (solo en el Panel NA por ahora)
-        PALABRAS_MAL = {k.lower(): v for k, v in
-                        (load_json(PALABRAS_PATH, {}).get("palabras") or {}).items()}
-        log(f"revisión de ortografía: {len(PALABRAS_MAL)} palabras cargadas")
+        REQ_CANDADO_EXTRA = {2: 2}  # PS en nivel 1: solo el Panel NA por ahora
         STATE_PATH = os.path.join(BASE, "state", "scan_state_na.json")
         LASTRUN_PATH = os.path.join(BASE, "state", "last_run_na.json")
         DEBUG_PATH = os.path.join(BASE, "state", "debug_na.txt")
