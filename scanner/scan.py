@@ -463,6 +463,13 @@ def nueva_sesion(env):
 _RE_TOKEN = re.compile(r"[0-9A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+")
 
 
+def _plano(s):
+    """Minúsculas, sin acentos y con la eñe vuelta n."""
+    s = unicodedata.normalize("NFD", s)
+    s = "".join(c for c in s if unicodedata.category(c) != "Mn")
+    return s.replace("ñ", "n").replace("Ñ", "N").lower()
+
+
 def revisar_ortografia(nombre):
     """Busca palabras mal escritas en un nombre de calle.
 
@@ -476,15 +483,21 @@ def revisar_ortografia(nombre):
 
     def _cambia(m):
         t = m.group(0)
-        bien = PALABRAS_MAL.get(t.lower())
+        # se busca sin acentos ni eñes, para cazar también las medio corregidas
+        # (Zuñiga, que tiene la eñe pero le falta el acento de Zúñiga)
+        bien = PALABRAS_MAL.get(_plano(t))
         if not bien:
             return t
-        encontradas.append(bien)
         if t.isupper() and len(t) > 1:
-            return bien.upper()
-        if t[0].isupper():
-            return bien[0].upper() + bien[1:]
-        return bien.lower()
+            nuevo = bien.upper()
+        elif t[0].isupper():
+            nuevo = bien[0].upper() + bien[1:]
+        else:
+            nuevo = bien.lower()
+        if nuevo == t:  # ya estaba bien escrita
+            return t
+        encontradas.append(bien)
+        return nuevo
 
     sug = _RE_TOKEN.sub(_cambia, nombre)
     if not encontradas or sug == nombre:
