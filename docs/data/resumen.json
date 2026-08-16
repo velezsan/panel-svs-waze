@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-16T03:25:30+00:00",
+ "actualizado": "2026-08-16T04:06:12+00:00",
  "env": "row",
- "total": 182481,
+ "total": 181825,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -36,7 +36,7 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 7250,
+   "total": 7247,
    "ciudades": 186
   },
   {
@@ -48,8 +48,8 @@
   {
    "estado": "Coahuila",
    "slug": "coahuila",
-   "total": 4767,
-   "ciudades": 150
+   "total": 4708,
+   "ciudades": 148
   },
   {
    "estado": "Colima",
@@ -60,8 +60,8 @@
   {
    "estado": "Durango",
    "slug": "durango",
-   "total": 5358,
-   "ciudades": 163
+   "total": 4952,
+   "ciudades": 155
   },
   {
    "estado": "Guanajuato",
@@ -114,8 +114,8 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 7259,
-   "ciudades": 223
+   "total": 7256,
+   "ciudades": 222
   },
   {
    "estado": "Oaxaca",
@@ -150,8 +150,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 4177,
-   "ciudades": 206
+   "total": 3992,
+   "ciudades": 204
   },
   {
    "estado": "Sonora",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161634,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 61.7,
+  "porcentaje_vuelta": 61.8,
   "modo": "completo"
  },
  "aviso": "",
