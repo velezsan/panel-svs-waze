@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Panel SVS Waze · Segmentos sin nombre — México</title>
+<title>velezss ROW · México</title>
 <style>
   :root{
     --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
@@ -17,321 +17,193 @@
   h1{margin:0 0 4px;font-size:1.45rem;font-weight:700}
   h1 .wz{color:var(--accent)}
   .sub{color:var(--muted);font-size:.95rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
   main{max-width:1100px;margin:0 auto;padding:14px 20px 60px}
-  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin:18px 0}
+  .aviso{display:none;background:#3a2c14;border:1px solid var(--warn);color:#ffd9a0;
+         border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.9rem}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:18px 0}
   .tile{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px 16px}
   .tile .v{font-size:1.55rem;font-weight:700;margin:2px 0}
   .tile .l{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.04em}
   .tile .d{color:var(--muted);font-size:.78rem}
-  .aviso{display:none;background:#3a2c14;border:1px solid var(--warn);color:#ffd9a0;
-         border-radius:10px;padding:10px 14px;margin:10px 0;font-size:.9rem}
-  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
-  select,input[type=search]{background:var(--panel2);color:var(--text);border:1px solid var(--line);
-         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
-  input[type=search]{flex:1;min-width:200px}
-  .hint{color:var(--muted);font-size:.85rem;margin:6px 0 14px}
-  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
-        border-radius:12px;overflow:hidden;font-size:.92rem}
-  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line)}
-  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
-  tr:last-child td{border-bottom:none}
-  tr.clickable{cursor:pointer}
-  tr.clickable:hover td{background:var(--panel2)}
-  .num{text-align:right;font-variant-numeric:tabular-nums}
-  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
-        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
-  a.wme:hover{filter:brightness(1.1)}
-  tr.visitado td{opacity:.45}
-  a.wme.hecho{background:var(--accent2)}
-  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
-  .quitar:hover{color:var(--text)}
-  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--panel2);
-         border:1px solid var(--accent);color:var(--text);padding:10px 16px;border-radius:10px;
-         font-size:.9rem;opacity:0;pointer-events:none;transition:opacity .3s;z-index:9;max-width:90%}
-  #toast.ver{opacity:1}
-  .chip{display:inline-block;background:var(--chip);border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
-  .sug{color:var(--accent2)}
-  .sug.na{color:var(--muted);font-style:italic}
-  .chip.nuevo{background:#1e3a24;color:#7fd18c}
-  td.fecha{color:var(--muted);font-size:.85rem;white-space:nowrap}
-  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
-  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
-        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
-  .pager button:disabled{opacity:.4;cursor:default}
-  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
-        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
-  .pager #pg-total{color:var(--muted);font-size:.9rem}
-  .volver{background:none;border:none;color:var(--accent);cursor:pointer;font-size:.92rem;padding:0;margin-right:6px}
-  footer{max-width:1100px;margin:0 auto;padding:0 20px 40px;color:var(--muted);font-size:.82rem}
-  .cargando{color:var(--muted);padding:30px;text-align:center}
-  @media (max-width:640px){ th:nth-child(2),td:nth-child(2){display:none} }
+  .grupo{margin:26px 0 0}
+  .grupo h2{font-size:1rem;font-weight:700;margin:0 0 2px;color:var(--text)}
+  .grupo .g-sub{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+  .secciones{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin:14px 0 0}
+  a.seccion{display:block;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+            padding:14px 16px;text-decoration:none;color:var(--text);transition:border-color .15s,background .15s}
+  a.seccion:hover{border-color:var(--accent);background:var(--panel2)}
+  a.seccion .t{font-weight:700;font-size:1rem;margin-bottom:2px}
+  a.seccion .d{color:var(--muted);font-size:.84rem}
+  a.seccion .n{color:var(--accent);font-weight:700;font-size:.9rem}
+  a.tile{display:block;text-decoration:none;color:inherit;transition:border-color .15s,background .15s}
+  a.tile:hover{border-color:var(--accent);background:var(--panel2)}
+  a.tile .v{color:var(--accent)}
+  footer{max-width:1100px;margin:0 auto;padding:10px 20px 40px;color:var(--muted);font-size:.82rem}
 </style>
 </head>
 <body>
 <header>
-  <h1>Panel SVS <span class="wz">Waze</span> · Segmentos sin nombre</h1>
-  <p class="sub">México · Revisión automática diaria del mapa (datos del editor, modo práctica) · <a href="mapa.html" style="color:var(--accent);text-decoration:none">🗺️ Mapa de escaneo</a> · <a href="champs.html" style="color:var(--accent);text-decoration:none">🏆 Local Champs</a> · <a href="candados.html" style="color:var(--accent);text-decoration:none">🔒 Candados bajos</a> · <a href="pases.html" style="color:var(--accent);text-decoration:none">🎫 Pases de peaje</a> · <a href="na/index.html" style="color:var(--accent);text-decoration:none">🇲🇽 Panel NA</a></p>
+  <h1><span class="wz">velezss ROW</span></h1>
+  <p class="sub">México (servidor ROW) · Revisión automática del mapa (datos del editor, modo práctica) ·
+    <a href="na/index.html">🌵 Panel NA (franja fronteriza)</a></p>
 </header>
 <main>
   <div class="aviso" id="aviso"></div>
 
   <div class="tiles">
-    <div class="tile"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en todo el país</div></div>
-    <div class="tile"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 32</div></div>
     <div class="tile"><div class="l">Cobertura del escaneo</div><div class="v" id="t-prog">—</div><div class="d" id="t-ciclo"></div></div>
     <div class="tile"><div class="l">Última actualización</div><div class="v" id="t-fecha" style="font-size:1.05rem">—</div><div class="d" id="t-hora"></div></div>
   </div>
 
-  <div class="controls" id="controles" style="display:none">
-    <button class="volver" id="btn-volver" style="display:none">← Todos los estados</button>
-    <select id="sel-estado"><option value="">Elige un estado…</option></select>
-    <select id="sel-ciudad" style="display:none"><option value="">Todas las ciudades</option></select>
-    <select id="sel-tipo" style="display:none"><option value="">Todos los tipos</option></select>
-    <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
-    <input type="search" id="buscar" placeholder="Buscar por ciudad o nombre sugerido…" style="display:none">
+  <div class="grupo">
+    <h2>Segmentos sin nombre</h2>
+    <p class="g-sub">Calles y avenidas principales que deberían tener nombre y no lo tienen.</p>
+    <div class="tiles">
+      <a class="tile" href="sin-nombre.html"><div class="l">Segmentos sin nombre</div><div class="v" id="t-total">—</div><div class="d">acumulados en todo México</div></a>
+      <a class="tile" href="sin-nombre.html"><div class="l">Estados con pendientes</div><div class="v" id="t-estados">—</div><div class="d">de 32 estados</div></a>
+    </div>
   </div>
-  <p class="hint" id="pista">Elige un estado en la lista (o en la tabla) para ver sus segmentos sin nombre y abrirlos directo en el editor.</p>
 
-  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
-  <div class="pager" id="pager" style="display:none">
-    <button id="pg-first" title="Primera página">«</button>
-    <button id="pg-prev">← Anterior</button>
-    <span id="pg-info"></span>
-    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
-    <span id="pg-total"></span>
-    <button id="pg-next">Siguiente →</button>
-    <button id="pg-last" title="Última página">»</button>
+  <div class="grupo">
+    <h2>Segmentos con bloqueo bajo</h2>
+    <p class="g-sub">Vías importantes con candado por debajo del estándar de México.</p>
+    <div class="tiles">
+      <a class="tile" href="candados.html"><div class="l">Segmentos con bloqueo bajo</div><div class="v" id="c-total">—</div><div class="d">acumulados en todo México</div></a>
+      <a class="tile" href="candados.html"><div class="l">Estados con pendientes</div><div class="v" id="c-estados">—</div><div class="d">de 32 estados</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>Comentarios de mapa</h2>
+    <p class="g-sub">Las notas que los editores dejan en el mapa, con su asunto, descripción, bloqueo y autores.</p>
+    <div class="tiles">
+      <a class="tile" href="comentarios.html"><div class="l">Comentarios de mapa</div><div class="v" id="m-total">—</div><div class="d">acumulados en todo México</div></a>
+      <a class="tile" href="comentarios.html"><div class="l">Estados con comentarios</div><div class="v" id="m-estados">—</div><div class="d">de 32 estados</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>Calles mal escritas</h2>
+    <p class="g-sub">Nombres de calle a los que les falta un acento o una eñe, con la escritura correcta.</p>
+    <div class="tiles">
+      <a class="tile" href="mal-escritas.html"><div class="l">Calles mal escritas</div><div class="v" id="o-total">—</div><div class="d">acumuladas en todo México</div></a>
+      <a class="tile" href="mal-escritas.html"><div class="l">Estados con pendientes</div><div class="v" id="o-estados">—</div><div class="d">de 32 estados</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>Pases de peaje</h2>
+    <p class="g-sub">Segmentos con restricción de pago electrónico, por estado y por tipo de pase.</p>
+    <div class="tiles">
+      <a class="tile" href="pases.html"><div class="l">Segmentos con pases</div><div class="v" id="p-total">—</div><div class="d">acumulados en todo México</div></a>
+      <a class="tile" href="pases.html"><div class="l">Estados con pases</div><div class="v" id="p-estados">—</div><div class="d">de 32 estados</div></a>
+    </div>
+  </div>
+
+  <div class="grupo">
+    <h2>Secciones</h2>
+    <div class="secciones">
+      <a class="seccion" href="sin-nombre.html">
+        <div class="t">📝 Segmentos sin nombre</div>
+        <div class="d">Lista por estado, con sugerencia de nombre y enlace al editor.</div>
+        <div class="n" id="n-sinnombre"></div>
+      </a>
+      <a class="seccion" href="candados.html">
+        <div class="t">🔒 Segmentos con bloqueo bajo</div>
+        <div class="d">Autopistas, carreteras y rampas por debajo del candado estándar.</div>
+        <div class="n" id="n-candados"></div>
+      </a>
+      <a class="seccion" href="comentarios.html">
+        <div class="t">💬 Comentarios de mapa</div>
+        <div class="d">Notas del mapa con asunto, descripción, bloqueo, creador y último editor.</div>
+        <div class="n" id="n-comentarios"></div>
+      </a>
+      <a class="seccion" href="mal-escritas.html">
+        <div class="t">✏️ Calles mal escritas</div>
+        <div class="d">Nombres sin acento o sin eñe, con la corrección lista para copiar.</div>
+        <div class="n" id="n-ortografia"></div>
+      </a>
+      <a class="seccion" href="pases.html">
+        <div class="t">🎫 Pases de peaje</div>
+        <div class="d">Segmentos con restricción de IAVE, PASE, TELEVía y demás.</div>
+        <div class="n" id="n-pases"></div>
+      </a>
+      <a class="seccion" href="champs.html">
+        <div class="t">🏆 Local Champs</div>
+        <div class="d">Ediciones recientes de los champs dentro de la franja.</div>
+      </a>
+      <a class="seccion" href="mapa.html">
+        <div class="t">🗺️ Mapa de escaneo</div>
+        <div class="d">Qué celdas se han recorrido y cuándo.</div>
+      </a>
+    </div>
   </div>
 </main>
 <footer>
   Los datos provienen de la API pública del Waze Map Editor (la misma que usa el modo práctica, sin iniciar sesión).
-  El escaneo corre en automático con GitHub Actions y recorre el país por partes; la cobertura crece con cada corrida.
-  Hecho por la comunidad, para la comunidad. 🚗
+  El escaneo corre en automático con GitHub Actions y recorre el país por partes.
 </footer>
 
 <script>
 (function(){
   const $=id=>document.getElementById(id);
-  let resumen=null, datosEstado=null, lista=[], pagina=0, porPagina=100;
-
-  // segmentos que ya abriste en el WME (se guarda en este navegador)
-  let visitados=new Set();
-  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados')||'[]'));}catch(e){}
-  function guardarVisitados(){try{localStorage.setItem('svs_visitados',JSON.stringify([...visitados]));}catch(e){}}
-
-  const fmt=n=>n.toLocaleString('es-MX');
-  // "visto" puede ser solo fecha (2026-07-23) o fecha con hora (2026-07-23T05:32, UTC)
-  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
-
-  function permalink(r){
-    const env=(resumen&&resumen.env)||'usa';
-    return `https://www.waze.com/editor?env=${env}&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
-  }
-  function tipoNombre(rt){
-    return (resumen&&resumen.tipos&&resumen.tipos[String(rt)])||('Tipo '+rt);
-  }
-
-  function pintarResumen(){
-    $('t-total').textContent=fmt(resumen.total);
-    $('t-estados').textContent=resumen.estados.length;
-    const p=resumen.progreso||{};
-    $('t-prog').textContent=(p.porcentaje_vuelta!=null?p.porcentaje_vuelta+'%':(p.porcentaje!=null?p.porcentaje+'%':'—'));
-    $('t-ciclo').textContent=p.ciclo?('de la vuelta '+p.ciclo+' al país'):'';
-    if(resumen.actualizado){
-      const d=new Date(resumen.actualizado);
-      $('t-fecha').textContent=d.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'});
-      $('t-hora').textContent=d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})+' (tu hora)';
-    }
-    if(resumen.aviso){ const a=$('aviso'); a.style.display='block'; a.textContent='⚠️ '+resumen.aviso; }
-    const sel=$('sel-estado');
-    if(resumen.estados.length){
-      const ot=document.createElement('option');
-      ot.value='__todos';ot.textContent=`Todo México (${fmt(resumen.total)})`;
-      sel.appendChild(ot);
-    }
-    resumen.estados.forEach(e=>{
-      const o=document.createElement('option');
-      o.value=e.slug;o.textContent=`${e.estado} (${fmt(e.total)})`;
-      sel.appendChild(o);
-    });
-    $('controles').style.display='flex';
-  }
-
-  function tablaEstados(){
-    $('btn-volver').style.display='none';
-    ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='none');
-    $('sel-estado').value='';
-    $('pager').style.display='none';
-    $('pista').style.display='block';
-    if(!resumen.estados.length){
-      $('contenido').innerHTML='<div class="cargando">Aún no hay datos. En cuanto corra el primer escaneo aparecerán aquí.</div>';
-      return;
-    }
-    let html='<table><thead><tr><th>Estado</th><th class="num">Ciudades</th><th class="num">Segmentos sin nombre</th></tr></thead><tbody>';
-    resumen.estados.slice().sort((a,b)=>b.total-a.total).forEach(e=>{
-      html+=`<tr class="clickable" data-slug="${e.slug}"><td>${e.estado}</td><td class="num">${fmt(e.ciudades)}</td><td class="num">${fmt(e.total)}</td></tr>`;
-    });
-    html+='</tbody></table>';
-    $('contenido').innerHTML=html;
-    document.querySelectorAll('tr.clickable').forEach(tr=>{
-      tr.addEventListener('click',()=>{ $('sel-estado').value=tr.dataset.slug; cargarEstado(tr.dataset.slug); });
-    });
-  }
-
-  async function cargarEstado(slug){
-    if(!slug){ tablaEstados(); return; }
-    $('contenido').innerHTML='<div class="cargando">Cargando segmentos…</div>';
-    const esNacional=slug==='__todos';
-    // recordar los filtros activos para conservarlos al cambiar de estado
-    const fPrev=$('sel-fecha').value, tPrev=$('sel-tipo').value;
-    try{
-      if(esNacional){
-        const listas=await Promise.all(resumen.estados.map(async e=>{
-          try{
-            const r=await fetch('data/estados/'+e.slug+'.json',{cache:'no-store'});
-            const d=await r.json();
-            return Object.values(d.segmentos||{}).map(s=>({...s,est:e.estado}));
-          }catch(_){return [];}
-        }));
-        const segs={};
-        listas.flat().forEach(s=>{segs[s.id]=s;});
-        datosEstado={segmentos:segs};
-      }else{
-        const r=await fetch('data/estados/'+slug+'.json',{cache:'no-store'});
-        datosEstado=await r.json();
-      }
-    }catch(e){
-      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
-      return;
-    }
-    $('btn-volver').style.display='inline';
-    $('pista').style.display='none';
-    const regs=Object.values(datosEstado.segmentos||{});
-    const ciudades=esNacional?[]:[...new Set(regs.map(r=>r.ciudad||'(sin ciudad)'))].sort((a,b)=>a.localeCompare(b,'es'));
-    const tipos=[...new Set(regs.map(r=>r.rt))].sort((a,b)=>a-b);
-    const sc=$('sel-ciudad'), st=$('sel-tipo');
-    sc.innerHTML='<option value="">Todas las ciudades</option>'+ciudades.map(c=>`<option>${c}</option>`).join('');
-    st.innerHTML='<option value="">Todos los tipos</option>'+tipos.map(t=>`<option value="${t}">${tipoNombre(t)}</option>`).join('');
-    const fechas=[...new Set(regs.map(r=>(r.rev||r.visto||'').slice(0,10)).filter(Boolean))].sort().reverse();
-    const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
-    $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevos (48 h)</option>'
-      +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
-      +'<option value="sinfecha">Sin fecha</option>';
-    ['sel-ciudad','sel-tipo','sel-fecha','buscar'].forEach(i=>$(i).style.display='inline-block');
-    if(esNacional){$('sel-ciudad').style.display='none';$('sel-ciudad').value='';}
-    // restaurar los filtros que el usuario traía puestos (si siguen siendo válidos)
-    if([...$('sel-tipo').options].some(o=>o.value===tPrev))$('sel-tipo').value=tPrev;
-    if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
-    $('buscar').value='';
-    filtrar();
-  }
-
-  function filtrar(){
-    if(!datosEstado)return;
-    const c=$('sel-ciudad').value, t=$('sel-tipo').value, f=$('sel-fecha').value, q=$('buscar').value.trim().toLowerCase();
-    lista=Object.values(datosEstado.segmentos||{}).filter(r=>{
-      const ciudad=r.ciudad||'(sin ciudad)';
-      if(c&&ciudad!==c)return false;
-      if(t&&String(r.rt)!==t)return false;
-      if(f){
-        const marca=r.rev||r.visto;
-        if(f==='sinfecha'){ if(marca)return false; }
-        else if(f==='nuevos'){ if(!r.visto||Date.now()-fechaDe(r.visto).getTime()>=48*3600*1000)return false; }
-        else if(!marca||marca.slice(0,10)!==f)return false;
-      }
-      if(q&&!(ciudad.toLowerCase().includes(q)||(r.sug||'').toLowerCase().includes(q)||(r.vec||'').toLowerCase().includes(q)||(r.est||'').toLowerCase().includes(q)))return false;
-      return true;
-    });
-    if(f&&f!=='sinfecha'){
-      // con filtro de fecha: los detectados más recientemente van hasta arriba
-      lista.sort((a,b)=>(b.rev||b.visto||'').localeCompare(a.rev||a.visto||'')||(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
-    }else{
-      lista.sort((a,b)=>(a.ciudad||'zzz').localeCompare(b.ciudad||'zzz','es')||a.id-b.id);
-    }
-    pagina=0;
-    pintarTabla();
-  }
-
-  function pintarTabla(){
-    const total=lista.length;
-    const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th>Revisado</th><th></th></tr></thead><tbody>`;
-    if(!total){
-      html+='<tr><td colspan="5" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
-    }
-    lista.slice(ini,fin).forEach(r=>{
-      let sug;
-      if(r.sug){
-        sug=`<span class="sug">${r.sug}</span> <span class="chip" title="Coincidencia del INEGI en los puntos del segmento">INEGI ${r.conf!=null?r.conf+'%':''}</span>`;
-      }else if(r.vec){
-        sug=`<span class="sug na" title="El INEGI no tiene nombre aquí; esta es la vialidad vecina que continúa">vecina: ${r.vec}</span>`;
-      }else{
-        sug='<span class="sug na">sin pista</span>';
-      }
-      const vis=visitados.has(String(r.id));
-      let det='—', esNuevo=false;
-      const marca=r.rev||r.visto;  // columna: último escaneo (o primera detección si no hay)
-      if(marca){
-        const d=fechaDe(marca);
-        det=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
-        if(marca.includes('T'))det+=' '+d.toLocaleTimeString('es-MX',{hour:'numeric',minute:'2-digit'});
-      }
-      if(r.visto)esNuevo=(Date.now()-fechaDe(r.visto).getTime())<48*3600*1000;
-      html+=`<tr${vis?' class="visitado"':''}><td><span class="chip">${tipoNombre(r.rt)}</span></td>
-        <td>${r.ciudad||'<span class="chip">sin ciudad</span>'}${r.est?' <span class="chip">'+r.est+'</span>':''}</td>
-        <td>${sug}</td>
-        <td class="fecha">${det}${esNuevo?' <span class="chip nuevo">nuevo</span>':''}</td>
-        <td><a class="wme${vis?' hecho':''}" data-id="${r.id}" target="_blank" rel="noopener" href="${permalink(r)}">${vis?'✓ Abierto':'Abrir en WME'}</a>${vis?`<span class="quitar" data-quitar="${r.id}" title="Desmarcar">✕</span>`:''}</td></tr>`;
-    });
-    html+='</tbody></table>';
-    $('contenido').innerHTML=html;
-    const pgs=Math.max(1,Math.ceil(total/porPagina));
-    $('pager').style.display=total>porPagina?'flex':'none';
-    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(fin)} de ${fmt(total)} · pág.`;
-    $('pg-num').value=pagina+1;
-    $('pg-num').max=pgs;
-    $('pg-total').textContent=`/ ${pgs}`;
-    $('pg-first').disabled=pagina===0;
-    $('pg-prev').disabled=pagina===0;
-    $('pg-next').disabled=pagina>=pgs-1;
-    $('pg-last').disabled=pagina>=pgs-1;
-  }
-
-  $('contenido').addEventListener('click',e=>{
-    const q=e.target.closest('.quitar');
-    if(q){visitados.delete(String(q.dataset.quitar));guardarVisitados();pintarTabla();return;}
-    const a=e.target.closest('a.wme');
-    if(a&&a.dataset.id){visitados.add(String(a.dataset.id));guardarVisitados();setTimeout(pintarTabla,150);}
-  });
-
-  $('pg-prev').addEventListener('click',()=>{pagina--;pintarTabla();window.scrollTo(0,0);});
-  $('pg-next').addEventListener('click',()=>{pagina++;pintarTabla();window.scrollTo(0,0);});
-  $('pg-first').addEventListener('click',()=>{pagina=0;pintarTabla();window.scrollTo(0,0);});
-  $('pg-last').addEventListener('click',()=>{pagina=Math.max(0,Math.ceil(lista.length/porPagina)-1);pintarTabla();window.scrollTo(0,0);});
-  function irAPagina(){
-    const pgs=Math.max(1,Math.ceil(lista.length/porPagina));
-    let v=parseInt($('pg-num').value,10);
-    if(isNaN(v))v=pagina+1;
-    pagina=Math.min(Math.max(v,1),pgs)-1;
-    pintarTabla();window.scrollTo(0,0);
-  }
-  $('pg-num').addEventListener('change',irAPagina);
-  $('pg-num').addEventListener('keydown',e=>{if(e.key==='Enter')irAPagina();});
-  function mostrarToast(msg){
-    let t=document.getElementById('toast');
-    if(!t){t=document.createElement('div');t.id='toast';document.body.appendChild(t);}
-    t.textContent=msg;t.className='ver';
-    clearTimeout(window._tt);window._tt=setTimeout(()=>{t.className='';},7000);
-  }
-  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
-  $('btn-volver').addEventListener('click',()=>tablaEstados());
-  ['sel-ciudad','sel-tipo','sel-fecha'].forEach(i=>$(i).addEventListener('change',filtrar));
-  $('buscar').addEventListener('input',()=>{clearTimeout(window._bt);window._bt=setTimeout(filtrar,250);});
+  const fmt=n=>Number(n||0).toLocaleString('es-MX');
+  const pon=(id,txt)=>{const e=$(id); if(e)e.textContent=txt;};
 
   fetch('data/resumen.json',{cache:'no-store'})
-    .then(r=>r.json())
-    .then(d=>{resumen=d;pintarResumen();tablaEstados();})
-    .catch(()=>{ $('contenido').innerHTML='<div class="cargando">Aún no hay datos. Corre el primer escaneo en la pestaña Actions de GitHub y recarga esta página.</div>'; });
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('t-total', fmt(d.total));
+      pon('t-estados', (d.estados||[]).length);
+      const p=d.progreso||{};
+      pon('t-prog', p.porcentaje_vuelta!=null?p.porcentaje_vuelta+'%':(p.porcentaje!=null?p.porcentaje+'%':'—'));
+      pon('t-ciclo', p.ciclo?('de la vuelta '+p.ciclo+' al país'):'');
+      if(d.actualizado){
+        const f=new Date(d.actualizado);
+        pon('t-fecha', f.toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}));
+        pon('t-hora', f.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'})+' (tu hora)');
+      }
+      if(d.aviso){ const a=$('aviso'); a.style.display='block'; a.textContent='⚠️ '+d.aviso; }
+      pon('n-sinnombre', fmt(d.total)+' pendientes en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('t-prog','—'); pon('n-sinnombre','sin datos todavía'); });
+
+  fetch('data/pases/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('p-total', fmt(d.total));
+      pon('p-estados', (d.estados||[]).length);
+      pon('n-pases', fmt(d.total)+' segmentos en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('p-total','—'); pon('p-estados','—'); pon('n-pases','sin datos todavía'); });
+
+  fetch('data/ortografia/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('o-total', fmt(d.total));
+      pon('o-estados', (d.estados||[]).length);
+      pon('n-ortografia', fmt(d.total)+' calles en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('o-total','—'); pon('o-estados','—'); pon('n-ortografia','sin datos todavía'); });
+
+  fetch('data/comentarios/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('m-total', fmt(d.total));
+      pon('m-estados', (d.estados||[]).length);
+      pon('n-comentarios', fmt(d.total)+' notas en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('m-total','—'); pon('m-estados','—'); pon('n-comentarios','sin datos todavía'); });
+
+  fetch('data/candados/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      pon('c-total', fmt(d.total));
+      pon('c-estados', (d.estados||[]).length);
+      pon('n-candados', fmt(d.total)+' pendientes en '+((d.estados||[]).length)+' estados');
+    })
+    .catch(()=>{ pon('c-total','—'); pon('c-estados','—'); pon('n-candados','sin datos todavía'); });
 })();
 </script>
 </body>
