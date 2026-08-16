@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-16T04:46:56+00:00",
+ "actualizado": "2026-08-16T05:28:19+00:00",
  "env": "row",
- "total": 181555,
+ "total": 181517,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -114,7 +114,7 @@
   {
    "estado": "Nuevo León",
    "slug": "nuevo-leon",
-   "total": 6986,
+   "total": 6958,
    "ciudades": 220
   },
   {
@@ -150,8 +150,8 @@
   {
    "estado": "Sinaloa",
    "slug": "sinaloa",
-   "total": 3992,
-   "ciudades": 204
+   "total": 3982,
+   "ciudades": 203
   },
   {
    "estado": "Sonora",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161634,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 61.8,
+  "porcentaje_vuelta": 62.1,
   "modo": "completo"
  },
  "aviso": "",
