@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="es-MX">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calles mal escritas · velezss ROW</title>
+<style>
+  :root{
+    --bg:#0f1420; --panel:#171e2e; --panel2:#1d2639; --line:#2a3550;
+    --text:#e8ecf4; --muted:#93a0b8; --accent:#4da3ff; --accent2:#7fd18c; --warn:#ffb454;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       background:var(--bg);color:var(--text);line-height:1.45}
+  header{padding:24px 20px 8px;max-width:1150px;margin:0 auto}
+  h1{margin:0 0 4px;font-size:1.3rem;font-weight:700}
+  .sub{color:var(--muted);font-size:.92rem;margin:0}
+  .sub a{color:var(--accent);text-decoration:none}
+  main{max-width:1150px;margin:0 auto;padding:14px 20px 60px}
+  .controls{display:flex;flex-wrap:wrap;gap:10px;margin:16px 0;align-items:center}
+  select,input.buscar{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+         border-radius:8px;padding:8px 10px;font-size:.92rem;min-width:150px}
+  table{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--line);
+        border-radius:12px;overflow:hidden;font-size:.92rem}
+  th,td{padding:9px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
+  tr:last-child td{border-bottom:none}
+  td.mal{max-width:290px}
+  td.bien{max-width:290px;font-weight:600}
+  td.ciudad{color:var(--muted);font-size:.86rem;white-space:nowrap}
+  mark{background:#4a2323;color:#ffb1b1;border-radius:3px;padding:0 2px;font-weight:600}
+  mark.ok{background:#1e3a24;color:#9fe0ad}
+  a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
+        padding:5px 11px;border-radius:7px;text-decoration:none;font-size:.85rem;white-space:nowrap}
+  a.wme:hover{filter:brightness(1.1)}
+  tr.visitado td{opacity:.45}
+  a.wme.hecho{background:var(--accent2)}
+  .quitar{color:var(--muted);cursor:pointer;margin-left:7px;font-size:.85rem}
+  .quitar:hover{color:var(--text)}
+  .copiar{color:var(--muted);cursor:pointer;margin-left:8px;font-size:.8rem}
+  .copiar:hover{color:var(--accent)}
+  .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
+  .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
+        border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
+  .pager button:disabled{opacity:.4;cursor:default}
+  .pager input{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:8px;
+        padding:7px 6px;width:64px;font-size:.9rem;text-align:center}
+  .pager #pg-total{color:var(--muted);font-size:.9rem}
+  .cargando{color:var(--muted);padding:40px;text-align:center}
+  .nota{color:var(--muted);font-size:.85rem;margin-top:12px}
+  .nota a{color:var(--accent)}
+  .glosario{margin-top:26px;border-top:1px solid var(--line);padding-top:16px}
+  .glosario h2{font-size:.95rem;font-weight:700;margin:0 0 4px}
+  .glosario p{color:var(--muted);font-size:.85rem;margin:0 0 10px}
+  .palabras{display:flex;flex-wrap:wrap;gap:6px}
+  .pal{background:var(--panel);border:1px solid var(--line);border-radius:7px;
+       padding:3px 9px;font-size:.85rem;white-space:nowrap}
+  .pal .mala{color:var(--muted);text-decoration:line-through;margin-right:5px}
+  .pal .n{color:var(--accent);font-weight:700;margin-left:5px}
+  .pal.sin{opacity:.45}
+</style>
+</head>
+<body>
+<header>
+  <h1>✏️ Calles mal escritas</h1>
+  <p class="sub">Nombres de calle a los que les falta un acento o una eñe ·
+    <a href="index.html">← Volver al panel</a></p>
+</header>
+<main>
+  <div class="controls">
+    <select id="sel-estado"><option value="">Elige un estado…</option></select>
+    <select id="sel-palabra" style="display:none"><option value="">Todas las palabras</option></select>
+    <input type="search" class="buscar" id="buscar" placeholder="Buscar en el nombre…" style="display:none">
+    <span class="chip" id="resumen-chip" style="display:none"></span>
+  </div>
+  <div id="contenido"><div class="cargando">Cargando datos…</div></div>
+  <div class="pager" id="pager" style="display:none">
+    <button id="pg-first" title="Primera página">«</button>
+    <button id="pg-prev">← Anterior</button>
+    <span id="pg-info"></span>
+    <input type="number" id="pg-num" min="1" value="1" title="Escribe la página y presiona Enter">
+    <span id="pg-total"></span>
+    <button id="pg-next">Siguiente →</button>
+    <button id="pg-last" title="Última página">»</button>
+  </div>
+  <p class="nota">Se revisa el nombre de cada calle contra una lista de palabras que en español
+    llevan acento o eñe. Cada renglón es una calle, no un segmento: al corregir el nombre en el
+    editor se arreglan todos sus tramos de una vez. El botón ⧉ copia la escritura correcta al portapapeles.
+    La lista de palabras vive en <code>scanner/palabras_mal_escritas.json</code> y se puede editar sin tocar el código.</p>
+  <div class="glosario" id="glosario" style="display:none">
+    <h2>Palabras que se revisan <span id="glosario-n"></span></h2>
+    <p>Cada nombre de calle se compara contra esta lista. A la izquierda la escritura que se marca
+      como incorrecta, a la derecha la correcta. Si eliges un estado, el número indica cuántas calles
+      la traen mal escritas; las que salen apagadas no tienen ninguna.</p>
+    <div class="palabras" id="palabras"></div>
+  </div>
+</main>
+<script>
+(function(){
+  const $=id=>document.getElementById(id);
+  const fmt=n=>Number(n||0).toLocaleString('es-MX');
+  let indice=null, lista=[], pagina=0, porPagina=100;
+
+  let visitados=new Set();
+  try{visitados=new Set(JSON.parse(localStorage.getItem('svs_visitados_orto')||'[]'));}catch(e){}
+  function guardar(){try{localStorage.setItem('svs_visitados_orto',JSON.stringify([...visitados]));}catch(e){}}
+
+  const permalink=r=>`https://www.waze.com/editor?env=row&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
+  const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+  const sinAcentos=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+
+  // resalta en el nombre las palabras que cambian
+  function pinta(texto, palabras, clase){
+    let html=esc(texto);
+    (palabras||[]).forEach(p=>{
+      const base=sinAcentos(p);
+      html=html.replace(new RegExp('(^|[^\\p{L}])('+base+'|'+esc(p)+')([^\\p{L}]|$)','giu'),
+        (m,a,b,c)=>a+'<mark class="'+clase+'">'+b+'</mark>'+c);
+    });
+    return html;
+  }
+
+  async function cargarEstado(slug){
+    if(!slug){
+      $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus calles mal escritas.</div>';
+      $('pager').style.display='none'; $('sel-palabra').style.display='none';
+      $('buscar').style.display='none'; $('resumen-chip').style.display='none';
+      return;
+    }
+    $('contenido').innerHTML='<div class="cargando">Cargando calles…</div>';
+    let regs=[];
+    try{
+      if(slug==='__todos'){
+        const listas=await Promise.all(indice.estados.map(async e=>{
+          try{
+            const r=await fetch('data/ortografia/'+e.slug+'.json',{cache:'no-store'});
+            const d=await r.json();
+            return Object.values(d.calles||{}).map(c=>({...c,est:e.estado}));
+          }catch(_){return [];}
+        }));
+        const vistos={};
+        listas.flat().forEach(c=>{vistos[c.sid]=c;});
+        regs=Object.values(vistos);
+      }else{
+        const r=await fetch('data/ortografia/'+slug+'.json',{cache:'no-store'});
+        const d=await r.json();
+        regs=Object.values(d.calles||{}).map(c=>({...c,est:d.estado}));
+      }
+    }catch(e){
+      $('contenido').innerHTML='<div class="cargando">No se pudo cargar este estado.</div>';
+      return;
+    }
+    const cuenta={};
+    regs.forEach(r=>(r.pal||[]).forEach(p=>{cuenta[p]=(cuenta[p]||0)+1;}));
+    const pals=Object.keys(cuenta).sort((a,b)=>cuenta[b]-cuenta[a]||a.localeCompare(b,'es'));
+    $('sel-palabra').innerHTML='<option value="">Todas las palabras</option>'+
+      pals.map(p=>`<option value="${esc(p)}">${esc(p)} (${cuenta[p]})</option>`).join('');
+    $('sel-palabra').style.display='inline-block';
+    $('buscar').style.display='inline-block';
+    pintarGlosario(cuenta);
+    window.__regs=regs;
+    aplicarFiltros();
+  }
+
+  function aplicarFiltros(){
+    const regs=window.__regs||[];
+    const fp=$('sel-palabra').value;
+    const q=($('buscar').value||'').trim().toLowerCase();
+    lista=regs.filter(r=>{
+      if(fp && !(r.pal||[]).includes(fp)) return false;
+      if(q && !((r.nombre||'').toLowerCase().includes(q) || (r.sug||'').toLowerCase().includes(q)
+                || (r.ciudad||'').toLowerCase().includes(q))) return false;
+      return true;
+    }).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
+    pagina=0;
+    $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' calles';
+    $('resumen-chip').style.display='inline-block';
+    pintar();
+  }
+
+  function pintar(){
+    if(!lista.length){
+      $('contenido').innerHTML='<div class="cargando">No hay calles con esos filtros.</div>';
+      $('pager').style.display='none';
+      return;
+    }
+    const ini=pagina*porPagina, trozo=lista.slice(ini,ini+porPagina);
+    const filas=trozo.map(r=>{
+      const hecho=visitados.has(r.sid);
+      return `<tr class="${hecho?'visitado':''}" data-sid="${esc(r.sid)}">
+        <td class="mal">${pinta(r.nombre,r.pal,'')}</td>
+        <td class="bien">${pinta(r.sug,r.pal,'ok')}
+          <span class="copiar" data-copia="${esc(r.sug)}" title="Copiar el nombre correcto">⧉</span></td>
+        <td class="ciudad">${esc(r.ciudad)||'—'}</td>
+        <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
+          ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
+      </tr>`;
+    }).join('');
+    $('contenido').innerHTML=`<table><thead><tr>
+        <th>Como está escrita</th><th>Como debería estar</th><th>Ciudad</th><th></th>
+      </tr></thead><tbody>${filas}</tbody></table>`;
+    $('contenido').querySelectorAll('a.wme').forEach(a=>{
+      a.addEventListener('click',()=>{
+        const sid=a.closest('tr').dataset.sid;
+        visitados.add(sid); guardar();
+        a.classList.add('hecho'); a.closest('tr').classList.add('visitado');
+      });
+    });
+    $('contenido').querySelectorAll('.copiar').forEach(c=>{
+      c.addEventListener('click',()=>{
+        const t=c.dataset.copia;
+        if(navigator.clipboard) navigator.clipboard.writeText(t);
+        const antes=c.textContent; c.textContent='✓';
+        setTimeout(()=>{c.textContent=antes;},1200);
+      });
+    });
+    $('contenido').querySelectorAll('.quitar').forEach(q=>{
+      q.addEventListener('click',()=>{
+        const tr=q.closest('tr');
+        visitados.delete(tr.dataset.sid); guardar(); pintar();
+      });
+    });
+    const paginas=Math.ceil(lista.length/porPagina);
+    $('pager').style.display=paginas>1?'flex':'none';
+    $('pg-info').textContent=`${fmt(ini+1)}–${fmt(Math.min(ini+porPagina,lista.length))} de ${fmt(lista.length)}`;
+    $('pg-num').value=pagina+1; $('pg-num').max=paginas;
+    $('pg-total').textContent='de '+fmt(paginas);
+    $('pg-prev').disabled=pagina===0; $('pg-first').disabled=pagina===0;
+    $('pg-next').disabled=pagina>=paginas-1; $('pg-last').disabled=pagina>=paginas-1;
+  }
+
+  function pintarGlosario(cuenta){
+    const pal=(indice&&indice.palabras)||{};
+    const claves=Object.keys(pal);
+    if(!claves.length) return;
+    claves.sort((a,b)=>pal[a].localeCompare(pal[b],'es'));
+    $('glosario-n').textContent='('+fmt(claves.length)+')';
+    $('palabras').innerHTML=claves.map(k=>{
+      const n=cuenta?(cuenta[pal[k]]||0):null;
+      const apagada=cuenta&&!n?' sin':'';
+      return `<span class="pal${apagada}"><span class="mala">${esc(k)}</span>${esc(pal[k])}`+
+             (n?`<span class="n">${n}</span>`:'')+`</span>`;
+    }).join('');
+    $('glosario').style.display='block';
+  }
+
+  $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
+  $('sel-palabra').addEventListener('change',aplicarFiltros);
+  $('buscar').addEventListener('input',aplicarFiltros);
+  $('pg-prev').addEventListener('click',()=>{if(pagina>0){pagina--;pintar();window.scrollTo(0,0);}});
+  $('pg-next').addEventListener('click',()=>{if((pagina+1)*porPagina<lista.length){pagina++;pintar();window.scrollTo(0,0);}});
+  $('pg-first').addEventListener('click',()=>{pagina=0;pintar();window.scrollTo(0,0);});
+  $('pg-last').addEventListener('click',()=>{pagina=Math.ceil(lista.length/porPagina)-1;pintar();window.scrollTo(0,0);});
+  $('pg-num').addEventListener('change',()=>{
+    const p=parseInt($('pg-num').value,10);
+    const paginas=Math.ceil(lista.length/porPagina);
+    if(p>=1&&p<=paginas){pagina=p-1;pintar();window.scrollTo(0,0);}
+  });
+
+  fetch('data/ortografia/index.json',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw 0;return r.json();})
+    .then(d=>{
+      indice=d;
+      pintarGlosario(null);
+      const sel=$('sel-estado');
+      if(d.estados&&d.estados.length){
+        const ot=document.createElement('option');
+        ot.value='__todos'; ot.textContent=`Todo México (${fmt(d.total)})`;
+        sel.appendChild(ot);
+        d.estados.forEach(e=>{
+          const o=document.createElement('option');
+          o.value=e.slug; o.textContent=`${e.estado} (${fmt(e.total)})`;
+          sel.appendChild(o);
+        });
+        $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus calles mal escritas.</div>';
+      }else{
+        $('contenido').innerHTML='<div class="cargando">No se encontraron calles mal escritas. Aparecerán conforme avance el escaneo.</div>';
+      }
+    })
+    .catch(()=>{
+      $('contenido').innerHTML='<div class="cargando">Todavía no hay datos. Aparecerán tras la próxima corrida del escáner.</div>';
+    });
+})();
+</script>
+</body>
+</html>
