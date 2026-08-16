@@ -40,6 +40,8 @@
   .copiar{color:var(--muted);cursor:pointer;margin-left:8px;font-size:.8rem}
   .copiar:hover{color:var(--accent)}
   .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
+  .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  td.fecha{color:var(--muted);font-size:.85rem;white-space:nowrap}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
@@ -71,6 +73,7 @@
   <div class="controls">
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-palabra" style="display:none"><option value="">Todas las palabras</option></select>
+    <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
     <input type="search" class="buscar" id="buscar" placeholder="Buscar en el nombre…" style="display:none">
     <span class="chip" id="resumen-chip" style="display:none"></span>
   </div>
@@ -109,6 +112,9 @@
   const permalink=r=>`https://www.waze.com/editor?env=row&lat=${r.lat}&lon=${r.lon}&zoomLevel=17&segments=${r.id}`;
   const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
   const sinAcentos=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase();
+  // "visto" puede venir como fecha o como fecha con hora (UTC)
+  const fechaDe=v=>v.includes('T')?new Date(v+':00Z'):new Date(v+'T12:00:00Z');
+  const fmtDia=v=>new Date(v+'T12:00:00Z').toLocaleDateString('es-MX',{weekday:'short',day:'numeric',month:'short'});
 
   // resalta en el nombre las palabras que cambian
   function pinta(texto, palabras, clase){
@@ -126,6 +132,7 @@
       $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus calles mal escritas.</div>';
       $('pager').style.display='none'; $('sel-palabra').style.display='none';
       $('buscar').style.display='none'; $('resumen-chip').style.display='none';
+      $('sel-fecha').style.display='none';
       return;
     }
     $('contenido').innerHTML='<div class="cargando">Cargando calles…</div>';
@@ -157,6 +164,13 @@
     $('sel-palabra').innerHTML='<option value="">Todas las palabras</option>'+
       pals.map(p=>`<option value="${esc(p)}">${esc(p)} (${cuenta[p]})</option>`).join('');
     $('sel-palabra').style.display='inline-block';
+    const fPrev=$('sel-fecha').value;
+    const fechas=[...new Set(regs.map(r=>(r.r||r.v||'').slice(0,10)).filter(Boolean))].sort().reverse();
+    $('sel-fecha').innerHTML='<option value="">Todas las fechas</option><option value="nuevos">Nuevas (48 h)</option>'
+      +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
+      +'<option value="sinfecha">Sin fecha</option>';
+    if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
+    $('sel-fecha').style.display='inline-block';
     $('buscar').style.display='inline-block';
     pintarGlosario(cuenta);
     window.__regs=regs;
@@ -165,10 +179,16 @@
 
   function aplicarFiltros(){
     const regs=window.__regs||[];
-    const fp=$('sel-palabra').value;
+    const fp=$('sel-palabra').value, ff=$('sel-fecha').value;
     const q=($('buscar').value||'').trim().toLowerCase();
     lista=regs.filter(r=>{
       if(fp && !(r.pal||[]).includes(fp)) return false;
+      if(ff){
+        const marca=r.r||r.v;
+        if(ff==='sinfecha'){ if(marca) return false; }
+        else if(ff==='nuevos'){ if(!r.v||Date.now()-fechaDe(r.v).getTime()>=48*3600*1000) return false; }
+        else if(!marca||marca.slice(0,10)!==ff) return false;
+      }
       if(q && !((r.nombre||'').toLowerCase().includes(q) || (r.sug||'').toLowerCase().includes(q)
                 || (r.ciudad||'').toLowerCase().includes(q))) return false;
       return true;
@@ -177,6 +197,16 @@
     $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' calles';
     $('resumen-chip').style.display='inline-block';
     pintar();
+  }
+
+  function revisado(r){
+    const marca=r.r||r.v;  // último escaneo, o la primera detección si no hay
+    if(!marca) return '—';
+    const d=fechaDe(marca);
+    let txt=d.toLocaleDateString('es-MX',{day:'numeric',month:'short'});
+    if(marca.includes('T')) txt+=' '+d.toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit'});
+    const nueva=r.v && (Date.now()-fechaDe(r.v).getTime())<48*3600*1000;
+    return txt+(nueva?' <span class="chip nuevo">nueva</span>':'');
   }
 
   function pintar(){
@@ -193,12 +223,13 @@
         <td class="bien">${pinta(r.sug,r.pal,'ok')}
           <span class="copiar" data-copia="${esc(r.sug)}" title="Copiar el nombre correcto">⧉</span></td>
         <td class="ciudad">${esc(r.ciudad)||'—'}</td>
+        <td class="fecha">${revisado(r)}</td>
         <td><a class="wme ${hecho?'hecho':''}" href="${permalink(r)}" target="_blank" rel="noopener">Abrir</a>
           ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
       </tr>`;
     }).join('');
     $('contenido').innerHTML=`<table><thead><tr>
-        <th>Como está escrita</th><th>Como debería estar</th><th>Ciudad</th><th></th>
+        <th>Como está escrita</th><th>Como debería estar</th><th>Ciudad</th><th>Revisado</th><th></th>
       </tr></thead><tbody>${filas}</tbody></table>`;
     $('contenido').querySelectorAll('a.wme').forEach(a=>{
       a.addEventListener('click',()=>{
@@ -247,6 +278,7 @@
 
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('sel-palabra').addEventListener('change',aplicarFiltros);
+  $('sel-fecha').addEventListener('change',aplicarFiltros);
   $('buscar').addEventListener('input',aplicarFiltros);
   $('pg-prev').addEventListener('click',()=>{if(pagina>0){pagina--;pintar();window.scrollTo(0,0);}});
   $('pg-next').addEventListener('click',()=>{if((pagina+1)*porPagina<lista.length){pagina++;pintar();window.scrollTo(0,0);}});
