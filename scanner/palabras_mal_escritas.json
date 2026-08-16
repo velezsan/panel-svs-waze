@@ -8,6 +8,7 @@
   "martin": "'Martin' es nombre válido en inglés",
   "medico": "'medico' existe como forma verbal",
   "montana": "choca con el estado de Montana",
+  "nuno": "'Nuno' es nombre propio válido en portugués, no siempre es Nuño",
   "pena": "'Pena' es apellido y palabra común"
  },
  "palabras": {
@@ -262,7 +263,6 @@
   "ninos": "Niños",
   "numero": "Número",
   "nunez": "Núñez",
-  "nuno": "Nuño",
   "nutricion": "Nutrición",
   "obregon": "Obregón",
   "observacion": "Observación",
