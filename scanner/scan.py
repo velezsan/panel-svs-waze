@@ -844,7 +844,10 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
     if REVISAR_ORTOGRAFIA:
         for seg in segs:
             sid = seg.get("primaryStreetID")
-            if sid is None or str(sid) in _ortografia_celda:
+            if sid is None:
+                continue
+            if str(sid) in _ortografia_celda:  # otro tramo de la misma calle
+                _ortografia_celda[str(sid)]["n"] += 1
                 continue
             st_o, ciudad_o, edo_o = _ciudad_estado(seg, streets, cities, states)
             nom_o = nombre_de_calle(st_o)
@@ -863,6 +866,7 @@ def analizar_respuesta(data, tipos_con_nombre, min_metros=0):
                 "pal": sorted(set(palabras_o)),
                 "rt": seg.get("roadType"),
                 "ciudad": ciudad_o, "edo": edo_o,
+                "n": 1,  # tramos con ese nombre (se van sumando)
             }
 
     # comentarios de mapa (map notes): asunto, descripción, candado y autores
@@ -1444,7 +1448,18 @@ def main():
                     if not r.get("edo") and not estados_mx.dentro_de_alguno(r["lon"], r["lat"]):
                         continue
                 reg_o = {k: v for k, v in r.items() if k != "edo"}
-                orto_por_estado.setdefault(est_o, {})[r["sid"]] = reg_o
+                calles_o = orto_por_estado.setdefault(est_o, {})
+                previa = calles_o.get(r["sid"])
+                if previa:
+                    # la calle cruza varias celdas: se suman sus tramos y se
+                    # conserva la detección más vieja y la revisión más nueva
+                    previa["n"] = previa.get("n", 1) + reg_o.get("n", 1)
+                    if reg_o.get("v") and (not previa.get("v") or reg_o["v"] < previa["v"]):
+                        previa["v"] = reg_o["v"]
+                    if reg_o.get("r") and reg_o["r"] > previa.get("r", ""):
+                        previa["r"] = reg_o["r"]
+                else:
+                    calles_o[r["sid"]] = reg_o
         os.makedirs(ORTOGRAFIA_DIR, exist_ok=True)
         slugs_o = set()
         lista_o = []
