@@ -41,6 +41,9 @@
   .copiar:hover{color:var(--accent)}
   .chip{display:inline-block;background:#243049;border-radius:6px;padding:2px 8px;font-size:.8rem;color:var(--muted)}
   .chip.nuevo{background:#1e3a24;color:#7fd18c}
+  .tramos{display:inline-block;background:var(--panel2);border:1px solid var(--line);
+          border-radius:20px;padding:1px 8px;font-size:.78rem;color:var(--muted);
+          font-weight:600;margin-left:6px;vertical-align:middle}
   td.fecha{color:var(--muted);font-size:.85rem;white-space:nowrap}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
@@ -89,7 +92,8 @@
   </div>
   <p class="nota">Se revisa el nombre de cada calle contra una lista de palabras que en español
     llevan acento o eñe. Cada renglón es una calle, no un segmento: al corregir el nombre en el
-    editor se arreglan todos sus tramos de una vez. El botón ⧉ copia la escritura correcta al portapapeles.
+    editor se arreglan todos sus tramos de una vez. El número junto al nombre es cuántos tramos lo llevan; al corregir la calle se arreglan todos.
+    El botón ⧉ copia la escritura correcta al portapapeles.
     La lista de palabras vive en <code>scanner/palabras_mal_escritas.json</code> y se puede editar sin tocar el código.</p>
   <div class="glosario" id="glosario" style="display:none">
     <h2>Palabras que se revisan <span id="glosario-n"></span></h2>
@@ -194,7 +198,8 @@
       return true;
     }).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
     pagina=0;
-    $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' calles';
+    const tramos=lista.reduce((a,r)=>a+(r.n||1),0);
+    $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' calles · '+fmt(tramos)+' tramos';
     $('resumen-chip').style.display='inline-block';
     pintar();
   }
@@ -219,7 +224,7 @@
     const filas=trozo.map(r=>{
       const hecho=visitados.has(r.sid);
       return `<tr class="${hecho?'visitado':''}" data-sid="${esc(r.sid)}">
-        <td class="mal">${pinta(r.nombre,r.pal,'')}</td>
+        <td class="mal">${pinta(r.nombre,r.pal,'')}<span class="tramos" title="${r.n||1} ${(r.n||1)===1?'tramo tiene':'tramos tienen'} este nombre">${r.n||1}</span></td>
         <td class="bien">${pinta(r.sug,r.pal,'ok')}
           <span class="copiar" data-copia="${esc(r.sug)}" title="Copiar el nombre correcto">⧉</span></td>
         <td class="ciudad">${esc(r.ciudad)||'—'}</td>
