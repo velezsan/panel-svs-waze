@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-17T11:04:39+00:00",
+ "actualizado": "2026-08-17T11:45:00+00:00",
  "env": "row",
- "total": 173489,
+ "total": 173166,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,8 +12,8 @@
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 2210,
-   "ciudades": 63
+   "total": 2161,
+   "ciudades": 62
   },
   {
    "estado": "Baja California Sur",
@@ -36,8 +36,8 @@
   {
    "estado": "Chihuahua",
    "slug": "chihuahua",
-   "total": 3309,
-   "ciudades": 144
+   "total": 3181,
+   "ciudades": 143
   },
   {
    "estado": "Ciudad de México",
@@ -156,8 +156,8 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 2674,
-   "ciudades": 87
+   "total": 2528,
+   "ciudades": 85
   },
   {
    "estado": "Tabasco",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161635,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 86.0,
+  "porcentaje_vuelta": 87.0,
   "modo": "completo"
  },
  "aviso": "",
