@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-17T12:33:58+00:00",
+ "actualizado": "2026-08-17T13:51:02+00:00",
  "env": "row",
- "total": 172815,
+ "total": 172607,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -12,8 +12,8 @@
   {
    "estado": "Baja California",
    "slug": "baja-california",
-   "total": 2066,
-   "ciudades": 60
+   "total": 2024,
+   "ciudades": 58
   },
   {
    "estado": "Baja California Sur",
@@ -156,7 +156,7 @@
   {
    "estado": "Sonora",
    "slug": "sonora",
-   "total": 2352,
+   "total": 2186,
    "ciudades": 83
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161636,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 87.9,
+  "porcentaje_vuelta": 88.6,
   "modo": "completo"
  },
  "aviso": "",
