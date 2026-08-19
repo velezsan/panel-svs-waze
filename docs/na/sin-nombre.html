@@ -36,6 +36,9 @@
   th{background:var(--panel2);color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.04em}
   tr:last-child td{border-bottom:none}
   tr.clickable{cursor:pointer}
+  th.orden{cursor:pointer;user-select:none;white-space:nowrap}
+  th.orden:hover{color:var(--accent)}
+  th.orden .flecha{color:var(--accent);font-size:.8rem}
   tr.clickable:hover td{background:var(--panel2)}
   .num{text-align:right;font-variant-numeric:tabular-nums}
   a.wme{display:inline-block;background:var(--accent);color:#08131f;font-weight:600;
@@ -253,7 +256,10 @@
   function pintarTabla(){
     const total=lista.length;
     const ini=pagina*porPagina, fin=Math.min(ini+porPagina,total);
-    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th>Revisado</th><th></th></tr></thead><tbody>`;
+    // el encabezado de fecha ordena la lista con un clic (▼ reciente, ▲ antiguo)
+    const ordAct=$('sel-orden').value;
+    const flecha=ordAct==='rec'?' <span class="flecha">▼</span>':(ordAct==='ant'?' <span class="flecha">▲</span>':'');
+    let html=`<table><thead><tr><th>Tipo de vía</th><th>Ciudad</th><th>Nombre sugerido</th><th class="orden" title="Clic para ordenar por fecha de escaneo">Revisado${flecha}</th><th></th></tr></thead><tbody>`;
     if(!total){
       html+='<tr><td colspan="5" class="cargando">No hay segmentos con esos filtros. 🎉</td></tr>';
     }
@@ -296,6 +302,12 @@
   }
 
   $('contenido').addEventListener('click',e=>{
+    const th=e.target.closest('th.orden');
+    if(th){  // reciente -> antiguo -> por ciudad
+      const s=$('sel-orden');
+      s.value = s.value==='rec' ? 'ant' : (s.value==='ant' ? '' : 'rec');
+      filtrar(); return;
+    }
     const q=e.target.closest('.quitar');
     if(q){visitados.delete(String(q.dataset.quitar));guardarVisitados();pintarTabla();return;}
     const a=e.target.closest('a.wme');
