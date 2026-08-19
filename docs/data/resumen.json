@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-19T15:16:44+00:00",
+ "actualizado": "2026-08-19T16:00:03+00:00",
  "env": "row",
- "total": 162772,
+ "total": 162499,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -72,8 +72,8 @@
   {
    "estado": "Guerrero",
    "slug": "guerrero",
-   "total": 7827,
-   "ciudades": 228
+   "total": 7574,
+   "ciudades": 225
   },
   {
    "estado": "Hidalgo",
@@ -162,8 +162,8 @@
   {
    "estado": "Tabasco",
    "slug": "tabasco",
-   "total": 3053,
-   "ciudades": 90
+   "total": 3033,
+   "ciudades": 87
   },
   {
    "estado": "Tamaulipas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161639,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 17.0,
+  "porcentaje_vuelta": 17.2,
   "modo": "completo"
  },
  "aviso": "",
