@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-08-19T20:15:32+00:00",
+ "actualizado": "2026-08-19T20:55:48+00:00",
  "env": "usa",
  "total": 117,
  "estados": [
@@ -21,7 +21,7 @@
   "celdas_escaneadas": 161650,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 71.0,
+  "porcentaje_vuelta": 82.1,
   "modo": "completo"
  },
  "aviso": "",
