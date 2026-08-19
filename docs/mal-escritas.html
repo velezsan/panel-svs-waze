@@ -45,6 +45,9 @@
           border-radius:20px;padding:1px 8px;font-size:.78rem;color:var(--muted);
           font-weight:600;margin-left:6px;vertical-align:middle}
   td.fecha{color:var(--muted);font-size:.85rem;white-space:nowrap}
+  th.orden{cursor:pointer;user-select:none;white-space:nowrap}
+  th.orden:hover{color:var(--accent)}
+  th.orden .flecha{color:var(--accent);font-size:.8rem}
   .pager{display:flex;gap:8px;align-items:center;justify-content:center;margin:16px 0}
   .pager button{background:var(--panel2);color:var(--text);border:1px solid var(--line);
         border-radius:8px;padding:7px 14px;cursor:pointer;font-size:.9rem}
@@ -77,6 +80,11 @@
     <select id="sel-estado"><option value="">Elige un estado…</option></select>
     <select id="sel-palabra" style="display:none"><option value="">Todas las palabras</option></select>
     <select id="sel-fecha" style="display:none"><option value="">Todas las fechas</option></select>
+    <select id="sel-orden" style="display:none" title="Cómo se acomoda la lista">
+      <option value="">Orden: por nombre</option>
+      <option value="rec">Orden: escaneo más reciente</option>
+      <option value="ant">Orden: escaneo más antiguo</option>
+    </select>
     <input type="search" class="buscar" id="buscar" placeholder="Buscar en el nombre…" style="display:none">
     <span class="chip" id="resumen-chip" style="display:none"></span>
   </div>
@@ -136,7 +144,7 @@
       $('contenido').innerHTML='<div class="cargando">Elige un estado para ver sus calles mal escritas.</div>';
       $('pager').style.display='none'; $('sel-palabra').style.display='none';
       $('buscar').style.display='none'; $('resumen-chip').style.display='none';
-      $('sel-fecha').style.display='none';
+      $('sel-fecha').style.display='none'; $('sel-orden').style.display='none';
       return;
     }
     $('contenido').innerHTML='<div class="cargando">Cargando calles…</div>';
@@ -174,7 +182,7 @@
       +fechas.map(v=>`<option value="${v}">${fmtDia(v)}</option>`).join('')
       +'<option value="sinfecha">Sin fecha</option>';
     if([...$('sel-fecha').options].some(o=>o.value===fPrev))$('sel-fecha').value=fPrev;
-    $('sel-fecha').style.display='inline-block';
+    $('sel-fecha').style.display='inline-block'; $('sel-orden').style.display='inline-block';
     $('buscar').style.display='inline-block';
     pintarGlosario(cuenta);
     window.__regs=regs;
@@ -196,7 +204,19 @@
       if(q && !((r.nombre||'').toLowerCase().includes(q) || (r.sug||'').toLowerCase().includes(q)
                 || (r.ciudad||'').toLowerCase().includes(q))) return false;
       return true;
-    }).sort((a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es'));
+    });
+    const orden=$('sel-orden').value;
+    const marca=r=>r.r||r.v||'';   // fecha del último escaneo (o de la primera detección)
+    const porNombre=(a,b)=>(a.nombre||'').localeCompare(b.nombre||'','es');
+    if(orden==='rec'){
+      // lo escaneado más recientemente primero; lo que no trae fecha, hasta abajo
+      lista.sort((a,b)=>marca(b).localeCompare(marca(a))||porNombre(a,b));
+    }else if(orden==='ant'){
+      // lo que lleva más tiempo sin revisarse primero
+      lista.sort((a,b)=>(marca(a)||'9999').localeCompare(marca(b)||'9999')||porNombre(a,b));
+    }else{
+      lista.sort(porNombre);
+    }
     pagina=0;
     const tramos=lista.reduce((a,r)=>a+(r.n||1),0);
     $('resumen-chip').textContent=fmt(lista.length)+' de '+fmt(regs.length)+' calles · '+fmt(tramos)+' tramos';
@@ -233,9 +253,18 @@
           ${hecho?'<span class="quitar" title="Marcar como pendiente">↺</span>':''}</td>
       </tr>`;
     }).join('');
+    // el encabezado de fecha ordena la lista con un clic (▼ reciente, ▲ antiguo)
+    const ordAct=$('sel-orden').value;
+    const flecha=ordAct==='rec'?' <span class="flecha">▼</span>':(ordAct==='ant'?' <span class="flecha">▲</span>':'');
     $('contenido').innerHTML=`<table><thead><tr>
-        <th>Como está escrita</th><th>Como debería estar</th><th>Ciudad</th><th>Revisado</th><th></th>
+        <th>Como está escrita</th><th>Como debería estar</th><th>Ciudad</th><th class="orden" title="Clic para ordenar por fecha de escaneo">Revisado${flecha}</th><th></th>
       </tr></thead><tbody>${filas}</tbody></table>`;
+    const thOrden=$('contenido').querySelector('th.orden');
+    if(thOrden) thOrden.addEventListener('click',()=>{  // reciente -> antiguo -> por nombre
+      const s=$('sel-orden');
+      s.value = s.value==='rec' ? 'ant' : (s.value==='ant' ? '' : 'rec');
+      aplicarFiltros();
+    });
     $('contenido').querySelectorAll('a.wme').forEach(a=>{
       a.addEventListener('click',()=>{
         const sid=a.closest('tr').dataset.sid;
@@ -284,6 +313,7 @@
   $('sel-estado').addEventListener('change',e=>cargarEstado(e.target.value));
   $('sel-palabra').addEventListener('change',aplicarFiltros);
   $('sel-fecha').addEventListener('change',aplicarFiltros);
+  $('sel-orden').addEventListener('change',aplicarFiltros);
   $('buscar').addEventListener('input',aplicarFiltros);
   $('pg-prev').addEventListener('click',()=>{if(pagina>0){pagina--;pintar();window.scrollTo(0,0);}});
   $('pg-next').addEventListener('click',()=>{if((pagina+1)*porPagina<lista.length){pagina++;pintar();window.scrollTo(0,0);}});
