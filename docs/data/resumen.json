@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-20T15:58:48+00:00",
+ "actualizado": "2026-08-20T16:40:48+00:00",
  "env": "row",
- "total": 159930,
+ "total": 159909,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -24,8 +24,8 @@
   {
    "estado": "Campeche",
    "slug": "campeche",
-   "total": 728,
-   "ciudades": 60
+   "total": 707,
+   "ciudades": 58
   },
   {
    "estado": "Chiapas",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161639,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 22.2,
+  "porcentaje_vuelta": 22.5,
   "modo": "completo"
  },
  "aviso": "",
