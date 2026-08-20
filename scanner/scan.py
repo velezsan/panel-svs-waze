@@ -661,7 +661,7 @@ def normalizar_estado(nombre, estados_mx):
 
 CHAMPS_MX = {
     "arielorellana", "arturoae", "camachista", "carloslaso", "davidabarca",
-    "drysoft", "editorbcmx", "eumirgarciac2", "maalrivba", "manufc122",
+    "drysoft", "editorbcmx", "eumirgarciac2", "maalrivba", "manufc212",
     "gwm_", "hector_hf",
 }
 VENTANA_CHAMPS_DIAS = 60
