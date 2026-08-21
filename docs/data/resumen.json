@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T22:08:06+00:00",
+ "actualizado": "2026-08-21T22:48:36+00:00",
  "env": "row",
- "total": 157728,
+ "total": 157716,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -174,7 +174,7 @@
   {
    "estado": "Tlaxcala",
    "slug": "tlaxcala",
-   "total": 2390,
+   "total": 2378,
    "ciudades": 151
   },
   {
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161640,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 26.1,
+  "porcentaje_vuelta": 26.4,
   "modo": "completo"
  },
  "aviso": "",
