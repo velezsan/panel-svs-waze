@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T12:32:35+00:00",
+ "actualizado": "2026-08-21T13:55:19+00:00",
  "env": "row",
- "total": 158730,
+ "total": 158628,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,7 +54,7 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 664,
+   "total": 645,
    "ciudades": 30
   },
   {
@@ -90,8 +90,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 5711,
-   "ciudades": 412
+   "total": 5657,
+   "ciudades": 409
   },
   {
    "estado": "Morelos",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 11398,
-   "ciudades": 417
+   "total": 11369,
+   "ciudades": 416
   },
   {
    "estado": "Nayarit",
