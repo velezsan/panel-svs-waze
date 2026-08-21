@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T10:29:27+00:00",
+ "actualizado": "2026-08-21T11:09:58+00:00",
  "env": "row",
- "total": 159414,
+ "total": 159339,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -90,8 +90,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 5713,
-   "ciudades": 413
+   "total": 5711,
+   "ciudades": 412
   },
   {
    "estado": "Morelos",
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3578,
-   "ciudades": 51
+   "total": 3548,
+   "ciudades": 48
   },
   {
    "estado": "San Luis Potosí",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 11208,
-   "ciudades": 842
+   "total": 11165,
+   "ciudades": 840
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161640,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 24.5,
+  "porcentaje_vuelta": 24.8,
   "modo": "completo"
  },
  "aviso": "",
