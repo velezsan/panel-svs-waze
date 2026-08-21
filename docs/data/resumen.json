@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T19:01:23+00:00",
+ "actualizado": "2026-08-21T19:41:34+00:00",
  "env": "row",
- "total": 157856,
+ "total": 157801,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 10637,
-   "ciudades": 821
+   "total": 10582,
+   "ciudades": 820
   },
   {
    "estado": "Yucatán",
