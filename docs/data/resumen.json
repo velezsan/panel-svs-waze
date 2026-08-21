@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T14:35:38+00:00",
+ "actualizado": "2026-08-21T15:15:49+00:00",
  "env": "row",
- "total": 158356,
+ "total": 158280,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -54,7 +54,7 @@
   {
    "estado": "Colima",
    "slug": "colima",
-   "total": 645,
+   "total": 649,
    "ciudades": 30
   },
   {
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3548,
-   "ciudades": 48
+   "total": 3525,
+   "ciudades": 47
   },
   {
    "estado": "San Luis Potosí",
@@ -180,8 +180,8 @@
   {
    "estado": "Veracruz",
    "slug": "veracruz",
-   "total": 10776,
-   "ciudades": 830
+   "total": 10719,
+   "ciudades": 826
   },
   {
    "estado": "Yucatán",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161640,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 25.1,
+  "porcentaje_vuelta": 25.4,
   "modo": "completo"
  },
  "aviso": "",
