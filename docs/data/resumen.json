@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-21T04:08:11+00:00",
+ "actualizado": "2026-08-21T04:52:18+00:00",
  "env": "row",
- "total": 159621,
+ "total": 159615,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 11420,
-   "ciudades": 419
+   "total": 11416,
+   "ciudades": 418
   },
   {
    "estado": "Nayarit",
@@ -138,8 +138,8 @@
   {
    "estado": "Quintana Roo",
    "slug": "quintana-roo",
-   "total": 3598,
-   "ciudades": 52
+   "total": 3596,
+   "ciudades": 51
   },
   {
    "estado": "San Luis Potosí",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161639,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 23.9,
+  "porcentaje_vuelta": 24.1,
   "modo": "completo"
  },
  "aviso": "",
