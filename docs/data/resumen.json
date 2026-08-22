@@ -1,7 +1,7 @@
 {
- "actualizado": "2026-08-22T14:25:11+00:00",
+ "actualizado": "2026-08-22T15:17:21+00:00",
  "env": "row",
- "total": 156060,
+ "total": 156025,
  "estados": [
   {
    "estado": "Aguascalientes",
@@ -90,8 +90,8 @@
   {
    "estado": "Michoacán",
    "slug": "michoacan",
-   "total": 5342,
-   "ciudades": 390
+   "total": 5325,
+   "ciudades": 385
   },
   {
    "estado": "Morelos",
@@ -102,8 +102,8 @@
   {
    "estado": "México",
    "slug": "mexico",
-   "total": 10879,
-   "ciudades": 410
+   "total": 10861,
+   "ciudades": 408
   },
   {
    "estado": "Nayarit",
@@ -201,7 +201,7 @@
   "celdas_escaneadas": 161640,
   "celdas_total": 161650,
   "porcentaje": 100.0,
-  "porcentaje_vuelta": 28.0,
+  "porcentaje_vuelta": 28.1,
   "modo": "completo"
  },
  "aviso": "",
